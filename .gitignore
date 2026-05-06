@@ -11,4 +11,6 @@ src/main/resources/application.properties
 
 # Mac
 .DS_Store
-src/**/.DS_Store
+src/**/.DS_Storeai-server/venv/
+ai-server/.env
+
