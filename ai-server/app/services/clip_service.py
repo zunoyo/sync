@@ -2,35 +2,35 @@ from __future__ import annotations
 
 import io
 from functools import lru_cache
-from typing import Optional
 
 import torch
 from PIL import Image
 from transformers import CLIPModel, CLIPProcessor
 
-EMOTIONS = ["happy", "sad", "calm", "energetic", "melancholic", "dark", "dreamy", "romantic"]
-
-EMOTION_PROMPTS = {
-    "happy":       "a happy, joyful, bright and cheerful scene",
-    "sad":         "a sad, sorrowful, tearful and gloomy scene",
-    "calm":        "a calm, peaceful, serene and tranquil scene",
-    "energetic":   "an energetic, exciting, dynamic and powerful scene",
-    "melancholic": "a melancholic, nostalgic, bittersweet and longing scene",
-    "dark":        "a dark, mysterious, eerie and intense scene",
-    "dreamy":      "a dreamy, ethereal, surreal and soft scene",
-    "romantic":    "a romantic, tender, passionate and intimate scene",
+VALENCE_PROMPTS = {
+    "positive": "a pleasant, beautiful, warm and uplifting feeling",
+    "negative": "a dark, painful, miserable and hopeless atmosphere",
 }
 
-LASTFM_TAG_MAP: dict[str, list[str]] = {
-    "happy":       ["happy", "feel good", "upbeat", "cheerful", "fun"],
-    "sad":         ["sad", "melancholy", "tearjerker", "emotional", "heartbreak"],
-    "calm":        ["chill", "relaxing", "ambient", "peaceful", "mellow"],
-    "energetic":   ["energetic", "upbeat", "workout", "hype", "party"],
-    "melancholic": ["melancholic", "nostalgic", "bittersweet", "reflective", "longing"],
-    "dark":        ["dark", "heavy", "intense", "gloomy", "brooding"],
-    "dreamy":      ["dreamy", "ethereal", "atmospheric", "shoegaze", "space"],
-    "romantic":    ["romantic", "love", "sensual", "tender", "intimate"],
+AROUSAL_PROMPTS = {
+    "active": "an energetic, exciting, intense and active atmosphere",
+    "calm":   "a soft, gentle, slow and quiet atmosphere",
 }
+
+# Russell Circumplex 4-quadrant Last.fm tags
+QUADRANT_TAGS: dict[str, list[str]] = {
+    "q1": ["happy", "upbeat", "energetic", "party", "feel good"],         # +V +A
+    "q2": ["intense", "aggressive", "dark", "hard", "heavy"],             # -V +A
+    "q3": ["sad", "melancholy", "depressing", "gloomy", "emotional"],     # -V -A
+    "q4": ["chill", "relaxing", "peaceful", "ambient", "mellow"],         # +V -A
+}
+
+_ANCHOR_TEXTS = [
+    VALENCE_PROMPTS["positive"],
+    VALENCE_PROMPTS["negative"],
+    AROUSAL_PROMPTS["active"],
+    AROUSAL_PROMPTS["calm"],
+]
 
 
 @lru_cache(maxsize=1)
@@ -41,58 +41,58 @@ def _load_model() -> tuple[CLIPModel, CLIPProcessor]:
     return model, processor
 
 
-def _softmax(scores: list[float]) -> list[float]:
-    t = torch.tensor(scores)
-    return torch.softmax(t, dim=0).tolist()
+@lru_cache(maxsize=1)
+def _anchor_features() -> torch.Tensor:
+    """Cached L2-normalised text embeddings for the 4 anchor prompts."""
+    model, processor = _load_model()
+    inputs = processor(text=_ANCHOR_TEXTS, return_tensors="pt", padding=True, truncation=True)
+    with torch.no_grad():
+        feats = model.get_text_features(**inputs)
+    return feats / feats.norm(dim=-1, keepdim=True)  # [4, dim]
+
+
+def _build_result(valence: float, arousal: float) -> dict:
+    if valence >= 0 and arousal >= 0:
+        tags = QUADRANT_TAGS["q1"]
+    elif valence < 0 and arousal >= 0:
+        tags = QUADRANT_TAGS["q2"]
+    elif valence < 0 and arousal < 0:
+        tags = QUADRANT_TAGS["q3"]
+    else:
+        tags = QUADRANT_TAGS["q4"]
+
+    return {
+        "valence": round(valence, 4),
+        "arousal": round(arousal, 4),
+        "lastfm_tags": tags,
+    }
 
 
 def analyze_image(image_bytes: bytes) -> dict:
     model, processor = _load_model()
     image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-    prompts = list(EMOTION_PROMPTS.values())
 
-    inputs = processor(text=prompts, images=image, return_tensors="pt", padding=True)
+    img_inputs = processor(images=image, return_tensors="pt")
     with torch.no_grad():
-        outputs = model(**inputs)
-        logits = outputs.logits_per_image[0].tolist()
+        image_feats = model.get_image_features(**img_inputs)
+    image_feats = image_feats / image_feats.norm(dim=-1, keepdim=True)  # [1, dim]
 
-    probs = _softmax(logits)
-    return _build_result(probs)
+    anchors = _anchor_features()  # [4, dim]
+    sims = (image_feats @ anchors.T)[0].tolist()  # [4]
+    v_pos, v_neg, a_act, a_calm = sims
+
+    return _build_result(v_pos - v_neg, a_act - a_calm)
 
 
 def analyze_text(text: str) -> dict:
     model, processor = _load_model()
-    emotion_texts = list(EMOTION_PROMPTS.values())
-
-    # 입력 텍스트와 각 감성 프롬프트 간 유사도 계산
-    all_texts = [text] + emotion_texts
-    inputs = processor(text=all_texts, return_tensors="pt", padding=True, truncation=True)
+    inputs = processor(text=[text], return_tensors="pt", padding=True, truncation=True)
     with torch.no_grad():
-        text_features = model.get_text_features(**inputs)
-        text_features = text_features / text_features.norm(dim=-1, keepdim=True)
+        query_feat = model.get_text_features(**inputs)
+    query_feat = query_feat / query_feat.norm(dim=-1, keepdim=True)  # [1, dim]
 
-    query = text_features[0]
-    emotion_feats = text_features[1:]
-    sims = (query @ emotion_feats.T).tolist()
-    probs = _softmax(sims)
-    return _build_result(probs)
+    anchors = _anchor_features()  # [4, dim]
+    sims = (query_feat @ anchors.T)[0].tolist()  # [4]
+    v_pos, v_neg, a_act, a_calm = sims
 
-
-def _build_result(probs: list[float]) -> dict:
-    emotion_scores = {emotion: round(prob, 4) for emotion, prob in zip(EMOTIONS, probs)}
-    sorted_emotions = sorted(emotion_scores.items(), key=lambda x: x[1], reverse=True)
-
-    primary = sorted_emotions[0][0]
-    secondary = sorted_emotions[1][0]
-
-    # primary + secondary 태그 합집합 (중복 제거, primary 우선)
-    tags = LASTFM_TAG_MAP[primary] + [
-        t for t in LASTFM_TAG_MAP[secondary] if t not in LASTFM_TAG_MAP[primary]
-    ]
-
-    return {
-        "primary_emotion": primary,
-        "secondary_emotion": secondary,
-        "emotion_scores": emotion_scores,
-        "lastfm_tags": tags,
-    }
+    return _build_result(v_pos - v_neg, a_act - a_calm)

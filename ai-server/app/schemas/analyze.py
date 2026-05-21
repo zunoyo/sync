@@ -2,7 +2,6 @@ from pydantic import BaseModel
 
 
 class AnalyzeResponse(BaseModel):
-    primary_emotion: str
-    secondary_emotion: str
-    emotion_scores: dict[str, float]
+    valence: float
+    arousal: float
     lastfm_tags: list[str]

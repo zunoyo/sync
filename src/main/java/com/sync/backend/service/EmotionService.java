@@ -108,9 +108,8 @@ public class EmotionService {
                                              String inputType, String inputText) {
         EmotionVector vector = EmotionVector.builder()
                 .userId(userId)
-                .primaryEmotion(response.getPrimaryEmotion())
-                .secondaryEmotion(response.getSecondaryEmotion())
-                .emotionScores(response.getEmotionScores())
+                .valence(response.getValence())
+                .arousal(response.getArousal())
                 .lastfmTags(response.getLastfmTags())
                 .inputType(inputType)
                 .inputText(inputText)
