@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Locale;
 import java.util.Optional;
 
 @Slf4j
@@ -96,6 +97,11 @@ public class SpotifyService {
             String spotifyArtist = (artists.isArray() && !artists.isEmpty())
                     ? artists.get(0).path("name").asText(null) : null;
 
+            if (!artistMatches(artistName, spotifyArtist)) {
+                log.debug("아티스트 불일치 (lastfm={}, spotify={}): 유사도 80% 미만", artistName, spotifyArtist);
+                return Optional.empty();
+            }
+
             String albumName = item.path("album").path("name").asText(null);
 
             return Optional.of(new SpotifyTrackInfo(trackId, spotifyArtist, albumName, previewUrl));
@@ -107,4 +113,34 @@ public class SpotifyService {
     }
 
     public record SpotifyTrackInfo(String trackId, String artistName, String albumName, String previewUrl) {}
+
+    private static boolean artistMatches(String lastfm, String spotify) {
+        String a = normalizeArtist(lastfm);
+        String b = normalizeArtist(spotify);
+        if (a.isEmpty() || b.isEmpty()) return false;
+        int maxLen = Math.max(a.length(), b.length());
+        double similarity = (double) (maxLen - levenshtein(a, b)) / maxLen;
+        return similarity >= 0.80;
+    }
+
+    private static String normalizeArtist(String name) {
+        if (name == null) return "";
+        String s = name.toLowerCase(Locale.ROOT).trim();
+        return s.startsWith("the ") ? s.substring(4) : s;
+    }
+
+    private static int levenshtein(String a, String b) {
+        int m = a.length(), n = b.length();
+        int[][] dp = new int[m + 1][n + 1];
+        for (int i = 0; i <= m; i++) dp[i][0] = i;
+        for (int j = 0; j <= n; j++) dp[0][j] = j;
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                dp[i][j] = (a.charAt(i - 1) == b.charAt(j - 1))
+                        ? dp[i - 1][j - 1]
+                        : 1 + Math.min(dp[i - 1][j - 1], Math.min(dp[i - 1][j], dp[i][j - 1]));
+            }
+        }
+        return dp[m][n];
+    }
 }
