@@ -1,0 +1,23 @@
+{{>layouts/header}}
+<div class="section">
+  <h2 class="section-title" style="margin-bottom:20px">장르 탐색</h2>
+  <div class="genre-grid">
+    <div class="genre-chip grad-4" onclick="DetailPage.showCollection('K-Pop','🎤','grad-4',[1,2,3,4,5,6,7,8,9,10])"><span class="genre-chip-label">K-Pop</span><span class="genre-chip-emoji">🎤</span></div>
+    <div class="genre-chip grad-6" onclick="DetailPage.showCollection('힙합','🎧','grad-6',[2,4,5,8,10])"><span class="genre-chip-label">힙합</span><span class="genre-chip-emoji">🎧</span></div>
+    <div class="genre-chip grad-1" onclick="DetailPage.showCollection('인디','🎸','grad-1',[2,3,5,7,9,10])"><span class="genre-chip-label">인디</span><span class="genre-chip-emoji">🎸</span></div>
+    <div class="genre-chip grad-3" onclick="DetailPage.showCollection('R&amp;B','🎵','grad-3',[2,5,7,9])"><span class="genre-chip-label">R&amp;B</span><span class="genre-chip-emoji">🎵</span></div>
+    <div class="genre-chip grad-5" onclick="DetailPage.showCollection('팝','⭐','grad-5',[1,2,3,4,5,8,9,10])"><span class="genre-chip-label">팝</span><span class="genre-chip-emoji">⭐</span></div>
+    <div class="genre-chip grad-2" onclick="DetailPage.showCollection('Lo-Fi','🌙','grad-2',[3,6,7])"><span class="genre-chip-label">Lo-Fi</span><span class="genre-chip-emoji">🌙</span></div>
+    <div class="genre-chip grad-7" onclick="DetailPage.showCollection('클래식','🎻','grad-7',[3,7])"><span class="genre-chip-label">클래식</span><span class="genre-chip-emoji">🎻</span></div>
+    <div class="genre-chip grad-8" onclick="DetailPage.showCollection('재즈','🎺','grad-8',[3,6,7])"><span class="genre-chip-label">재즈</span><span class="genre-chip-emoji">🎺</span></div>
+    <div class="genre-chip" style="background:linear-gradient(135deg,#ff9a9e,#fecfef)" onclick="DetailPage.showCollection('발라드','💔','grad-7',[3,5,7])"><span class="genre-chip-label">발라드</span><span class="genre-chip-emoji">💔</span></div>
+    <div class="genre-chip" style="background:linear-gradient(135deg,#a1c4fd,#c2e9fb)" onclick="DetailPage.showCollection('전자음악','🎛️','grad-2',[1,4,6,8,9])"><span class="genre-chip-label">전자음악</span><span class="genre-chip-emoji">🎛️</span></div>
+    <div class="genre-chip" style="background:linear-gradient(135deg,#fddb92,#d1fdff)" onclick="DetailPage.showCollection('어쿠스틱','🪗','grad-1',[3,7,10])"><span class="genre-chip-label" style="color:#333">어쿠스틱</span><span class="genre-chip-emoji">🪗</span></div>
+    <div class="genre-chip" style="background:linear-gradient(135deg,#e0c3fc,#8ec5fc)" onclick="DetailPage.showCollection('트로트','🌺','grad-7',[3,7])"><span class="genre-chip-label">트로트</span><span class="genre-chip-emoji">🌺</span></div>
+  </div>
+</div>
+<div id="page-detail-overlay" style="display:none">
+  <div id="detail-hero" class="detail-hero grad-4"></div>
+  <div class="section"><div class="track-list" id="detail-track-list"></div></div>
+</div>
+{{>layouts/footer}}

@@ -1,0 +1,71 @@
+{{>layouts/header}}
+<div class="friends-header">
+  <div>
+    <div class="friends-title">친구</div>
+    <div class="friends-subtitle">친구 목록을 확인하고 음악을 공유하세요</div>
+  </div>
+  <div class="friends-header-actions">
+    <form action="/friends/request" method="post" style="display:flex;gap:8px;align-items:center">
+      <input type="text" name="target" placeholder="사용자명 또는 이메일"
+             style="background:var(--bg-card);border:1px solid rgba(255,255,255,.1);
+                    border-radius:var(--radius-full);padding:8px 16px;font-size:13px;
+                    color:var(--text-base);font-family:var(--font);outline:none;width:200px">
+      <button type="submit" class="pill-btn accent" style="background:var(--accent);color:#000;border:none;
+              padding:8px 18px;border-radius:var(--radius-full);font-size:13px;font-weight:700;
+              cursor:pointer;font-family:var(--font)">+ 친구 추가</button>
+    </form>
+  </div>
+</div>
+
+{{#successMsg}}<div style="background:rgba(30,215,96,.1);border:1px solid rgba(30,215,96,.3);border-radius:var(--radius-md);padding:10px 16px;font-size:13px;color:var(--accent);margin-bottom:16px">{{successMsg}}</div>{{/successMsg}}
+{{#errorMsg}}<div style="background:rgba(243,114,127,.1);border:1px solid rgba(243,114,127,.3);border-radius:var(--radius-md);padding:10px 16px;font-size:13px;color:var(--negative);margin-bottom:16px">{{errorMsg}}</div>{{/errorMsg}}
+
+{{#pendingRequests}}
+<div class="section">
+  <div class="friends-section-label" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.4px;color:var(--text-secondary);margin-bottom:12px">📬 친구 요청</div>
+  <div class="friends-grid">
+    {{#.}}
+    <div class="friend-card">
+      <div class="friend-avatar grad-3" style="width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#000;flex-shrink:0">
+        {{user.username}}
+      </div>
+      <div class="friend-info">
+        <div class="friend-name">{{user.displayName}}</div>
+        <div class="friend-status">@{{user.username}}</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0">
+        <a href="/friends/accept/{{id}}" class="frm-accept" style="background:var(--accent);border:none;color:#000;padding:6px 14px;border-radius:var(--radius-full);font-size:12px;font-weight:700;cursor:pointer;text-decoration:none">수락</a>
+        <a href="/friends/reject/{{id}}" class="frm-decline" style="background:transparent;border:1px solid rgba(255,255,255,.18);color:var(--text-secondary);padding:6px 12px;border-radius:var(--radius-full);font-size:12px;font-weight:700;cursor:pointer;text-decoration:none">거절</a>
+      </div>
+    </div>
+    {{/.}}
+  </div>
+</div>
+{{/pendingRequests}}
+
+<div class="section">
+  <div class="friends-section-label" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.4px;color:var(--text-secondary);margin-bottom:12px">
+    <span class="online-indicator" style="display:inline-block;width:7px;height:7px;background:var(--accent);border-radius:50%;margin-right:6px"></span>친구
+  </div>
+  <div class="friends-grid">
+    {{#friends}}
+    <div class="friend-card">
+      <div class="friend-avatar grad-4" style="width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#000;flex-shrink:0;position:relative">
+        {{friend.username}}
+        <div class="online-dot" style="position:absolute;bottom:1px;right:1px;width:11px;height:11px;background:var(--accent);border:2px solid var(--bg-mid);border-radius:50%"></div>
+      </div>
+      <div class="friend-info">
+        <div class="friend-name">{{friend.displayName}}</div>
+        <div class="friend-status">@{{friend.username}}</div>
+      </div>
+    </div>
+    {{/friends}}
+    {{^friends}}
+    <div style="grid-column:1/-1;padding:48px;text-align:center;color:var(--text-secondary)">
+      <div style="font-size:36px;margin-bottom:12px">👥</div>
+      <div style="font-size:14px">아직 친구가 없어요. 위에서 친구를 추가해보세요!</div>
+    </div>
+    {{/friends}}
+  </div>
+</div>
+{{>layouts/footer}}

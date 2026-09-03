@@ -1,0 +1,249 @@
+/* ============================================================
+   SOUNDWAVE — Sync Page (AI 음악 추천)
+   ============================================================ */
+
+/* ── 히어로 배너 ── */
+.sync-hero {
+  background: linear-gradient(135deg, #0a1628 0%, #1a0a28 50%, #121212 100%);
+  border-radius: var(--radius-lg);
+  padding: 36px;
+  margin-bottom: 28px;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+.sync-hero::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle,
+    rgba(30,215,96,0.08) 0%,
+    rgba(83,157,245,0.08) 40%,
+    transparent 70%
+  );
+  pointer-events: none;
+  animation: spin 20s linear infinite;
+}
+
+.sync-logo {
+  font-size: 56px;
+  margin-bottom: 12px;
+  display: block;
+  animation: float 3s ease-in-out infinite;
+}
+
+.sync-title {
+  font-size: 36px;
+  font-weight: 900;
+  margin-bottom: 8px;
+  background: linear-gradient(90deg, var(--accent), var(--info));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.sync-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  max-width: 400px;
+  margin: 0 auto 24px;
+  line-height: 1.6;
+}
+
+/* ── 입력 영역 ── */
+.sync-input-area {
+  max-width: 480px;
+  margin: 0 auto;
+  position: relative;
+}
+.sync-input-area textarea {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius-xl);
+  padding: 16px 100px 16px 18px;
+  font-size: 14px;
+  color: var(--text-base);
+  font-family: var(--font);
+  outline: none;
+  resize: none;
+  height: 80px;
+  line-height: 1.5;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.sync-input-area textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(30,215,96,0.15);
+}
+.sync-input-area textarea::placeholder { color: var(--text-muted); }
+
+/* ── 이미지 첨부 버튼 ── */
+.sync-attach-btn {
+  position: absolute;
+  right: 54px;
+  bottom: 12px;
+  width: 34px;
+  height: 34px;
+  background: rgba(255,255,255,0.07);
+  border: none;
+  border-radius: var(--radius-circle);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.sync-attach-btn:hover { background: rgba(255,255,255,0.14); color: var(--text-base); }
+
+#sync-file-input { display: none; }
+
+/* ── 전송 버튼 ── */
+.sync-send-btn {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 36px;
+  height: 36px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-circle);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+.sync-send-btn:hover { transform: scale(1.08); }
+
+/* ── 이미지 미리보기 ── */
+.sync-image-previews {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.sync-img-preview {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.15);
+  flex-shrink: 0;
+  animation: fadeIn .2s ease;
+}
+.sync-img-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.sync-img-remove {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 18px;
+  height: 18px;
+  background: rgba(0,0,0,0.7);
+  border: none;
+  border-radius: var(--radius-circle);
+  color: var(--text-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: background var(--transition-fast);
+}
+.sync-img-remove:hover { background: var(--negative); }
+
+/* ── 무드 필 ── */
+.sync-mood-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+.mood-pill {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-secondary);
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all var(--transition-fast);
+}
+.mood-pill:hover, .mood-pill.active {
+  background: rgba(30,215,96,0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── AI 응답 카드 ── */
+.ai-response {
+  background: linear-gradient(135deg, rgba(30,215,96,0.06) 0%, rgba(83,157,245,0.06) 100%);
+  border: 1px solid rgba(30,215,96,0.2);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.ai-response-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.ai-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--accent), var(--info));
+  border-radius: var(--radius-circle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.ai-name { font-size: 13px; font-weight: 700; color: var(--accent); }
+.ai-text { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+/* ── 추천 트랙 ── */
+.sync-track-rec {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  border: 1px solid rgba(255,255,255,0.05);
+  background: var(--bg-mid);
+  margin-bottom: 8px;
+}
+.sync-track-rec:hover { background: #2a2a2a; border-color: rgba(30,215,96,0.2); }
+
+.sync-match-badge {
+  background: rgba(30,215,96,0.15);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}

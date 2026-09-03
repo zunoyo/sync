@@ -1,0 +1,49 @@
+{{>layouts/header}}
+{{#playlist}}
+<div class="detail-hero {{gradient}}">
+  <div class="detail-hero-art">{{emoji}}</div>
+  <div class="detail-hero-info">
+    <div class="detail-hero-type">플레이리스트</div>
+    <div class="detail-hero-name">{{playlistName}}</div>
+    <div class="detail-hero-meta">{{tracks.size}}곡</div>
+    <div class="detail-hero-actions">
+      <button class="play-btn-large" title="재생">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <a href="/playlists/{{id}}/delete" onclick="return confirm('삭제할까요?')" class="action-btn" title="삭제" style="text-decoration:none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+      </a>
+    </div>
+  </div>
+</div>
+<div class="section">
+  <div class="track-list">
+    {{#tracks}}
+    <div class="track-item">
+      <div class="track-num-wrap"><span class="track-num">{{orderIndex}}</span></div>
+      <div class="track-art grad-4">🎵</div>
+      <div class="track-info">
+        <div class="track-name">{{lastfmTrackName}}</div>
+        <div class="track-artist">{{lastfmArtistName}}</div>
+      </div>
+      <div class="track-album">{{spotifyAlbumName}}</div>
+      <div class="track-actions">
+        <a href="/playlists/tracks/{{id}}/delete" class="track-like-btn" title="삭제" style="text-decoration:none">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </a>
+      </div>
+    </div>
+    {{/tracks}}
+    {{^tracks}}
+    <div style="padding:48px;text-align:center;color:var(--text-secondary)">
+      <div style="font-size:36px;margin-bottom:12px">🎵</div>
+      <div>아직 트랙이 없어요</div>
+    </div>
+    {{/tracks}}
+  </div>
+</div>
+{{/playlist}}
+<div style="padding:16px">
+  <a href="/playlists" style="color:var(--accent);font-size:13px;text-decoration:none">← 플레이리스트 목록으로</a>
+</div>
+{{>layouts/footer}}

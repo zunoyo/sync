@@ -1,0 +1,183 @@
+/* ============================================================
+   SOUNDWAVE — Topbar Component
+   ============================================================ */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  height: var(--topbar-height);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: var(--z-topbar);
+  background: linear-gradient(
+    to bottom,
+    rgba(24,24,24,0.97) 0%,
+    rgba(24,24,24,0.6)  100%
+  );
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+/* ── Navigation arrows ── */
+.topbar-nav { display: flex; gap: 8px; }
+
+.nav-arrow-btn {
+  width: 32px;
+  height: 32px;
+  background: rgba(0,0,0,0.65);
+  border: none;
+  border-radius: var(--radius-circle);
+  color: var(--text-base);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast);
+}
+.nav-arrow-btn:hover { background: rgba(0,0,0,0.9); }
+.nav-arrow-btn:disabled { opacity: 0.3; cursor: default; }
+
+/* ── Search input ── */
+.search-container {
+  position: relative;
+  flex: 1;
+  max-width: 360px;
+  margin: 0 20px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-base);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  background: var(--bg-mid);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 10px 16px 10px 42px;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-base);
+  font-family: var(--font);
+  outline: none;
+  box-shadow: var(--shadow-inset);
+  transition: box-shadow var(--transition-fast);
+}
+.search-input:focus        { box-shadow: #ffffff 0px 0px 0px 2px inset; }
+.search-input::placeholder { color: var(--text-secondary); }
+
+/* ── Right section ── */
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.topbar-pill-btn {
+  background: var(--text-base);
+  border: none;
+  color: #000;
+  padding: 7px 18px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font);
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  transition: transform var(--transition-fast), background var(--transition-fast);
+}
+.topbar-pill-btn:hover { transform: scale(1.03); background: #f0f0f0; }
+
+.topbar-outline-btn {
+  background: transparent;
+  border: 1px solid var(--border-light);
+  color: var(--text-base);
+  padding: 7px 18px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+.topbar-outline-btn:hover { border-color: var(--text-base); transform: scale(1.03); }
+
+/* ── Avatar ── */
+.avatar {
+  width: 34px;
+  height: 34px;
+  background: linear-gradient(135deg, var(--accent) 0%, #1a8c3a 100%);
+  border-radius: var(--radius-circle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #000;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  position: relative;
+}
+.avatar:hover {
+  transform: scale(1.07);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+/* ── Dropdown menu ── */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-heavy);
+  min-width: 180px;
+  overflow: hidden;
+  z-index: var(--z-panel);
+  animation: fadeIn 0.15s ease;
+}
+.dropdown:hover .dropdown-menu,
+.dropdown.open  .dropdown-menu {
+  display: block;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-base);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  border: none;
+  background: none;
+  font-family: var(--font);
+  width: 100%;
+  text-align: left;
+}
+.dropdown-item:hover { background: rgba(255,255,255,0.07); }
+.dropdown-item.danger { color: var(--negative); }
+
+.dropdown-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.07);
+  margin: 4px 0;
+}
