@@ -20,7 +20,7 @@ _VA_ANCHORS = [
     # Arousal 축 (활기/차분)
     "an energetic, exciting, intense and active atmosphere",   # A+ 강
     "a lively, upbeat and dynamic feeling",                    # A+ 중
-    "a soft, gentle, slow and quiet atmosphere",               # A- 강
+    "a soft, gentle, slow and quiet atmosphere",                # A- 강
     "a calm, peaceful and relaxing feeling",                   # A- 중
 ]
 
@@ -252,14 +252,40 @@ class ClipModel:
         return self._build_result(feat.cpu().numpy()[0], probs)
 
     def analyze_both(self, text: str, image: Image.Image) -> dict:
+        """
+        복합(텍스트+이미지) 분석.
+
+        [수정] 기존에는 analyze_text()/analyze_image()를 각각 끝까지 돌려
+        (softmax까지 완료된) 확률분포 두 개를 사후에 평균냈다. 텍스트와
+        이미지가 서로 다른 감정을 가리키는 경우, 이 방식은 최고 확률이
+        여러 클래스로 흩어져 신뢰도가 비정상적으로 낮게(예: 8클래스 기준
+        랜덤 확률 12.5%에 가까운 수준까지) 나오는 문제가 있었다.
+
+        대신 텍스트·이미지 각각의 정규화된 CLIP 임베딩을 구한 뒤, 그
+        임베딩 자체를 평균·재정규화해서 "하나의 결합 임베딩"을 만들고,
+        감정 유사도 softmax는 그 결합 임베딩에 대해 딱 한 번만 계산한다.
+        텍스트·이미지가 같은 감정을 가리킬 때는 신뢰도가 서로 보강되고,
+        다른 감정을 가리킬 때도 억지로 짓눌리지 않는 정직한 결과가 나온다.
+        """
         logger.info("복합 분석 시작")
-        t_res = self.analyze_text(text)
-        i_res = self.analyze_image(image)
-        avg_probs = (np.array(t_res["probabilities"]) +
-                     np.array(i_res["probabilities"])) / 2
-        avg_emb   = (np.array(json.loads(t_res["clip_embedding"])) +
-                     np.array(json.loads(i_res["clip_embedding"]))) / 2
-        return self._build_result(avg_emb, avg_probs)
+        english_text = _translate_korean(text)
+
+        with torch.no_grad():
+            token  = clip.tokenize([english_text], truncate=True).to(self.device)
+            t_feat = self.model.encode_text(token)
+            t_feat = t_feat / t_feat.norm(dim=-1, keepdim=True)
+
+            img    = self.preprocess(image).unsqueeze(0).to(self.device)
+            i_feat = self.model.encode_image(img)
+            i_feat = i_feat / i_feat.norm(dim=-1, keepdim=True)
+
+            combined = (t_feat + i_feat) / 2
+            combined = combined / combined.norm(dim=-1, keepdim=True)
+
+            probs = (combined @ self.emotion_features.T) \
+                    .squeeze().softmax(dim=-1).cpu().numpy()
+
+        return self._build_result(combined.cpu().numpy()[0], probs)
 
     # ── 결과 빌드 ───────────────────────────────────────────────────────────
     def _build_result(self, embedding: np.ndarray,

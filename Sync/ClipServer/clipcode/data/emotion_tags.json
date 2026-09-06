@@ -1,0 +1,34 @@
+{
+  "happy": {
+    "lastfm_tags": ["happy", "upbeat", "feel good", "pop", "cheerful"],
+    "description": "신남, 기분 좋음"
+  },
+  "sad": {
+    "lastfm_tags": ["sad", "emotional", "heartbreak", "ballad", "melancholic"],
+    "description": "슬픔, 우울"
+  },
+  "calm": {
+    "lastfm_tags": ["chill", "relax", "ambient", "lo-fi", "peaceful"],
+    "description": "차분함, 안정"
+  },
+  "energetic": {
+    "lastfm_tags": ["energetic", "workout", "upbeat", "dance", "powerful"],
+    "description": "활기참, 운동"
+  },
+  "romantic": {
+    "lastfm_tags": ["romantic", "love songs", "soft pop", "sweet", "tender"],
+    "description": "설렘, 로맨틱"
+  },
+  "melancholy": {
+    "lastfm_tags": ["melancholy", "rainy day", "indie", "lo-fi", "nostalgic"],
+    "description": "감성적, 몽환적"
+  },
+  "angry": {
+    "lastfm_tags": ["intense", "rock", "aggressive", "powerful", "dark"],
+    "description": "격렬함, 강렬함"
+  },
+  "dreamy": {
+    "lastfm_tags": ["dreamy", "atmospheric", "shoegaze", "indie", "ethereal"],
+    "description": "몽상적, 공상"
+  }
+}

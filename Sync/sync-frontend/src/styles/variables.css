@@ -1,0 +1,86 @@
+/* ============================================================
+   SOUNDWAVE — Design Tokens (Spotify Design System 기반)
+   모든 CSS 파일에서 이 변수를 참조합니다.
+   ============================================================ */
+
+:root {
+  /* ── Background Surfaces ── */
+  --bg-base:        #121212;
+  --bg-surface:     #181818;
+  --bg-mid:         #1f1f1f;
+  --bg-card:        #252525;
+  --bg-card-alt:    #272727;
+
+  /* ── Brand Accent ── */
+  --accent:         #1ed760;
+  --accent-dark:    #1db954;
+  --accent-shadow:  rgba(30, 215, 96, 0.35);
+
+  /* ── Text ── */
+  --text-base:      #ffffff;
+  --text-secondary: #b3b3b3;
+  --text-muted:     #6a6a6a;
+  --text-near:      #cbcbcb;
+  --text-light:     #fdfdfd;
+
+  /* ── Semantic ── */
+  --negative:       #f3727f;
+  --warning:        #ffa42b;
+  --info:           #539df5;
+
+  /* ── Borders ── */
+  --border:         #4d4d4d;
+  --border-light:   #7c7c7c;
+  --border-sep:     #b3b3b3;
+
+  /* ── Shadows ── */
+  --shadow-heavy:   rgba(0,0,0,0.5) 0px 8px 24px;
+  --shadow-medium:  rgba(0,0,0,0.3) 0px 8px 8px;
+  --shadow-inset:   rgb(18,18,18) 0px 1px 0px,
+                    rgb(124,124,124) 0px 0px 0px 1px inset;
+
+  /* ── Layout Dimensions ── */
+  --sidebar-width:       260px;
+  --right-panel-width:   320px;
+  --player-height:       90px;
+  --topbar-height:       64px;
+
+  /* ── Border Radius Scale ── */
+  --radius-xs:    2px;
+  --radius-sm:    4px;
+  --radius-md:    6px;
+  --radius-lg:    8px;
+  --radius-xl:    12px;
+  --radius-2xl:   20px;
+  --radius-pill:  500px;
+  --radius-full:  9999px;
+  --radius-circle: 50%;
+
+  /* ── Typography ── */
+  --font: 'Noto Sans KR', 'Helvetica Neue', Arial,
+          'Hiragino Sans', 'Hiragino Kaku Gothic ProN',
+          'Meiryo', 'MS Gothic', sans-serif;
+
+  /* ── Transition ── */
+  --transition-fast:   0.12s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow:   0.35s ease;
+
+  /* ── Z-Index Stack ── */
+  --z-base:    0;
+  --z-overlay: 100;
+  --z-topbar:  200;
+  --z-panel:   300;
+  --z-modal:   400;
+  --z-toast:   500;
+
+  /* ── Gradient Presets (앨범 아트용) ── */
+  --grad-1: linear-gradient(135deg, #1ed760 0%, #0a5c28 100%);
+  --grad-2: linear-gradient(135deg, #539df5 0%, #1a3a7a 100%);
+  --grad-3: linear-gradient(135deg, #ffa42b 0%, #7a3a0a 100%);
+  --grad-4: linear-gradient(135deg, #f3727f 0%, #7a1a28 100%);
+  --grad-5: linear-gradient(135deg, #c77dff 0%, #4a0a7a 100%);
+  --grad-6: linear-gradient(135deg, #48cae4 0%, #0a4a5c 100%);
+  --grad-7: linear-gradient(135deg, #ff6b6b 0%, #ffd93d 100%);
+  --grad-8: linear-gradient(135deg, #6bcb77 0%, #1a5c28 100%);
+}

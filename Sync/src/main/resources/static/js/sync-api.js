@@ -29,15 +29,49 @@
         c.innerHTML = [
             '<div class="ai-response">',
                 '<div class="ai-response-header">',
-                    '<div class="ai-icon">⏳</div>',
+                    '<div class="ai-icon">🤖</div>',
                     '<div>',
                         '<div class="ai-name">Sync AI</div>',
-                        '<div style="font-size:11px;color:var(--text-secondary)">',
-                            '감정 분석 중...',
-                        '</div>',
                     '</div>',
                 '</div>',
-                '<p class="ai-text">잠시만 기다려주세요 🎵</p>',
+                '<div class="sync-loading-stage">',
+                    '<div class="sync-orb">',
+                        '<div class="sync-orb-ring"></div>',
+                        '<div class="sync-orb-ring ring2"></div>',
+                        '<div class="sync-orb-core">🎧</div>',
+                    '</div>',
+                    '<div class="sync-analyzing">',
+                        '<div class="eq-bar"></div>',
+                        '<div class="eq-bar"></div>',
+                        '<div class="eq-bar"></div>',
+                        '<div class="eq-bar"></div>',
+                        '<div class="eq-bar"></div>',
+                        '<div class="eq-bar"></div>',
+                        '<div class="eq-bar"></div>',
+                    '</div>',
+                    '<span class="sync-loading-text">',
+                        '감정을 분석하고 있어요',
+                        '<span class="sync-dots"><span></span><span></span><span></span></span>',
+                    '</span>',
+                '</div>',
+            '</div>'
+        ].join('');
+    }
+
+    /* ── 분석 완료 전환 표시 (애니메이션이 끊기지 않도록 결과 렌더 직전에 잠깐 표시) ── */
+    function _showFinishing() {
+        var c = document.getElementById('sync-results');
+        if (!c) return;
+        c.innerHTML = [
+            '<div class="ai-response">',
+                '<div class="ai-response-header">',
+                    '<div class="ai-icon sync-check-pop">✓</div>',
+                    '<div>',
+                        '<div class="ai-name">Sync AI</div>',
+                        '<div style="font-size:11px;color:var(--text-secondary)">분석 완료!</div>',
+                    '</div>',
+                '</div>',
+                '<p class="ai-text">당신만을 위한 음악을 준비했어요 🎶</p>',
             '</div>'
         ].join('');
     }
@@ -373,7 +407,7 @@
             html += _renderAnalysisDetail(em);
         }
 
-        c.innerHTML = html;
+        c.innerHTML = '<div class="sync-results-enter">' + html + '</div>';
     }
 
     /* ── 미리듣기 재생 ───────────────────────── */
@@ -475,7 +509,9 @@
             return res.json();
         })
         .then(function (data) {
-            _renderResults(data);
+            // 분석 중 애니메이션이 뚝 끊기지 않도록, 완료 표시를 잠깐 보여준 뒤에 리스트를 띄움
+            _showFinishing();
+            setTimeout(function () { _renderResults(data); }, 700);
         })
         .catch(function (e) {
             _showError(e.message);

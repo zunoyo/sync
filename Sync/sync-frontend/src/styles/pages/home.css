@@ -1,0 +1,130 @@
+/* ============================================================
+   SOUNDWAVE — Home Page Styles
+   ============================================================ */
+
+/* ── Hero Banner ── */
+.hero-banner {
+  background: linear-gradient(135deg, #1a3a2a 0%, #0d2b1e 40%, #121212 100%);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  margin-bottom: 32px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.hero-banner::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -5%;
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, rgba(30,215,96,0.13) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.hero-art {
+  width: 150px;
+  height: 150px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #1ed760, #0a7a30);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-heavy);
+  font-size: 60px;
+}
+
+.hero-info { z-index: 1; }
+
+.hero-type {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.hero-title {
+  font-size: 46px;
+  font-weight: 900;
+  line-height: 1.0;
+  margin-bottom: 10px;
+  letter-spacing: -1px;
+}
+
+.hero-meta {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+.hero-meta span { color: var(--text-base); font-weight: 700; }
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* ── Recently Played (빠른 접근 grid) ── */
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.quick-item {
+  background: rgba(255,255,255,0.08);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  padding-right: 12px;
+}
+.quick-item:hover { background: rgba(255,255,255,0.15); }
+.quick-item:hover .quick-play { opacity: 1; }
+
+.quick-art {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  flex-shrink: 0;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quick-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-base);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quick-play {
+  width: 32px;
+  height: 32px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-circle);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  flex-shrink: 0;
+}

@@ -41,7 +41,8 @@ const HomePage = (() => {
   async function _fetchItunes(query) {
     try {
       const res  = await fetch(
-        `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=1`
+        `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=1`,
+        { cache: 'no-store' }
       );
       const data = await res.json();
       if (!data.results?.length) return null;
@@ -403,6 +404,77 @@ const HomePage = (() => {
     return palette[h % palette.length];
   }
 
+  /* ── iTunes 검색 — 실패(레이트리밋 등) 시 잠깐 대기 후 한 번 더 시도 ── */
+  async function _fetchItunesJson(url) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (res.ok) return await res.json();
+      } catch (e) { /* 재시도 */ }
+      if (attempt === 0) await new Promise(r => setTimeout(r, 600));
+    }
+    return { results: [] };
+  }
+
+  /* ── Spotify 아티스트 상세 폴백 — iTunes에서 아무 곡도 못 찾았을 때만 호출 ── */
+  async function _fetchSpotifyArtistDetail(artistName) {
+    try {
+      const res  = await fetch(`/api/spotify/catalog/artist-detail?name=${encodeURIComponent(artistName)}`, { credentials: 'include' });
+      const data = await res.json();
+      if (!data?.albums?.length) return null;
+
+      let gi = 0;
+      const albums = data.albums.map(alb => ({
+        id: alb.id, name: alb.name, art: alb.art, year: alb.year, artistName: alb.artistName,
+        tracks: (alb.tracks || []).map(t => {
+          const track = {
+            _id: t._id, name: t.name, artist: t.artist, album: t.album,
+            albumId: alb.id, albumArt: t.albumArt, albumArtSm: t.albumArt, albumCoverLg: t.albumArt,
+            durationMs: t.durationMs || 0, duration: t.duration || '—',
+            durationSec: Math.floor((t.durationMs || 0) / 1000),
+            previewUrl: t.previewUrl || null, spotifyId: t.spotifyId || null,
+            trackNumber: t.trackNumber || 1, releaseYear: t.releaseYear || alb.year,
+            gradient: _grad(gi), emoji: _emoji(gi),
+          };
+          gi++;
+          return track;
+        }),
+      }));
+      return { image: data.image, externalId: data.externalId, albums, flatTracks: albums.flatMap(a => a.tracks) };
+    } catch (e) { return null; }
+  }
+
+  /* 아티스트 이름 유사도 검증(Levenshtein 80% 이상) — 백엔드 MatchUtils와 동일한 기준.
+     iTunes 검색은 제목/앨범 등 어디든 검색어가 들어가면 결과에 포함시키므로,
+     실제로 그 아티스트의 곡이 맞는지 여기서 한 번 더 걸러야 함. */
+  function _normalizeArtist(name) {
+    const s = String(name || '').toLowerCase().trim();
+    return s.startsWith('the ') ? s.slice(4) : s;
+  }
+  function _levenshtein(a, b) {
+    const m = a.length, n = b.length;
+    const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+    for (let i = 0; i <= m; i++) dp[i][0] = i;
+    for (let j = 0; j <= n; j++) dp[0][j] = j;
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= n; j++) {
+        dp[i][j] = a[i-1] === b[j-1]
+          ? dp[i-1][j-1]
+          : 1 + Math.min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1]);
+      }
+    }
+    return dp[m][n];
+  }
+  function _artistMatches(a, b) {
+    const na = _normalizeArtist(a), nb = _normalizeArtist(b);
+    if (!na || !nb) return false;
+    if (na === nb) return true;
+    // 이름이 짧을수록 Levenshtein 비율이 부정확해짐 — 더 짧은 쪽이 4자 미만이면 정확히 일치할 때만 인정
+    if (Math.min(na.length, nb.length) < 4) return false;
+    const maxLen = Math.max(na.length, nb.length);
+    return (maxLen - _levenshtein(na, nb)) / maxLen >= 0.80;
+  }
+
   async function _showArtistDetail(artistName) {
     // 모달 대신 #page-detail 페이지로 이동
     if (typeof Navigation !== 'undefined') Navigation.switchPage('detail');
@@ -461,19 +533,38 @@ const HomePage = (() => {
 
     /* ── 데이터 병렬 로드 ── */
     const [itunesData, lastfmData] = await Promise.all([
-      fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(artistName)}&media=music&entity=song&limit=100`)
-        .then(r => r.json()).catch(() => ({ results: [] })),
+      _fetchItunesJson(`https://itunes.apple.com/search?term=${encodeURIComponent(artistName)}&media=music&entity=song&limit=100`),
       fetch(`http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=${encodeURIComponent(artistName)}&api_key=613ca46d815b6b0b2acf0145aa03b2dd&format=json&lang=ko`)
         .then(r => r.json()).catch(() => null),
       typeof SavedLibrary !== 'undefined' ? SavedLibrary.loadArtists() : Promise.resolve([]),
       typeof SavedLibrary !== 'undefined' ? SavedLibrary.loadAlbums()  : Promise.resolve([]),
     ]);
 
+    // iTunes는 제목/앨범 등에 검색어가 들어가면 무조건 결과에 포함시키므로,
+    // 실제로 이 아티스트의 곡이 맞는지 이름 유사도로 한 번 걸러냄
+    // iTunes는 제목/앨범 등에 검색어가 들어가면 무조건 결과에 포함시키고, 이름이 우연히
+    // 비슷해 보이는 다른 아티스트도 있을 수 있어서 — 이름 문자열 유사도보다 훨씬 확실한
+    // artistId 기준으로 필터링함. 이름이 정확히 일치하는 결과의 artistId를 '진짜' 기준으로 잡고,
+    // 정확히 일치하는 게 없으면 그나마 가장 비슷한 이름의 artistId를 기준으로 씀.
+    const rawItunesResults = itunesData.results || [];
+    const exactNameMatch = rawItunesResults.find(r => _normalizeArtist(r.artistName) === _normalizeArtist(artistName));
+    const canonicalArtistId = exactNameMatch?.artistId
+      ?? rawItunesResults.find(r => _artistMatches(artistName, r.artistName))?.artistId
+      ?? null;
+    const itunesResults = canonicalArtistId
+      ? rawItunesResults.filter(r => r.artistId === canonicalArtistId)
+      : rawItunesResults.filter(r => _artistMatches(artistName, r.artistName));
+
+    // iTunes에서 실제로 일치하는 곡을 하나도 못 찾았을 때만 Spotify 카탈로그로 보완
+    const spotifyFallback = itunesResults.length === 0
+      ? await _fetchSpotifyArtistDetail(artistName)
+      : null;
+
     /* ── 아티스트 이미지 ── */
     const imgBox = document.getElementById('artist-img-box');
-    const firstArt    = itunesData.results?.find(r => r.artworkUrl100)?.artworkUrl100;
-    const firstArtBig = firstArt ? firstArt.replace('100x100bb','400x400bb') : null;
-    const artistExtId = itunesData.results?.find(r => r.artistId)?.artistId || null;
+    const firstArt    = spotifyFallback ? spotifyFallback.image : itunesResults.find(r => r.artworkUrl100)?.artworkUrl100;
+    const firstArtBig = spotifyFallback ? spotifyFallback.image : (firstArt ? firstArt.replace('100x100bb','400x400bb') : null);
+    const artistExtId = spotifyFallback ? spotifyFallback.externalId : (canonicalArtistId || itunesResults.find(r => r.artistId)?.artistId || null);
     if (firstArtBig && imgBox) {
       imgBox.innerHTML = `<img src="${firstArtBig}"
         style="width:100%;height:100%;object-fit:cover"
@@ -507,48 +598,53 @@ const HomePage = (() => {
       if (bioEl && bio) bioEl.textContent = bio + (bio.length>=120 ? '...' : '');
     }
 
-    /* ── 트랙 가공 + 앨범 그룹화 ── */
-    const allTracks = (itunesData.results || [])
-      .filter(r => r.trackName)
-      .map((r, i) => ({
-        _id:        'it_' + r.trackId,
-        name:       r.trackName,
-        artist:     r.artistName,
-        album:      r.collectionName || '싱글',
-        albumId:    r.collectionId   || r.artistId,
-        albumArt:   r.artworkUrl100?.replace('100x100bb','500x500bb') || null,
-        albumArtSm: r.artworkUrl100?.replace('100x100bb','80x80bb')   || null,
-        albumCoverLg: r.artworkUrl100?.replace('100x100bb','300x300bb') || null,
-        durationMs: r.trackTimeMillis || 0,
-        duration:   r.trackTimeMillis
-          ? `${Math.floor(r.trackTimeMillis/60000)}:${String(Math.floor((r.trackTimeMillis%60000)/1000)).padStart(2,'0')}`
-          : '—',
-        durationSec: Math.floor((r.trackTimeMillis||0)/1000),
-        previewUrl:  r.previewUrl || null,
-        trackNumber: r.trackNumber || (i+1),
-        releaseYear: r.releaseDate ? new Date(r.releaseDate).getFullYear() : 0,
-        gradient:    _grad(i),
-        emoji:       _emoji(i),
-      }));
+    /* ── 트랙 가공 + 앨범 그룹화 (Spotify 폴백이 있으면 그걸 그대로 사용) ── */
+    let albums, flatTracks;
 
-    /* 앨범별 그룹화 → 최신순 정렬 */
-    const albumMap = {};
-    for (const t of allTracks) {
-      if (!albumMap[t.albumId]) {
-        albumMap[t.albumId] = {
-          id: t.albumId, name: t.album, art: t.albumCoverLg,
-          year: t.releaseYear, artistName: t.artist, tracks: [],
-        };
+    if (spotifyFallback) {
+      albums = spotifyFallback.albums;
+      flatTracks = spotifyFallback.flatTracks;
+    } else {
+      const allTracks = itunesResults
+        .filter(r => r.trackName)
+        .map((r, i) => ({
+          _id:        'it_' + r.trackId,
+          name:       r.trackName,
+          artist:     r.artistName,
+          album:      r.collectionName || '싱글',
+          albumId:    r.collectionId   || r.artistId,
+          albumArt:   r.artworkUrl100?.replace('100x100bb','500x500bb') || null,
+          albumArtSm: r.artworkUrl100?.replace('100x100bb','80x80bb')   || null,
+          albumCoverLg: r.artworkUrl100?.replace('100x100bb','300x300bb') || null,
+          durationMs: r.trackTimeMillis || 0,
+          duration:   r.trackTimeMillis
+            ? `${Math.floor(r.trackTimeMillis/60000)}:${String(Math.floor((r.trackTimeMillis%60000)/1000)).padStart(2,'0')}`
+            : '—',
+          durationSec: Math.floor((r.trackTimeMillis||0)/1000),
+          previewUrl:  r.previewUrl || null,
+          trackNumber: r.trackNumber || (i+1),
+          releaseYear: r.releaseDate ? new Date(r.releaseDate).getFullYear() : 0,
+          gradient:    _grad(i),
+          emoji:       _emoji(i),
+        }));
+
+      /* 앨범별 그룹화 → 최신순 정렬 */
+      const albumMap = {};
+      for (const t of allTracks) {
+        if (!albumMap[t.albumId]) {
+          albumMap[t.albumId] = {
+            id: t.albumId, name: t.album, art: t.albumCoverLg,
+            year: t.releaseYear, artistName: t.artist, tracks: [],
+          };
+        }
+        albumMap[t.albumId].tracks.push(t);
       }
-      albumMap[t.albumId].tracks.push(t);
+      albums = Object.values(albumMap).sort((a,b) => (b.year - a.year));
+      albums.forEach(a => a.tracks.sort((x,y) => x.trackNumber - y.trackNumber));
+      flatTracks = albums.flatMap(a => a.tracks);
     }
-    const albums = Object.values(albumMap)
-      .sort((a,b) => (b.year - a.year));
-    albums.forEach(a => a.tracks.sort((x,y) => x.trackNumber - y.trackNumber));
-    window._artistAlbums = albums;
 
-    /* 순서대로 인덱싱된 전체 트랙 */
-    const flatTracks = albums.flatMap(a => a.tracks);
+    window._artistAlbums = albums;
     window._artistAllTracks = flatTracks;
 
     /* 메타 업데이트 */

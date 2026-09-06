@@ -6,6 +6,7 @@ import com.graduate.Sync.entity.UserEntity;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PlayHistoryRepository
         extends CrudRepository<PlayHistoryEntity, Long> {
@@ -15,6 +16,9 @@ public interface PlayHistoryRepository
 
     // 사용자 최근 재생 10곡
     List<PlayHistoryEntity> findTop10ByUserOrderByPlayedAtDesc(UserEntity user);
+
+    // 사용자가 마지막으로 재생한 곡 1건 (다음 로그인 시 플레이어 복원용)
+    Optional<PlayHistoryEntity> findTopByUserOrderByPlayedAtDesc(UserEntity user);
 
     // 출처별 재생 이력 조회 (sync_rec / playlist / search)
     List<PlayHistoryEntity> findByUserAndSourceOrderByPlayedAtDesc(UserEntity user, String source);

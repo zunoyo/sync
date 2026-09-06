@@ -1,5 +1,6 @@
 package com.graduate.Sync.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.graduate.Sync.dto.EmotionVectorDTO;
 import com.graduate.Sync.dto.PlaylistDTO;
 import com.graduate.Sync.dto.PlaylistTrackDTO;
@@ -8,17 +9,16 @@ import com.graduate.Sync.entity.PlaylistEntity;
 import com.graduate.Sync.entity.UserEntity;
 import com.graduate.Sync.service.EmotionVectorService;
 import com.graduate.Sync.service.PlaylistService;
+import com.graduate.Sync.service.SpotifyAppTokenService;
+import com.graduate.Sync.util.MatchUtils;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Random;
 import java.util.*;
@@ -30,19 +30,11 @@ public class SyncApiController {
     @Autowired private EmotionVectorService emotionVectorService;
     @Autowired private PlaylistService      playlistService;
     @Autowired private RestTemplate         restTemplate;
+    @Autowired private ObjectMapper         objectMapper;
+    @Autowired private SpotifyAppTokenService spotifyAppTokenService;
 
     @Value("${lastfm.api.key:}")
     private String lastfmApiKey;
-
-    @Value("${spotify.client.id:}")
-    private String spotifyClientId;
-
-    @Value("${spotify.client.secret:}")
-    private String spotifyClientSecret;
-
-    // Spotify 토큰 캐시 (1시간 유효)
-    private String        _spotifyToken;
-    private LocalDateTime _spotifyTokenExpiry;
 
     /* ══ 전체 추천 파이프라인 ══════════════════════════
        ① CLIP 감정 분석
@@ -75,7 +67,7 @@ public class SyncApiController {
             List<Map<String, String>> lastfmTracks = searchLastFm(tags);
 
             /* 3. Spotify 검색 → 앨범아트 + 미리듣기 */
-            String spotifyToken = getSpotifyToken();
+            String spotifyToken = spotifyAppTokenService.getToken();
             System.out.println("[Sync] Spotify 토큰 " + (spotifyToken != null ? "발급됨" : "발급 실패(null)")
                     + " · Last.fm 트랙 " + lastfmTracks.size() + "건");
             List<Map<String, Object>> trackList = new ArrayList<>();
@@ -105,6 +97,14 @@ public class SyncApiController {
                         spotifyData.putIfAbsent("previewUrl", itunesData.get("previewUrl"));
                         spotifyData.putIfAbsent("durationMs", itunesData.get("durationMs"));
                         spotifyData.putIfAbsent("albumName",  itunesData.get("albumName"));
+                    }
+
+                    // 재생 정보(미리듣기/재생시간)는 아티스트가 확실히 일치할 때만 신뢰해야 하지만,
+                    // 앨범아트는 틀려도 재생에 영향이 없으므로 그래도 비어있으면 아티스트 일치 여부와
+                    // 무관하게 최후의 시각적 보완으로 채워 넣는다.
+                    if (spotifyData.get("albumArt") == null) {
+                        String fallbackArt = searchItunesArtworkOnly(name, artist);
+                        if (fallbackArt != null) spotifyData.put("albumArt", fallbackArt);
                     }
 
                     String spotifyId    = (String) spotifyData.get("id");
@@ -173,57 +173,6 @@ public class SyncApiController {
         }
     }
 
-    /* ══ Spotify Client Credentials 토큰 발급 ═════════
-       사용자 로그인 없이 검색/앨범아트/미리듣기 사용 가능
-    ═══════════════════════════════════════════════ */
-    private String getSpotifyToken() {
-        if (spotifyClientId == null || spotifyClientId.isBlank()
-                || spotifyClientSecret == null || spotifyClientSecret.isBlank()) {
-            System.out.println("[Spotify] Client ID/Secret 미설정");
-            return null;
-        }
-
-        // 캐시된 토큰이 유효하면 재사용
-        if (_spotifyToken != null && _spotifyTokenExpiry != null
-                && LocalDateTime.now().isBefore(_spotifyTokenExpiry)) {
-            return _spotifyToken;
-        }
-
-        try {
-            String credentials = spotifyClientId + ":" + spotifyClientSecret;
-            String encoded = Base64.getEncoder()
-                    .encodeToString(credentials.getBytes());
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-            headers.set("Authorization", "Basic " + encoded);
-
-            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-            body.add("grant_type", "client_credentials");
-
-            HttpEntity<MultiValueMap<String, String>> req =
-                    new HttpEntity<>(body, headers);
-
-            ResponseEntity<Map> res = restTemplate.postForEntity(
-                    "https://accounts.spotify.com/api/token", req, Map.class);
-
-            Map<String, Object> data = res.getBody();
-            if (data == null) return null;
-
-            _spotifyToken = (String) data.get("access_token");
-            Integer expiresIn = (Integer) data.get("expires_in");
-            _spotifyTokenExpiry = LocalDateTime.now()
-                    .plusSeconds(expiresIn != null ? expiresIn - 60 : 3540);
-
-            System.out.println("[Spotify] 토큰 발급 성공");
-            return _spotifyToken;
-
-        } catch (Exception e) {
-            System.err.println("[Spotify] 토큰 발급 실패: " + e.getMessage());
-            return null;
-        }
-    }
-
     /* ══ Spotify 트랙 검색 ════════════════════════════ */
     private Map<String, Object> searchSpotify(String trackName,
                                               String artistName,
@@ -276,7 +225,7 @@ public class SyncApiController {
                     (List<Map<String, Object>>) item.get("artists");
             String spotifyArtist = (artistList != null && !artistList.isEmpty())
                     ? (String) artistList.get(0).get("name") : null;
-            if (!artistMatches(artistName, spotifyArtist)) {
+            if (!MatchUtils.artistMatches(artistName, spotifyArtist)) {
                 System.out.println("[Spotify] 아티스트 불일치 스킵: "
                         + artistName + " vs " + spotifyArtist);
                 return result;
@@ -323,8 +272,12 @@ public class SyncApiController {
             String url = "https://itunes.apple.com/search?term=" + encoded
                     + "&media=music&entity=song&limit=1";
 
-            ResponseEntity<Map> res = restTemplate.getForEntity(url, Map.class);
-            Map<String, Object> body = res.getBody();
+            // iTunes는 Content-Type을 application/json이 아닌 text/javascript로 내려주기 때문에
+            // RestTemplate의 기본 Jackson 컨버터가 이를 매칭하지 못해 UnknownContentTypeException이 발생함.
+            // 문자열로 받은 뒤 직접 JSON으로 파싱해서 content-type 협상 문제를 우회함.
+            String rawJson = restTemplate.getForObject(url, String.class);
+            if (rawJson == null || rawJson.isBlank()) return result;
+            Map<String, Object> body = objectMapper.readValue(rawJson, Map.class);
             if (body == null) return result;
 
             List<Map<String, Object>> items =
@@ -336,7 +289,7 @@ public class SyncApiController {
 
             Map<String, Object> item = items.get(0);
             String itunesArtist = (String) item.get("artistName");
-            if (!artistMatches(artistName, itunesArtist)) {
+            if (!MatchUtils.artistMatches(artistName, itunesArtist)) {
                 System.out.println("[iTunes] 아티스트 불일치 스킵: " + artistName + " vs " + itunesArtist);
                 return result;
             }
@@ -355,6 +308,36 @@ public class SyncApiController {
                     + e.getClass().getSimpleName() + ": " + e.getMessage());
         }
         return result;
+    }
+
+    /* ══ iTunes 아트워크 전용 최후 보완 — 재생 정보(previewUrl/재생시간)는 오매칭 방지를 위해
+       아티스트가 확실히 일치할 때만 쓰지만, 앨범아트는 틀려도 재생 자체엔 영향이 없으므로
+       아티스트 일치 여부와 무관하게 검색 결과 1건의 이미지만 시각적으로 채워 넣는다 ══ */
+    private String searchItunesArtworkOnly(String trackName, String artistName) {
+        try {
+            String query = trackName + " " + artistName;
+            String encoded = java.net.URLEncoder.encode(query, "UTF-8");
+            String url = "https://itunes.apple.com/search?term=" + encoded
+                    + "&media=music&entity=song&limit=1";
+
+            String rawJson = restTemplate.getForObject(url, String.class);
+            if (rawJson == null || rawJson.isBlank()) return null;
+            Map<String, Object> body = objectMapper.readValue(rawJson, Map.class);
+            if (body == null) return null;
+
+            List<Map<String, Object>> items =
+                    (List<Map<String, Object>>) body.get("results");
+            if (items == null || items.isEmpty()) return null;
+
+            String art = (String) items.get(0).get("artworkUrl100");
+            if (art != null) art = art.replace("100x100bb", "600x600bb");
+            return art;
+
+        } catch (Exception e) {
+            System.err.println("[iTunes] 아트워크 전용 보완 실패 [" + trackName + "]: "
+                    + e.getClass().getSimpleName() + ": " + e.getMessage());
+            return null;
+        }
     }
 
     /* ══ Last.fm 태그 기반 트랙 검색 ═════════════════ */
@@ -431,35 +414,6 @@ public class SyncApiController {
 
     /* ══ 유틸리티 ════════════════════════════════════ */
 
-    /** 아티스트명 유사도 검증 - Levenshtein 80% 이상만 허용 (src2 방식) */
-    private static boolean artistMatches(String a, String b) {
-        if (a == null || b == null) return false;
-        String na = normalizeArtist(a);
-        String nb = normalizeArtist(b);
-        if (na.isEmpty() || nb.isEmpty()) return false;
-        int maxLen = Math.max(na.length(), nb.length());
-        double similarity = (double)(maxLen - levenshtein(na, nb)) / maxLen;
-        return similarity >= 0.80;
-    }
-
-    private static String normalizeArtist(String name) {
-        String s = name.toLowerCase(java.util.Locale.ROOT).trim();
-        return s.startsWith("the ") ? s.substring(4) : s;
-    }
-
-    private static int levenshtein(String a, String b) {
-        int m = a.length(), n = b.length();
-        int[][] dp = new int[m + 1][n + 1];
-        for (int i = 0; i <= m; i++) dp[i][0] = i;
-        for (int j = 0; j <= n; j++) dp[0][j] = j;
-        for (int i = 1; i <= m; i++)
-            for (int j = 1; j <= n; j++)
-                dp[i][j] = (a.charAt(i-1) == b.charAt(j-1))
-                        ? dp[i-1][j-1]
-                        : 1 + Math.min(dp[i-1][j-1],
-                                Math.min(dp[i-1][j], dp[i][j-1]));
-        return dp[m][n];
-    }
 
     private List<String> parseTags(String json) {
         List<String> result = new ArrayList<>();

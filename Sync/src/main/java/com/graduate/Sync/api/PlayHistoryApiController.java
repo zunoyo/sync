@@ -69,6 +69,28 @@ public class PlayHistoryApiController {
                 playHistoryService.getRecentTracks(loginUser));
     }
 
+    /* ── 마지막으로 재생한 곡 조회 (로그인 시 플레이어 복원용) ── */
+    @GetMapping("/last")
+    public ResponseEntity<Object> getLast(HttpSession session) {
+
+        UserEntity loginUser =
+                (UserEntity) session.getAttribute("loginUser");
+        if (loginUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        // now_playing(사용자당 1행, 매 재생마다 갱신)을 우선 사용
+        var nowPlaying = playHistoryService.getNowPlaying(loginUser);
+        if (nowPlaying.isPresent()) {
+            return ResponseEntity.ok(nowPlaying.get());
+        }
+
+        // now_playing이 아직 없는 계정(이번 업데이트 이전에 쌓인 이력만 있는 경우) 대비
+        return playHistoryService.getLastPlayed(loginUser)
+                .map(h -> ResponseEntity.ok((Object) h))
+                .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
     /* ── 출처별 재생 이력 조회 ────────────────────────── */
     @GetMapping("/source/{source}")
     public ResponseEntity<List<PlayHistoryEntity>> getBySource(

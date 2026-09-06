@@ -1,0 +1,177 @@
+/* ============================================================
+   SOUNDWAVE — Base Styles
+   Reset, 기본 타이포그래피, 전역 유틸리티
+   ============================================================ */
+
+/* ── Reset ── */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg-base);
+  color: var(--text-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: var(--radius-sm);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+/* ── Links ── */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+a:hover { color: var(--text-base); }
+
+/* ── Buttons base ── */
+button {
+  font-family: var(--font);
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Input base ── */
+input, textarea, select {
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--text-base);
+}
+
+/* ── List reset ── */
+ul, ol { list-style: none; }
+
+/* ── Gradient art helpers ── */
+.grad-1 { background: var(--grad-1); }
+.grad-2 { background: var(--grad-2); }
+.grad-3 { background: var(--grad-3); }
+.grad-4 { background: var(--grad-4); }
+.grad-5 { background: var(--grad-5); }
+.grad-6 { background: var(--grad-6); }
+.grad-7 { background: var(--grad-7); }
+.grad-8 { background: var(--grad-8); }
+
+/* ── Typography helpers ── */
+.text-accent    { color: var(--accent); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted     { color: var(--text-muted); }
+.text-negative  { color: var(--negative); }
+.text-warning   { color: var(--warning); }
+.text-info      { color: var(--info); }
+.text-truncate  { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.fw-400 { font-weight: 400; }
+.fw-600 { font-weight: 600; }
+.fw-700 { font-weight: 700; }
+.fw-900 { font-weight: 900; }
+
+.fs-10 { font-size: 10px; }
+.fs-12 { font-size: 12px; }
+.fs-14 { font-size: 14px; }
+.fs-16 { font-size: 16px; }
+.fs-18 { font-size: 18px; }
+.fs-24 { font-size: 24px; }
+
+/* ── Spacing helpers ── */
+.mt-8  { margin-top: 8px; }
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+.mb-8  { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-24 { margin-bottom: 24px; }
+
+/* ── Flex helpers ── */
+.flex         { display: flex; }
+.flex-col     { display: flex; flex-direction: column; }
+.align-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-8  { gap: 8px; }
+.gap-12 { gap: 12px; }
+.gap-16 { gap: 16px; }
+
+/* ── Animations ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-4px); }
+}
+
+@keyframes eq-pulse {
+  from { transform: scaleY(0.35); }
+  to   { transform: scaleY(1); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 16px var(--accent-shadow); }
+  50%       { box-shadow: 0 0 32px rgba(30,215,96,0.55); }
+}
+
+.anim-fade-in-up  { animation: fadeInUp  0.25s ease; }
+.anim-fade-in     { animation: fadeIn    0.2s ease; }
+.anim-slide-right { animation: slideInRight 0.3s ease; }
+
+/* ── Equalizer bars (재생 중 표시) ── */
+.eq-bars {
+  display: inline-flex;
+  gap: 2px;
+  align-items: flex-end;
+  height: 14px;
+}
+.eq-bar {
+  width: 3px;
+  background: var(--accent);
+  border-radius: 1px;
+  animation: eq-pulse 0.8s ease-in-out infinite alternate;
+}
+.eq-bar:nth-child(1) { height: 40%; animation-delay: 0s;    }
+.eq-bar:nth-child(2) { height: 100%; animation-delay: 0.15s; }
+.eq-bar:nth-child(3) { height: 60%; animation-delay: 0.3s;  }
+.eq-bar:nth-child(4) { height: 80%; animation-delay: 0.1s;  }
+
+/* ── Responsive display ── */
+@media (max-width: 900px) {
+  .hide-mobile { display: none !important; }
+}
+@media (min-width: 901px) {
+  .hide-desktop { display: none !important; }
+}

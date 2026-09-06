@@ -39,6 +39,18 @@ const SavedLibrary = (() => {
   function _artistEntry(name) { return (_artists || []).find(a => a.artistName === name); }
   function _albumEntry(externalId) { return (_albums || []).find(a => a.albumExternalId === String(externalId)); }
 
+  /* ── iTunes 조회 — 실패(레이트리밋 등) 시 잠깐 대기 후 한 번 더 시도 ── */
+  async function _fetchItunesJson(url) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (res.ok) return await res.json();
+      } catch (e) { /* 재시도 */ }
+      if (attempt === 0) await new Promise(r => setTimeout(r, 600));
+    }
+    return { results: [] };
+  }
+
   /** 저장 ↔ 해제 토글. 반환값: 토글 후 저장 상태(true=저장됨) */
   async function toggleArtist(name, imageUrl, externalId) {
     if (!_artists) await loadArtists();
@@ -93,6 +105,22 @@ const SavedLibrary = (() => {
     } catch (e) { return false; }
   }
 
+  /* ── Spotify 앨범 상세 폴백 — iTunes lookup이 아무것도 못 찾았을 때만 호출 ── */
+  async function _fetchSpotifyAlbumDetail(artistName, albumName) {
+    try {
+      const res = await fetch(`/api/spotify/catalog/album-detail?artistName=${encodeURIComponent(artistName)}&albumName=${encodeURIComponent(albumName)}`, { credentials: 'include' });
+      const data = await res.json();
+      if (!data?.tracks?.length) return null;
+      return data.tracks.map((t, i) => ({
+        _id: t._id, name: t.name, artist: t.artist, album: t.album || albumName,
+        albumArt: t.albumArt || null,
+        durationMs: t.durationMs || 0, duration: t.duration || '—',
+        previewUrl: t.previewUrl || null, spotifyId: t.spotifyId || null,
+        trackNumber: t.trackNumber || (i + 1),
+      }));
+    } catch (e) { return null; }
+  }
+
   /* ══ 저장한 앨범 클릭 시 — 단일 앨범 상세 페이지 (iTunes lookup) ══ */
   async function showAlbumDetail(externalId, albumName, artistName, albumArt) {
     if (typeof Navigation !== 'undefined') Navigation.switchPage('detail');
@@ -120,9 +148,8 @@ const SavedLibrary = (() => {
     list.innerHTML = `<div style="padding:24px;text-align:center;color:var(--text-secondary)">곡 불러오는 중...</div>`;
 
     try {
-      const res  = await fetch(`https://itunes.apple.com/lookup?id=${encodeURIComponent(externalId)}&entity=song`);
-      const data = await res.json();
-      const tracks = (data.results || [])
+      const data = await _fetchItunesJson(`https://itunes.apple.com/lookup?id=${encodeURIComponent(externalId)}&entity=song`);
+      let tracks = (data.results || [])
         .filter(r => r.wrapperType === 'track')
         .map((r, i) => ({
           _id: 'it_' + r.trackId,
@@ -136,6 +163,12 @@ const SavedLibrary = (() => {
           trackNumber: r.trackNumber || (i + 1),
         }))
         .sort((a, b) => a.trackNumber - b.trackNumber);
+
+      // iTunes에서 아무 트랙도 못 찾았으면 Spotify로 보완
+      if (tracks.length === 0 && artistName && albumName) {
+        const fallback = await _fetchSpotifyAlbumDetail(artistName, albumName);
+        if (fallback) tracks = fallback;
+      }
 
       window._albumDetailTracks = tracks;
 

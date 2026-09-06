@@ -104,7 +104,7 @@ const SearchPage = (() => {
   /* ── 아티스트 검색 결과 ── */
   async function _searchArtists(query) {
     try {
-      const res  = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=musicArtist&limit=6`);
+      const res  = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=musicArtist&limit=6`, { cache: 'no-store' });
       const data = await res.json();
       return (data.results || [])
         .filter(r => r.artistName)
@@ -123,7 +123,9 @@ const SearchPage = (() => {
             <div id="srch-artist-art-${i}"
                  style="width:96px;height:96px;border-radius:50%;background:rgba(255,255,255,.08);
                         display:flex;align-items:center;justify-content:center;font-size:32px;
-                        margin:0 auto 8px;overflow:hidden">🎤</div>
+                        margin:0 auto 8px;overflow:hidden">${a.image
+                          ? `<img src="${a.image}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.textContent='🎤'">`
+                          : '🎤'}</div>
             <div style="font-size:13px;font-weight:600;color:#fff;white-space:nowrap;
                         overflow:hidden;text-overflow:ellipsis">${a.name}</div>
             <div style="font-size:11px;color:var(--text-secondary)">아티스트</div>
@@ -133,8 +135,9 @@ const SearchPage = (() => {
 
   function _enrichArtistImages(artists) {
     artists.forEach(async (a, i) => {
+      if (a.image) return; // 이미 이미지가 있으면(Spotify 폴백) 덮어쓰지 않음
       try {
-        const res  = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(a.name)}&media=music&entity=song&limit=1`);
+        const res  = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(a.name)}&media=music&entity=song&limit=1`, { cache: 'no-store' });
         const data = await res.json();
         const art  = data.results?.[0]?.artworkUrl100?.replace('100x100bb','200x200bb');
         if (!art) return;
@@ -154,6 +157,31 @@ const SearchPage = (() => {
     }
   }
 
+  /* ── Spotify 카탈로그 폴백 — iTunes에서 곡·아티스트 둘 다 0건일 때만 호출 ── */
+  async function _spotifyCatalogSearch(query) {
+    try {
+      const [trackRes, artistRes] = await Promise.all([
+        fetch(`/api/spotify/catalog/search?q=${encodeURIComponent(query)}&limit=20`, { credentials: 'include' }).then(r => r.json()),
+        fetch(`/api/spotify/catalog/search-artists?q=${encodeURIComponent(query)}&limit=6`, { credentials: 'include' }).then(r => r.json()),
+      ]);
+      const tracks = (trackRes.tracks || []).map((t, i) => ({
+        _id: t._id || `sp_${i}`,
+        name: t.name || '알 수 없는 곡',
+        artist: t.artist || '',
+        album: t.album || '',
+        albumArt: t.albumArt || null,
+        durationMs: t.durationMs || 0,
+        duration: t.duration || _fmtMs(t.durationMs),
+        durationSec: Math.floor((t.durationMs || 0) / 1000),
+        previewUrl: t.previewUrl || null,
+        spotifyId: t.spotifyId || null,
+        gradient: GRADS[i % GRADS.length], emoji: EMOJIS[i % EMOJIS.length],
+      }));
+      const artists = (artistRes.artists || []).filter(a => a.name).map(a => ({ name: a.name, id: a.id, image: a.image || null }));
+      return { tracks, artists };
+    } catch (e) { return { tracks: [], artists: [] }; }
+  }
+
   /* ══ 실시간 검색 ════════════════════════════════════ */
   async function _doSearch(query) {
     const page = document.getElementById('page-search');
@@ -168,11 +196,19 @@ const SearchPage = (() => {
 
     try {
       const url  = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=20`;
-      const [trackRes, artists] = await Promise.all([
-        fetch(url).then(r => r.json()),
+      const [trackRes, artistsResult] = await Promise.all([
+        fetch(url, { cache: 'no-store' }).then(r => r.json()),
         _searchArtists(query),
       ]);
-      const tracks = (trackRes.results || []).map(_toTrack);
+      let tracks  = (trackRes.results || []).map(_toTrack);
+      let artists = artistsResult;
+
+      // iTunes에서 곡·아티스트 둘 다 하나도 못 찾았을 때만 Spotify로 보완
+      if (!tracks.length && !artists.length) {
+        const fallback = await _spotifyCatalogSearch(query);
+        tracks  = fallback.tracks;
+        artists = fallback.artists;
+      }
       window._srchTracks = tracks;
 
       if (!tracks.length && !artists.length) {
@@ -199,7 +235,7 @@ const SearchPage = (() => {
         ${_artistRow(artists)}
         ${tracks.length ? `<div class="track-list">${tracks.map((t,i) => _row(t,i)).join('')}</div>` : ''}`;
 
-      if (artists.length) _enrichArtistImages(artists);
+      if (artists.some(a => !a.image)) _enrichArtistImages(artists);
 
     } catch(e) {
       page.innerHTML = `
@@ -250,7 +286,7 @@ const SearchPage = (() => {
     try {
       const q    = GENRE_QUERIES[genreName] || genreName;
       // 필터링으로 걸러질 곡을 감안해 후보를 넉넉히 가져온 뒤 20곡으로 추림
-      const res  = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=music&entity=song&limit=50`);
+      const res  = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=music&entity=song&limit=50`, { cache: 'no-store' });
       const data = await res.json();
       let results = data.results || [];
 

@@ -131,11 +131,35 @@ const Player = (() => {
     try {
       const term = encodeURIComponent(`${artist} ${name}`);
       const res  = await fetch(
-        `https://itunes.apple.com/search?term=${term}&media=music&entity=song&limit=1`
+        `https://itunes.apple.com/search?term=${term}&media=music&entity=song&limit=1`,
+        { cache: 'no-store' }
       );
       const data = await res.json();
       return data.results?.[0]?.previewUrl || null;
     } catch(e) { return null; }
+  }
+
+  /* ── 곡 하나를 iTunes Search API로 검색해 상세정보 보강 (마지막 재생곡 복원용) ──
+     네트워크가 느리거나 iTunes 접속이 안 될 때 무한 대기하지 않도록 4초 타임아웃 */
+  async function _getItunesTrackInfo(query) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 4000);
+    try {
+      const res  = await fetch(
+        `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=1`,
+        { signal: controller.signal, cache: 'no-store' }
+      );
+      const data = await res.json();
+      if (!data.results?.length) return null;
+      const item = data.results[0];
+      return {
+        albumArt:   item.artworkUrl100?.replace('100x100bb', '500x500bb') || null,
+        durationMs: item.trackTimeMillis || null,
+        previewUrl: item.previewUrl      || null,
+        albumName:  item.collectionName  || '',
+      };
+    } catch(e) { return null; }
+    finally { clearTimeout(timer); }
   }
 
   /* ── 재생 기록 ── */
@@ -152,6 +176,40 @@ const Player = (() => {
         emotionVectorId: null,
       }),
     }).catch(() => {});
+  }
+
+  /* ── 로그인 시 계정의 마지막 재생곡을 플레이어에 복원 ──────────
+     서버가 200을 주면(=로그인 상태 + 기록 있음) 트랙 정보만 채워 넣고,
+     자동재생은 하지 않음 — 재생 버튼을 누르면 그때 playTrack이 이어서 처리.
+     401(비로그인)/204(기록 없음)이면 조용히 아무것도 하지 않음.
+  ──────────────────────────────────────────────────────────── */
+  async function _restoreLastPlayed() {
+    try {
+      const res = await fetch('/api/play-history/last', { credentials: 'include' });
+      if (res.status !== 200) return;
+      const last = await res.json();
+      if (!last?.trackName) return;
+
+      const enriched = await _getItunesTrackInfo(`${last.trackName} ${last.artistName || ''}`.trim());
+
+      state.currentTrack = {
+        name:        last.trackName,
+        artist:      last.artistName || '',
+        album:       enriched?.albumName  || '',
+        albumArt:    enriched?.albumArt   || null,
+        previewUrl:  enriched?.previewUrl || null,
+        durationMs:  enriched?.durationMs || null,
+        durationSec: enriched?.durationMs ? Math.floor(enriched.durationMs / 1000) : 0,
+        spotifyId:   last.spotifyTrackId  || null,
+      };
+      state.isPlaying    = false;
+      state.useRealAudio = false;
+      state.useSpotify   = false;
+
+      updateTrackInfo();
+      updatePlayBtn();
+      updateProgress();
+    } catch (e) { /* 조용히 무시 */ }
   }
 
   /* ── UI 업데이트 ── */
@@ -378,13 +436,22 @@ const Player = (() => {
 
   /* ══ 공개 제어 ══════════════════════════════════════════ */
   function togglePlay() {
-    state.isPlaying = !state.isPlaying;
+    if (!state.currentTrack) return;
     if (state.useSpotify && typeof SpotifyPlayer !== 'undefined') {
+      state.isPlaying = !state.isPlaying;
       state.isPlaying ? SpotifyPlayer.resume() : SpotifyPlayer.pause();
-    } else if (state.useRealAudio) {
-      state.isPlaying ? _audio.play().catch(()=>{}) : _audio.pause();
+      updatePlayBtn();
+      return;
     }
-    updatePlayBtn();
+    if (state.useRealAudio) {
+      state.isPlaying = !state.isPlaying;
+      state.isPlaying ? _audio.play().catch(()=>{}) : _audio.pause();
+      updatePlayBtn();
+      return;
+    }
+    // 아직 실제 재생원이 로드되지 않은 경우(로그인 시 복원된 마지막 곡 등)
+    // — playTrack의 재생 우선순위(Spotify SDK → previewUrl → iTunes 폴백)를 그대로 태워 처음부터 재생 시작
+    playTrack(state.currentTrack, state.queue.length ? state.queue : null, state.queueIndex);
   }
 
   function seek(pct) {
@@ -451,6 +518,9 @@ const Player = (() => {
     if (vf) vf.style.width = state.volume + '%';
 
     if (typeof SpotifyPlayer !== 'undefined') SpotifyPlayer.init();
+
+    // 로그인 상태면 계정의 마지막 재생곡으로 표시를 덮어씀 (자동재생 없이)
+    _restoreLastPlayed();
   }
 
   return {

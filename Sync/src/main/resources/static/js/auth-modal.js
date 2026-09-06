@@ -85,7 +85,24 @@ const AuthModal = (() => {
     setTimeout(async () => {
       // ① localStorage 먼저 시도 (SPA 계정)
       const localRes = Auth.login(email, password);
-      if (localRes.ok) { _onSuccess(); return; }
+      if (localRes.ok) {
+        // Auth.login() 내부의 서버 세션 생성(_syncServerSession)은 fire-and-forget이라
+        // 여기서 명시적으로 한 번 더 기다려준다. 이걸 안 기다리고 바로 새로고침하면
+        // 새로고침이 세션 쿠키가 실제로 저장되기 전에 진행 중이던 요청을 끊어버려서,
+        // 로그인 직후인데도 새로 뜬 페이지가 "로그인 안 된 상태"로 보이는 문제가 있었다.
+        try {
+          await fetch('/api/users/login', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ email, password }),
+          });
+        } catch (e) {
+          console.warn('[AuthModal] 서버 세션 동기화 대기 중 오류:', e.message);
+        }
+        _onSuccess();
+        return;
+      }
 
       // ② 서버 DB 확인 (BCrypt 해시 비교 — 폼 가입 / DB 직접 계정)
       try {
@@ -320,24 +337,11 @@ const AuthModal = (() => {
   /* ══════════════ 로그인 성공 후 처리 ══════════════ */
 
   function _onSuccess() {
-    hide();
-    _refreshTopbar();
-    /* 프로필 페이지가 이미 열려 있으면 데이터 갱신 */
-    if (typeof ProfilePage !== 'undefined') ProfilePage.populate();
-    /* 로그인 시점엔 아직 로그아웃 상태로 불러와졌던 사이드바 라이브러리 목록을
-       실제 로그인 사용자 기준으로 다시 불러온다 (그전엔 F5 해야만 반영됐음) */
-    if (typeof LibraryFilter !== 'undefined') LibraryFilter.refresh();
-    /* 친구 요청 배지도 로그인 사용자 기준으로 갱신 */
-    if (typeof FriendRequestsModal !== 'undefined') FriendRequestsModal.updateBadge();
-    /* 플레이리스트 관리 페이지가 이미 열려 있으면 데이터 갱신 */
-    if (typeof PlaylistPage !== 'undefined' &&
-        document.getElementById('page-playlist')?.classList.contains('active')) {
-      PlaylistPage.render();
-    }
-    /* 로그인 후 Spotify SDK 초기화 */
-    setTimeout(() => {
-      if (typeof SpotifyPlayer !== 'undefined') SpotifyPlayer.init();
-    }, 800);
+    /* 로그아웃과 동일하게 전체 페이지를 새로고침한다.
+       사이드바 라이브러리·홈 화면 차트/빠른 액세스·친구 배지 등
+       "로그인 전에 한 번 로드되고 다시 안 불러와지는" 부류의 문제를
+       하나하나 개별 갱신으로 막기보다, 아예 새로 불러오는 게 확실하다. */
+    window.location.replace('/');
   }
 
   /** 상단바 아바타 + 드롭다운 사용자 정보를 실시간 갱신 */
