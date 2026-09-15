@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoundWave</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&display=swap"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/components/sidebar.css">
+  <link rel="stylesheet" href="/css/components/topbar.css">
+  <link rel="stylesheet" href="/css/components/player.css">
+  <link rel="stylesheet" href="/css/components/cards.css">
+  <link rel="stylesheet" href="/css/components/playlist-picker.css">
+  <link rel="stylesheet" href="/css/components/right-panel.css">
+  <link rel="stylesheet" href="/css/pages/home.css">
+  <link rel="stylesheet" href="/css/pages/search.css">
+  <link rel="stylesheet" href="/css/pages/friends.css">
+  <link rel="stylesheet" href="/css/pages/sync.css">
+  <link rel="stylesheet" href="/css/pages/playlist.css">
+  <link rel="stylesheet" href="/css/pages/profile.css">
+
+  <!-- 인증 모듈 로드 (모달 방식 — 리다이렉트 없음) -->
+  <script src="/js/auth.js"></script>
+  <link rel="stylesheet" href="/css/pages/auth.css">
+  <link rel="stylesheet" href="/css/pages/splash.css">
+  <link rel="stylesheet" href="/css/pages/detail.css">
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════
+     SPLASH SCREEN — 앱 첫 진입 애니메이션
+     splash.js 가 2300ms 후 페이드아웃시킵니다.
+════════════════════════════════════════════════ -->
+<div id="splash-screen">
+  <div class="splash-icon">
+    <svg viewBox="0 0 32 32" fill="#000" width="40" height="40">
+      <path d="M12.5 10.5v11l9-5.5-9-5.5z"/>
+    </svg>
+  </div>
+  <div class="splash-title">SoundWave</div>
+  <div class="splash-tagline">Music for everyone</div>
+  <div class="splash-dots">
+    <div class="splash-dot"></div>
+    <div class="splash-dot"></div>
+    <div class="splash-dot"></div>
+  </div>
+</div>
+
+<div class="app-wrapper">
+  <div class="app-shell">
+
+    <!-- ① 사이드바 → components/sidebar.js 교체 -->
+    <div id="sidebar-root"></div>
+
+    <div class="app-main-area">
+      <main class="main">
+
+        <!-- ② 상단바 → components/topbar.js 교체 (로그인 사용자 정보 표시) -->
+        <div id="topbar-root"></div>
+
+        <div class="content">
+
+
+          <!-- ══ PAGE: 홈 ══════════════════════════════ -->
+          <div class="page active" id="page-home">
+            <div class="tabs">
+              <button class="tab-btn active">전체</button>
+              <button class="tab-btn">음악</button>
+              <button class="tab-btn">팟캐스트</button>
+            </div>
+            <div class="quick-grid">
+              <div class="quick-item" onclick="DetailPage.showPlaylist(1)"><div class="quick-art" style="background:linear-gradient(135deg,#450af5,#c4efd9)">💚</div><span class="quick-name">좋아요 표시한 곡</span><button class="quick-play"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button></div>
+              <div class="quick-item" onclick="DetailPage.showPlaylist(5)"><div class="quick-art grad-4">🎤</div><span class="quick-name">K-Pop 히트곡</span><button class="quick-play"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button></div>
+              <div class="quick-item" onclick="DetailPage.showPlaylist(4)"><div class="quick-art grad-2">🌊</div><span class="quick-name">Lo-Fi Beats</span><button class="quick-play"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button></div>
+              <div class="quick-item" onclick="DetailPage.showPlaylist(3)"><div class="quick-art grad-3">🚗</div><span class="quick-name">드라이브 플레이리스트</span><button class="quick-play"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button></div>
+              <div class="quick-item" onclick="SearchPage.showGenre('힙합 &amp; R&amp;B','🎧','grad-6')"><div class="quick-art grad-6">🎧</div><span class="quick-name">힙합 &amp; R&amp;B</span><button class="quick-play"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button></div>
+              <div class="quick-item" onclick="DetailPage.showPlaylist(2)"><div class="quick-art grad-1">🎸</div><span class="quick-name">인디 Mix</span><button class="quick-play"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button></div>
+            </div>
+            <div class="hero-banner">
+              <div class="hero-art">🎵</div>
+              <div class="hero-info">
+                <div class="hero-type">추천 플레이리스트</div>
+                <div class="hero-title">오늘의<br>신곡 레이더</div>
+                <div class="hero-meta"><span>SoundWave</span> 팀 선정 · 3시간 21분</div>
+                <div class="hero-actions">
+                  <button class="play-btn-large" onclick="togglePlay()"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+                  <button class="action-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
+                  <button class="action-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg></button>
+                </div>
+              </div>
+            </div>
+            <div class="section">
+              <div class="section-header"><h2 class="section-title">오늘의 추천</h2><button class="section-more">모두 보기</button></div>
+              <div class="cards-grid" id="home-new-releases">
+                <div class="card" onclick="SearchPage.showGenre('K-Pop 히트곡 모음','🎤','grad-4')"><div class="card-art"><div class="card-art-inner grad-4">🎤</div><button class="card-play"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button></div><div class="card-title">K-Pop 히트곡 모음</div><div class="card-subtitle">aespa, BTS, BLACKPINK 등의 최신 히트곡</div></div>
+                <div class="card" onclick="SearchPage.showGenre('Lo-Fi Beats','🌙','grad-2')"><div class="card-art"><div class="card-art-inner grad-2">🌙</div><button class="card-play"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button></div><div class="card-title">Lo-Fi Beats</div><div class="card-subtitle">공부하거나 집중할 때</div></div>
+                <div class="card" onclick="SearchPage.showGenre('인디 믹스','🎸','grad-1')"><div class="card-art"><div class="card-art-inner grad-1">🎸</div><button class="card-play"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button></div><div class="card-title">인디 믹스</div><div class="card-subtitle">국내외 인디 아티스트 큐레이션</div></div>
+                <div class="card" onclick="SearchPage.showGenre('힙합 &amp; R&amp;B','🎧','grad-5')"><div class="card-art"><div class="card-art-inner grad-5">🎧</div><button class="card-play"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button></div><div class="card-title">힙합 &amp; R&amp;B</div><div class="card-subtitle">지금 가장 핫한 힙합과 R&amp;B</div></div>
+                <div class="card" onclick="SearchPage.showGenre('드라이브 플레이리스트','🚗','grad-3')"><div class="card-art"><div class="card-art-inner grad-3">🚗</div><button class="card-play"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button></div><div class="card-title">드라이브 플레이리스트</div><div class="card-subtitle">달리는 밤을 위한 완벽한 선곡</div></div>
+                <div class="card" onclick="SearchPage.showGenre('클래식 집중','🎻','grad-6')"><div class="card-art"><div class="card-art-inner grad-6">🎻</div><button class="card-play"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button></div><div class="card-title">클래식 집중</div><div class="card-subtitle">깊은 집중을 위한 클래식 선곡</div></div>
+              </div>
+            </div>
+            <div class="section">
+              <div class="section-header"><h2 class="section-title">인기 아티스트</h2><button class="section-more">모두 보기</button></div>
+              <div class="cards-grid artist-grid"></div>
+            </div>
+            <div class="section">
+              <div class="section-header"><h2 class="section-title">🔥 인기 차트 TOP 10</h2><button class="section-more">전체 차트</button></div>
+              <div class="track-list" id="track-list"></div>
+            </div>
+          </div><!-- /page-home -->
+
+
+          <!-- ══ PAGE: 검색 ══ -->
+          <div class="page" id="page-search">
+            <div id="search-results-area" style="display:none;padding:0 0 24px"></div>
+            <div id="search-browse">
+            <h2 class="section-title" style="margin-bottom:24px">모두 둘러보기</h2>
+            <div class="genre-grid">
+              <div class="genre-chip grad-4" onclick="SearchPage.showGenre('K-Pop','🎤','grad-4')"><span class="genre-chip-label">K-Pop</span><span class="genre-chip-emoji">🎤</span></div>
+              <div class="genre-chip grad-6" onclick="SearchPage.showGenre('힙합','🎧','grad-6')"><span class="genre-chip-label">힙합</span><span class="genre-chip-emoji">🎧</span></div>
+              <div class="genre-chip grad-1" onclick="SearchPage.showGenre('인디','🎸','grad-1')"><span class="genre-chip-label">인디</span><span class="genre-chip-emoji">🎸</span></div>
+              <div class="genre-chip grad-3" onclick="SearchPage.showGenre('R&amp;B','🎵','grad-3')"><span class="genre-chip-label">R&amp;B</span><span class="genre-chip-emoji">🎵</span></div>
+              <div class="genre-chip grad-5" onclick="SearchPage.showGenre('팝','⭐','grad-5')"><span class="genre-chip-label">팝</span><span class="genre-chip-emoji">⭐</span></div>
+              <div class="genre-chip grad-2" onclick="SearchPage.showGenre('Lo-Fi','🌙','grad-2')"><span class="genre-chip-label">Lo-Fi</span><span class="genre-chip-emoji">🌙</span></div>
+              <div class="genre-chip grad-7" onclick="SearchPage.showGenre('클래식','🎻','grad-7')"><span class="genre-chip-label">클래식</span><span class="genre-chip-emoji">🎻</span></div>
+              <div class="genre-chip grad-8" onclick="SearchPage.showGenre('재즈','🎺','grad-8')"><span class="genre-chip-label">재즈</span><span class="genre-chip-emoji">🎺</span></div>
+              <div class="genre-chip" style="background:linear-gradient(135deg,#ff9a9e,#fecfef)" onclick="SearchPage.showGenre('발라드','💔','grad-7')"><span class="genre-chip-label">발라드</span><span class="genre-chip-emoji">💔</span></div>
+              <div class="genre-chip" style="background:linear-gradient(135deg,#a1c4fd,#c2e9fb)" onclick="SearchPage.showGenre('전자음악','🎛️','grad-2')"><span class="genre-chip-label">전자음악</span><span class="genre-chip-emoji">🎛️</span></div>
+              <div class="genre-chip" style="background:linear-gradient(135deg,#fddb92,#d1fdff)" onclick="SearchPage.showGenre('어쿠스틱','🪗','grad-1')"><span class="genre-chip-label" style="color:#333">어쿠스틱</span><span class="genre-chip-emoji">🪗</span></div>
+              <div class="genre-chip" style="background:linear-gradient(135deg,#e0c3fc,#8ec5fc)" onclick="SearchPage.showGenre('트로트','🌺','grad-7')"><span class="genre-chip-label">트로트</span><span class="genre-chip-emoji">🌺</span></div>
+            </div>
+            </div><!-- /search-browse -->
+          </div><!-- /page-search -->
+
+
+          <!-- ══ PAGE: 친구 ══════════════════════════════════
+               FriendsPage.render() → js/friends.js 처리
+          ═══════════════════════════════════════════════ -->
+          <div class="page" id="page-friends">
+
+            <div class="friends-header">
+              <div>
+                <div class="friends-title">친구</div>
+                <div class="friends-subtitle">친구 목록을 클릭해 공유 플레이리스트를 확인하세요</div>
+              </div>
+              <div class="friends-header-actions">
+                <button class="frm-open-btn" onclick="FriendRequestsModal.show()">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5
+                             c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5
+                             s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+                  </svg>
+                  친구 요청
+                  <span class="frm-open-btn-badge" id="frm-open-btn-badge">2</span>
+                </button>
+                <button class="pill-btn accent" onclick="AddFriendModal.show()">
+                  + 친구 추가
+                </button>
+                <div class="friend-search">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5
+                             0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99
+                             L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5
+                             5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                  </svg>
+                  <input type="text" placeholder="친구 검색...">
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="friends-section-label">
+                <span class="online-indicator"></span>
+                <span id="online-count">온라인</span>
+              </div>
+              <div class="friends-grid" id="friends-online-grid"></div>
+            </div>
+
+            <div class="section">
+              <div class="friends-section-label">오프라인</div>
+              <div class="friends-grid" id="friends-offline-grid"></div>
+            </div>
+
+          </div><!-- /page-friends -->
+
+
+          <!-- ══ PAGE: Sync AI ══ -->
+          <div class="page" id="page-sync">
+            <div class="sync-hero">
+              <span class="sync-logo">🎵</span>
+              <div class="sync-title">Sync AI</div>
+              <div class="sync-subtitle">지금 기분, 상황, 활동을 알려주세요.<br>AI가 당신만을 위한 완벽한 음악을 추천해드립니다.</div>
+              <div class="sync-input-area">
+                <textarea id="sync-textarea" placeholder="예: '비 오는 날 카페에서 공부할 때 듣기 좋은 음악'&#10;Ctrl+Enter 로 전송"></textarea>
+                <button class="sync-attach-btn" id="sync-attach-btn" title="이미지 첨부"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg></button>
+                <input type="file" id="sync-file-input" accept="image/*" multiple>
+                <button class="sync-send-btn" onclick="syncSend()" title="전송"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+              </div>
+              <div class="sync-image-previews" id="sync-image-previews"></div>
+              <div class="sync-mood-pills" id="sync-moods"></div>
+            </div>
+            <div class="section"><div class="section-header"><h2 class="section-title" style="font-size:18px">✨ 추천 결과</h2></div><div id="sync-results"></div></div>
+            <div class="section">
+              <div class="section-header"><h2 class="section-title" style="font-size:18px">📊 내 청취 패턴 분석</h2></div>
+              <div style="background:var(--bg-mid);border-radius:var(--radius-lg);padding:20px">
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px">
+                  <div style="background:rgba(30,215,96,.1);border:1px solid rgba(30,215,96,.2);border-radius:var(--radius-lg);padding:16px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--accent)">K-Pop</div><div style="font-size:12px;color:var(--text-secondary);margin-top:4px">가장 많이 들음</div><div style="font-size:24px;font-weight:900;margin-top:8px">68%</div></div>
+                  <div style="background:rgba(83,157,245,.1);border:1px solid rgba(83,157,245,.2);border-radius:var(--radius-lg);padding:16px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--info)">Lo-Fi</div><div style="font-size:12px;color:var(--text-secondary);margin-top:4px">집중할 때</div><div style="font-size:24px;font-weight:900;margin-top:8px">18%</div></div>
+                  <div style="background:rgba(255,164,43,.1);border:1px solid rgba(255,164,43,.2);border-radius:var(--radius-lg);padding:16px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--warning)">인디</div><div style="font-size:12px;color:var(--text-secondary);margin-top:4px">감성 충전</div><div style="font-size:24px;font-weight:900;margin-top:8px">14%</div></div>
+                </div>
+              </div>
+            </div>
+          </div><!-- /page-sync -->
+
+
+          <!-- ══ PAGE: 플레이리스트 ══ -->
+          <div class="page" id="page-playlist">
+            <div class="section-header" style="margin-bottom:24px"><h2 class="section-title">플레이리스트 관리</h2><button class="pill-btn accent" onclick="CreatePlaylistModal.show()">+ 새 플레이리스트</button></div>
+            <div class="playlist-toolbar">
+              <div style="position:relative;flex:1;max-width:280px"><svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-secondary);pointer-events:none" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg><input type="text" placeholder="플레이리스트 검색..." style="width:100%;background:var(--bg-card);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-full);padding:9px 16px 9px 36px;font-size:13px;color:var(--text-base);font-family:var(--font);outline:none"></div>
+              <div style="display:flex;gap:4px;flex-wrap:wrap">
+                <button class="filter-pill pl-filter-btn active" data-filter="all"    onclick="PlaylistPage.render('all')">전체</button>
+                <button class="filter-pill pl-filter-btn"        data-filter="my"     onclick="PlaylistPage.render('my')">내 플레이리스트</button>
+                <button class="filter-pill pl-filter-btn"        data-filter="saved"  onclick="PlaylistPage.render('saved')">저장된 플레이리스트</button>
+                <button class="filter-pill pl-filter-btn"        data-filter="artist" onclick="PlaylistPage.render('artist')">아티스트</button>
+                <button class="filter-pill pl-filter-btn"        data-filter="album"  onclick="PlaylistPage.render('album')">앨범</button>
+              </div>
+            </div>
+            <div class="cards-grid" id="playlist-grid"></div>
+          </div><!-- /page-playlist -->
+
+
+          <!-- ══ PAGE: 회원정보 ══════════════════════════
+               ⚠ profile-avatar-display ID 추가 (ProfilePage.populate() 타겟)
+          ═══════════════════════════════════════════════ -->
+          <div class="page" id="page-profile">
+            <div class="profile-hero">
+              <div class="profile-avatar-wrap">
+                <!-- id="profile-avatar-display" : Auth 데이터로 동적 업데이트 -->
+                <div class="profile-avatar" id="profile-avatar-display">SW</div>
+                <div class="profile-avatar-edit"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></div>
+              </div>
+              <div class="profile-info">
+                <div class="profile-type">프로필</div>
+                <div class="profile-name">SoundWave 사용자</div>
+                <div class="profile-stats">
+                  <div class="profile-stat"><span>28</span> 좋아요</div>
+                  <div class="profile-stat"><span>8</span> 플레이리스트</div>
+                  <div class="profile-stat"><span>6</span> 팔로잉</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 기본 정보 -->
+            <div class="settings-section">
+              <div class="settings-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>기본 정보</div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">이름</label><input class="form-input" id="f-name" type="text" value="SoundWave 사용자"></div>
+                <div class="form-group"><label class="form-label">사용자명</label><input class="form-input" id="f-username" type="text" value="soundwave_user"></div>
+              </div>
+              <div class="form-group"><label class="form-label">이메일</label><input class="form-input" id="f-email" type="email" value="demo@soundwave.kr"></div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">생년월일</label><input class="form-input" type="date" value="1995-01-01"></div>
+                <div class="form-group"><label class="form-label">성별</label><select class="form-input" style="cursor:pointer"><option>선택 안 함</option><option>남성</option><option>여성</option><option>기타</option></select></div>
+              </div>
+              <button class="btn-primary" onclick="saveBasicInfo()">변경사항 저장</button>
+            </div>
+
+            <!-- 비밀번호 변경 -->
+            <div class="settings-section">
+              <div class="settings-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>비밀번호 변경</div>
+              <div class="form-group"><label class="form-label">현재 비밀번호</label><input class="form-input" id="f-cur-pw" type="password" placeholder="현재 비밀번호 입력"></div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">새 비밀번호</label><input class="form-input" id="f-new-pw" type="password" placeholder="새 비밀번호 (8자 이상)" oninput="validatePw()"><div class="form-hint" id="pw-hint">영문, 숫자, 특수문자 8자 이상</div></div>
+                <div class="form-group"><label class="form-label">새 비밀번호 확인</label><input class="form-input" id="f-new-pw2" type="password" placeholder="새 비밀번호 재입력" oninput="validatePw()"></div>
+              </div>
+              <button class="btn-primary" onclick="changePassword()">비밀번호 변경</button>
+            </div>
+
+            <!-- Spotify 연동 -->
+            <div class="settings-section">
+              <div class="settings-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66
+                           0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74
+                           -6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539
+                           -.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32
+                           .42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262
+                           .3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12
+                           -1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561
+                           18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4
+                           8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18
+                           -.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721
+                           1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+                </svg>
+                Spotify 연동
+              </div>
+              <div id="spotify-status-section">
+                <div style="color:var(--text-secondary);font-size:13px">불러오는 중...</div>
+              </div>
+            </div>
+
+            <!-- 알림 설정 -->
+            <div class="settings-section">
+              <div class="settings-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>알림 설정</div>
+              <div class="toggle-row"><div><div class="toggle-label">신곡 알림</div><div class="toggle-desc">팔로우한 아티스트의 새 음악</div></div><label class="toggle-switch"><input type="checkbox" id="notif-newmusic" checked onchange="saveNotifications()"><span class="toggle-track"></span></label></div>
+              <div class="toggle-row"><div><div class="toggle-label">친구 활동 알림</div><div class="toggle-desc">친구가 음악을 공유하거나 팔로우할 때</div></div><label class="toggle-switch"><input type="checkbox" id="notif-friends" checked onchange="saveNotifications()"><span class="toggle-track"></span></label></div>
+              <div class="toggle-row"><div><div class="toggle-label">이메일 뉴스레터</div><div class="toggle-desc">SoundWave 소식 및 추천</div></div><label class="toggle-switch"><input type="checkbox" id="notif-email" onchange="saveNotifications()"><span class="toggle-track"></span></label></div>
+              <div class="toggle-row"><div><div class="toggle-label">Sync AI 추천 알림</div><div class="toggle-desc">AI가 새로운 음악을 발견했을 때</div></div><label class="toggle-switch"><input type="checkbox" id="notif-sync" checked onchange="saveNotifications()"><span class="toggle-track"></span></label></div>
+              <button class="btn-primary" style="margin-top:8px" onclick="saveNotifications()">설정 저장</button>
+            </div>
+
+            <!-- 계정 관리 -->
+            <div class="settings-section">
+              <div class="settings-title" style="color:var(--negative)">계정 관리</div>
+              <div style="display:flex;gap:12px">
+                <button class="btn-danger" onclick="deactivateAccount()">계정 비활성화</button>
+                <button class="btn-danger" onclick="deleteAccount()">탈퇴하기</button>
+              </div>
+              <div style="margin-top:12px;font-size:12px;color:var(--text-muted);line-height:1.6">계정 삭제 시 모든 플레이리스트, 좋아요, 데이터가 영구적으로 삭제됩니다.</div>
+            </div>
+          </div><!-- /page-profile -->
+
+          <!-- ══ PAGE: 상세 뷰 ════════════════════════════
+               DetailPage.populate(context) → js/library.js
+          ═══════════════════════════════════════════════ -->
+          <div class="page" id="page-detail">
+            <div id="detail-hero" class="detail-hero grad-4">
+              <!-- DetailPage.populate() 이 채웁니다 -->
+            </div>
+            <div class="section">
+              <div class="track-list" id="detail-track-list"></div>
+            </div>
+          </div><!-- /page-detail -->
+
+
+
+        </div><!-- end .content -->
+      </main>
+
+      <!-- ③ 우측 패널 → components/right-panel.js 교체 -->
+      <div id="right-panel-root"></div>
+
+    </div>
+  </div>
+
+  <!-- ④ 플레이어 바 → components/player-bar.js 교체 -->
+  <div id="player-root"></div>
+
+</div>
+
+<!-- ════════════════════════
+     CREATE PLAYLIST MODAL
+════════════════════════ -->
+<div id="create-playlist-modal" class="friend-modal-overlay hidden">
+  <div class="friend-modal-card friend-modal-card--sm">
+    <div class="fdm-header">
+      <div style="font-size:16px;font-weight:900">새 플레이리스트</div>
+      <button class="fdm-close" onclick="CreatePlaylistModal.hide()" title="닫기">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12
+                   5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </svg>
+      </button>
+    </div>
+    <div class="afm-body">
+      <div id="cpm-error" class="cpm-error" style="display:none"></div>
+      <div class="afm-field">
+        <label for="cpm-name">플레이리스트 이름</label>
+        <input type="text" id="cpm-name" class="afm-field input"
+               placeholder="예: 나의 K-Pop 모음" autocomplete="off">
+      </div>
+      <div class="afm-field">
+        <label>이모지 선택</label>
+        <div class="cpm-emoji-grid"><button class="cpm-emoji-btn active" onclick="CreatePlaylistModal.selectEmoji('🎵',this)">🎵</button><button class="cpm-emoji-btn" onclick="CreatePlaylistModal.selectEmoji('🎸',this)">🎸</button><button class="cpm-emoji-btn" onclick="CreatePlaylistModal.selectEmoji('🎤',this)">🎤</button><button class="cpm-emoji-btn" onclick="CreatePlaylistModal.selectEmoji('💜',this)">💜</button><button class="cpm-emoji-btn" onclick="CreatePlaylistModal.selectEmoji('🔥',this)">🔥</button><button class="cpm-emoji-btn" onclick="CreatePlaylistModal.selectEmoji('🌙',this)">🌙</button><button class="cpm-emoji-btn" onclick="CreatePlaylistModal.selectEmoji('⭐',this)">⭐</button><button class="cpm-emoji-btn" onclick="CreatePlaylistModal.selectEmoji('🎧',this)">🎧</button><button class="cpm-emoji-btn" onclick="CreatePlaylistModal.selectEmoji('🚗',this)">🚗</button><button class="cpm-emoji-btn" onclick="CreatePlaylistModal.selectEmoji('📚',this)">📚</button><button class="cpm-emoji-btn" onclick="CreatePlaylistModal.selectEmoji('💚',this)">💚</button><button class="cpm-emoji-btn" onclick="CreatePlaylistModal.selectEmoji('❤️',this)">❤️</button><button class="cpm-emoji-btn" onclick="CreatePlaylistModal.selectEmoji('🎹',this)">🎹</button><button class="cpm-emoji-btn" onclick="CreatePlaylistModal.selectEmoji('🎺',this)">🎺</button><button class="cpm-emoji-btn" onclick="CreatePlaylistModal.selectEmoji('🎻',this)">🎻</button><button class="cpm-emoji-btn" onclick="CreatePlaylistModal.selectEmoji('🌊',this)">🌊</button><button class="cpm-emoji-btn" onclick="CreatePlaylistModal.selectEmoji('🏃',this)">🏃</button><button class="cpm-emoji-btn" onclick="CreatePlaylistModal.selectEmoji('🌅',this)">🌅</button><button class="cpm-emoji-btn" onclick="CreatePlaylistModal.selectEmoji('💎',this)">💎</button><button class="cpm-emoji-btn" onclick="CreatePlaylistModal.selectEmoji('👑',this)">👑</button></div>
+      </div>
+      <button class="afm-btn" style="margin-top:20px"
+              onclick="CreatePlaylistModal.create()">
+        만들기
+      </button>
+      <div style="text-align:center;margin-top:12px">
+        <button onclick="CreatePlaylistModal.hide()"
+                style="background:none;border:none;color:var(--text-secondary);
+                       font-size:13px;cursor:pointer;font-family:var(--font)">취소</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════
+     FRIEND MODALS (js/friends.js 에서 제어)
+════════════════════════════════════════════════════ -->
+
+<!-- 1. FriendDetailModal: 친구 공유 플레이리스트 -->
+<div id="friend-detail-modal" class="friend-modal-overlay hidden">
+  <div class="friend-modal-card">
+    <div class="fdm-header">
+      <div class="fdm-avatar grad-4" id="fdm-avatar">JK</div>
+      <div>
+        <div class="fdm-name"   id="fdm-name">친구</div>
+        <div class="fdm-status" id="fdm-status">● 온라인</div>
+      </div>
+      <button class="fdm-close" onclick="FriendDetailModal.hide()" title="닫기">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12
+                   5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </svg>
+      </button>
+    </div>
+    <div class="fdm-playlists-wrap">
+      <div class="fdm-section-label">공유한 플레이리스트</div>
+      <div id="fdm-playlists"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. AddFriendModal: 친구 요청 발송 -->
+<div id="add-friend-modal" class="friend-modal-overlay hidden">
+  <div class="friend-modal-card friend-modal-card--sm">
+    <div class="afm-body">
+      <div class="afm-title">친구 추가</div>
+      <div class="afm-subtitle">
+        사용자명 또는 이메일로 친구를 찾아 요청을 보낼 수 있어요
+      </div>
+      <div id="afm-error"   class="afm-error"   style="display:none"></div>
+      <div id="afm-success" class="afm-success"  style="display:none"></div>
+      <div class="afm-field">
+        <label for="afm-input">사용자명 또는 이메일</label>
+        <input type="text" id="afm-input"
+               placeholder="예: soundwave_user 또는 user@email.com"
+               autocomplete="off">
+      </div>
+      <div class="afm-hint">
+        💡 요청을 보내면 상대방이 수락해야 친구가 됩니다.
+      </div>
+      <button class="afm-btn" id="afm-btn"
+              onclick="AddFriendModal.sendRequest()">
+        친구 요청 보내기
+      </button>
+      <div style="text-align:center;margin-top:14px">
+        <button onclick="AddFriendModal.hide()"
+                style="background:none;border:none;color:var(--text-secondary);
+                       font-size:13px;cursor:pointer;font-family:var(--font)">
+          취소
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. FriendRequestsModal: 친구 요청 수락/거절 -->
+<div id="friend-requests-modal" class="friend-modal-overlay hidden">
+  <div class="friend-modal-card">
+    <div class="frm-header">
+      <div class="frm-title" id="frm-title">친구 요청</div>
+      <button class="frm-close" onclick="FriendRequestsModal.hide()" title="닫기">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12
+                   5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </svg>
+      </button>
+    </div>
+    <div class="frm-list" id="frm-list"></div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════
+     AUTH MODAL
+     비로그인 시 AuthModal.init() 이 자동으로 표시합니다.
+     AuthModal.show() / AuthModal.hide() 로 수동 제어 가능.
+════════════════════════════════════════════════════ -->
+<div id="auth-modal" class="auth-modal-overlay hidden">
+  <div class="auth-modal-card">
+
+    <!-- 로고 -->
+    <div class="auth-logo" style="justify-content:center;margin-bottom:20px">
+      <div class="auth-logo-icon">
+        <svg viewBox="0 0 32 32" fill="#000" width="20" height="20">
+          <circle cx="16" cy="16" r="13" fill="none" stroke="#000" stroke-width="2.5"/>
+          <path d="M12.5 10.5v11l9-5.5-9-5.5z"/>
+        </svg>
+      </div>
+      <span class="auth-logo-text">SoundWave</span>
+    </div>
+
+    <!-- 탭: 로그인 | 회원가입 -->
+    <div class="auth-modal-tabs">
+      <button class="auth-modal-tab active" id="tab-login"
+              onclick="AuthModal.switchTab('login')">로그인</button>
+      <button class="auth-modal-tab"        id="tab-signup"
+              onclick="AuthModal.switchTab('signup')">회원가입</button>
+    </div>
+
+    <!-- 공통 메시지 영역 -->
+    <div id="modal-error"   class="auth-error"   style="display:none"></div>
+    <div id="modal-success" class="auth-success"  style="display:none"></div>
+
+    <!-- ── 로그인 뷰 ── -->
+    <div id="modal-login-view">
+
+      <div class="auth-socials" style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">
+        <a href="/api/oauth/google" class="auth-social-btn"
+           style="display:flex;align-items:center;justify-content:center;gap:8px;
+                  background:#fff;color:#1a1a1a;border:1px solid rgba(0,0,0,.1);
+                  border-radius:var(--radius-full);padding:11px;font-size:13px;
+                  font-weight:700;text-decoration:none;font-family:var(--font)">
+          <span style="font-weight:900;color:#4285F4">G</span> Google로 계속하기
+        </a>
+        <a href="/api/oauth/naver" class="auth-social-btn"
+           style="display:flex;align-items:center;justify-content:center;gap:8px;
+                  background:#03C75A;color:#fff;border:none;
+                  border-radius:var(--radius-full);padding:11px;font-size:13px;
+                  font-weight:700;text-decoration:none;font-family:var(--font)">
+          <span style="font-weight:900">N</span> 네이버로 계속하기
+        </a>
+      </div>
+      <div class="auth-divider">또는 이메일로 로그인</div>
+
+      <div class="auth-field">
+        <label for="modal-login-email">이메일</label>
+        <input type="email" id="modal-login-email"
+               placeholder="이메일 주소를 입력하세요"
+               autocomplete="email">
+      </div>
+
+      <div class="auth-field">
+        <label for="modal-login-password">비밀번호</label>
+        <input type="password" id="modal-login-password"
+               placeholder="비밀번호를 입력하세요"
+               autocomplete="current-password">
+      </div>
+
+      <button class="auth-btn" id="modal-login-btn"
+              onclick="AuthModal.handleLogin()">로그인</button>
+
+      <div class="auth-divider">또는</div>
+
+      <div class="auth-demo">
+        🎵 체험 계정으로 바로 시작하기<br>
+        <strong>demo@soundwave.kr</strong> / <strong>demo1234</strong><br>
+        <button onclick="AuthModal.quickDemo()"
+                style="margin-top:8px;background:var(--accent);border:none;color:#000;
+                       padding:6px 18px;border-radius:var(--radius-full);font-size:12px;
+                       font-weight:700;cursor:pointer;font-family:var(--font)">
+          데모로 시작하기
+        </button>
+      </div>
+
+    </div><!-- end modal-login-view -->
+
+    <!-- ── 회원가입 뷰 ── -->
+    <div id="modal-signup-view" style="display:none">
+
+      <div class="auth-socials" style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">
+        <a href="/api/oauth/google" class="auth-social-btn"
+           style="display:flex;align-items:center;justify-content:center;gap:8px;
+                  background:#fff;color:#1a1a1a;border:1px solid rgba(0,0,0,.1);
+                  border-radius:var(--radius-full);padding:11px;font-size:13px;
+                  font-weight:700;text-decoration:none;font-family:var(--font)">
+          <span style="font-weight:900;color:#4285F4">G</span> Google로 계속하기
+        </a>
+        <a href="/api/oauth/naver" class="auth-social-btn"
+           style="display:flex;align-items:center;justify-content:center;gap:8px;
+                  background:#03C75A;color:#fff;border:none;
+                  border-radius:var(--radius-full);padding:11px;font-size:13px;
+                  font-weight:700;text-decoration:none;font-family:var(--font)">
+          <span style="font-weight:900">N</span> 네이버로 계속하기
+        </a>
+      </div>
+      <div class="auth-divider">또는 이메일로 가입</div>
+
+      <div class="auth-field">
+        <label for="modal-su-display">이름 (표시 이름)</label>
+        <input type="text" id="modal-su-display"
+               placeholder="SoundWave 사용자"
+               autocomplete="name">
+      </div>
+
+      <div class="auth-field">
+        <label for="modal-su-username">사용자명</label>
+        <input type="text" id="modal-su-username"
+               placeholder="영문, 숫자, _ 2~20자"
+               oninput="AuthModal.validateUsername(this)">
+        <div class="auth-field-hint" id="modal-hint-username"></div>
+      </div>
+
+      <div class="auth-field">
+        <label for="modal-su-email">이메일</label>
+        <input type="email" id="modal-su-email"
+               placeholder="이메일 주소"
+               autocomplete="email">
+      </div>
+
+      <div class="auth-field">
+        <label for="modal-su-password">비밀번호</label>
+        <input type="password" id="modal-su-password"
+               placeholder="8자 이상, 영문+숫자+특수문자"
+               autocomplete="new-password"
+               oninput="AuthModal.onPwInput(this)">
+        <div class="pw-strength-bar">
+          <div class="pw-strength-fill" id="modal-pw-strength"></div>
+        </div>
+        <div class="auth-field-hint" id="modal-hint-pw"></div>
+      </div>
+
+      <div class="auth-field">
+        <label for="modal-su-password2">비밀번호 확인</label>
+        <input type="password" id="modal-su-password2"
+               placeholder="비밀번호를 다시 입력하세요"
+               autocomplete="new-password"
+               oninput="AuthModal.validatePw2(this)">
+        <div class="auth-field-hint" id="modal-hint-pw2"></div>
+      </div>
+
+      <div class="auth-checkbox-row">
+        <input type="checkbox" id="modal-su-agree">
+        <label for="modal-su-agree">
+          <a href="#">서비스 이용약관</a> 및
+          <a href="#">개인정보 처리방침</a>에 동의합니다.
+        </label>
+      </div>
+
+      <button class="auth-btn" id="modal-signup-btn"
+              onclick="AuthModal.handleSignup()">회원가입</button>
+
+    </div><!-- end modal-signup-view -->
+
+  </div><!-- end auth-modal-card -->
+</div><!-- end auth-modal-overlay -->
+
+
+<!--
+  ════════════════════════════════════════════════════
+  JavaScript 로드 순서
+
+  [1] auth.js          — 인증 모듈 (head에서 이미 로드됨)
+  [2] components/*.js  — auth.js 뒤에 로드되어 사용자 정보 활용 가능
+  [3] data/tracks.js   — 전역 데이터
+  [4] player.js        — Player 싱글턴
+  [5] right-panel.js   — RightPanel 싱글턴
+  [6] navigation.js    — 페이지 로직 + Auth 연동 함수
+  [7] main.js          — 초기화
+  ════════════════════════════════════════════════════
+-->
+
+<!-- [2] 공통 컴포넌트 (auth.js 이후에 로드) -->
+<script src="/components/sidebar.js"></script>
+<script src="/components/topbar.js"></script>
+<script src="/components/right-panel.js"></script>
+<script src="/components/player-bar.js"></script>
+
+<!-- [3-7] 데이터 & 모듈 -->
+<script src="/js/data/tracks.js"></script>
+<script src="/js/saved-library.js"></script>
+<script src="/js/playlist-picker.js"></script>
+<script src="/js/player.js"></script>
+<script src="/js/right-panel.js"></script>
+<script src="/js/friends.js"></script>
+<script src="/js/library.js"></script>
+<script src="/js/navigation.js"></script>
+<script src="/js/auth-modal.js"></script>
+<script src="/js/home.js"></script>
+<script src="/js/spotify-player.js"></script>
+<script src="/js/profile.js"></script>
+    <script src="/js/search.js"></script>
+    <script src="/js/main.js"></script>
+<script src="/js/splash.js"></script>
+<script src="/js/sync-api.js"></script>
+
+</body>
+</html>

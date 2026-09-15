@@ -1,0 +1,25 @@
+/* ============================================================
+   SOUNDWAVE — Search Page
+   장르 그리드는 css/components/cards.css의 .genre-grid 사용
+   ============================================================ */
+
+/* 검색 결과 섹션 (향후 확장용) */
+.search-results-section {
+  margin-top: 32px;
+}
+
+.search-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 24px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+.search-empty-icon { font-size: 48px; margin-bottom: 16px; }
+.search-empty-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-base);
+  margin-bottom: 8px;
+}

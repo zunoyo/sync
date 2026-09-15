@@ -1,0 +1,87 @@
+/* ============================================================
+   SYNC — Design Tokens
+   모든 CSS 파일에서 이 변수를 참조합니다.
+   ============================================================ */
+
+:root {
+  /* ── Background Surfaces ── */
+  --bg-base:        #0d0508;
+  --bg-surface:     #170a10;
+  --bg-mid:         #21101a;
+  --bg-card:        #2b1624;
+  --bg-card-alt:    #2f1a28;
+
+  /* ── Brand Accent ── */
+  --accent:         #d9c08f;
+  --accent-dark:    #c9a876;
+  --accent-shadow:  rgba(217, 192, 143, 0.35);
+
+  /* ── Text ── */
+  --text-base:      #f5eef0;
+  --text-secondary: rgba(245, 238, 240, 0.72);
+  --text-muted:     rgba(245, 238, 240, 0.45);
+  --text-near:      rgba(245, 238, 240, 0.8);
+  --text-light:     #faf6f7;
+
+  /* ── Semantic ── */
+  --negative:       #e0637a;
+  --warning:        #e0a458;
+  --info:           #b3527a;
+
+  /* ── Borders ── */
+  --border:         rgba(245, 238, 240, 0.14);
+  --border-light:   rgba(245, 238, 240, 0.25);
+  --border-sep:     rgba(245, 238, 240, 0.4);
+
+  /* ── Shadows ── */
+  --shadow-heavy:   rgba(0,0,0,0.5) 0px 8px 24px;
+  --shadow-medium:  rgba(0,0,0,0.3) 0px 8px 8px;
+  --shadow-inset:   rgb(13,5,8) 0px 1px 0px,
+                    rgb(124,100,112) 0px 0px 0px 1px inset;
+
+  /* ── Layout Dimensions ── */
+  --sidebar-width:       260px;
+  --right-panel-width:   320px;
+  --player-height:       90px;
+  --topbar-height:       64px;
+
+  /* ── Border Radius Scale ── */
+  --radius-xs:    2px;
+  --radius-sm:    4px;
+  --radius-md:    6px;
+  --radius-lg:    8px;
+  --radius-xl:    12px;
+  --radius-2xl:   20px;
+  --radius-pill:  500px;
+  --radius-full:  9999px;
+  --radius-circle: 50%;
+
+  /* ── Typography ── */
+  --font: 'Noto Sans KR', 'Helvetica Neue', Arial,
+          'Hiragino Sans', 'Hiragino Kaku Gothic ProN',
+          'Meiryo', 'MS Gothic', sans-serif;
+  --font-display: 'Syne', 'Noto Sans KR', 'Helvetica Neue', sans-serif;
+
+  /* ── Transition ── */
+  --transition-fast:   0.12s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow:   0.35s ease;
+
+  /* ── Z-Index Stack ── */
+  --z-base:    0;
+  --z-overlay: 100;
+  --z-topbar:  200;
+  --z-panel:   300;
+  --z-modal:   400;
+  --z-toast:   500;
+
+  /* ── Gradient Presets (앨범 아트용) ── */
+  --grad-1: linear-gradient(135deg, #d9c08f 0%, #6b5530 100%);
+  --grad-2: linear-gradient(135deg, #b3527a 0%, #4a1030 100%);
+  --grad-3: linear-gradient(135deg, #e0a458 0%, #7a3a0a 100%);
+  --grad-4: linear-gradient(135deg, #c9536b 0%, #5c0f22 100%);
+  --grad-5: linear-gradient(135deg, #9c1457 0%, #34081f 100%);
+  --grad-6: linear-gradient(135deg, #c9a0a8 0%, #4a2530 100%);
+  --grad-7: linear-gradient(135deg, #ecd9ae 0%, #b3527a 100%);
+  --grad-8: linear-gradient(135deg, #7a3a5c 0%, #21101a 100%);
+}

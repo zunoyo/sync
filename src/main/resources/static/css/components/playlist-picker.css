@@ -1,0 +1,153 @@
+/* ══════════════════════════════════════
+   SOUNDWAVE — Playlist Picker & Saved-Library UI
+   (add-to-playlist popover, track-add button, empty states)
+══════════════════════════════════════ */
+
+/* ── 곡 우측 "플레이리스트에 추가" 버튼 (track-like-btn과 동일한 룰) ── */
+.track-add-btn {
+  background: none;
+  border: none;
+  color: transparent;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+}
+.track-item:hover .track-add-btn { color: var(--text-secondary); }
+.track-add-btn:hover              { color: var(--text-base) !important; transform: scale(1.15); }
+
+.track-remove-btn {
+  background: none;
+  border: none;
+  color: transparent;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+}
+.track-item:hover .track-remove-btn { color: var(--text-secondary); }
+.track-remove-btn:hover             { color: #ff5555 !important; transform: scale(1.15); }
+
+/* ── Add-to-playlist 팝오버 ── */
+.pl-picker-popover {
+  position: absolute;
+  z-index: 500;
+  width: 260px;
+  max-height: 320px;
+  background: #181818;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-md);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pl-picker-header {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  padding: 2px 6px 6px;
+}
+
+.pl-picker-list {
+  max-height: 190px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pl-picker-item {
+  background: none;
+  border: none;
+  color: var(--text-base);
+  text-align: left;
+  padding: 8px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pl-picker-item:hover { background: rgba(255,255,255,0.08); }
+.pl-picker-item:disabled { opacity: .5; cursor: default; }
+
+.pl-picker-empty {
+  padding: 16px 8px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.pl-picker-new {
+  display: flex;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.pl-picker-new input {
+  flex: 1;
+  min-width: 0;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  padding: 7px 8px;
+  color: var(--text-base);
+  font-size: 12px;
+  font-family: inherit;
+}
+.pl-picker-new input:focus { outline: none; border-color: var(--accent); }
+.pl-picker-new button {
+  background: var(--accent);
+  border: none;
+  color: #000;
+  font-weight: 700;
+  font-size: 12px;
+  border-radius: 6px;
+  padding: 0 12px;
+  cursor: pointer;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+
+/* ── 간단 토스트 (추가 완료/중복 안내) ── */
+.sw-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 96px;
+  transform: translateX(-50%) translateY(12px);
+  background: #222;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 50px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease, transform .18s ease;
+  z-index: 999;
+  white-space: nowrap;
+}
+.sw-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── 사이드바 라이브러리 목록 빈 상태 ── */
+.library-empty-hint {
+  padding: 20px 12px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* ── 앨범 저장 버튼 hover (아티스트 상세 페이지) ── */
+.album-save-btn:hover { opacity: .85; }

@@ -1,0 +1,242 @@
+/* ============================================================
+   SOUNDWAVE — Player Bar Component (하단 재생바)
+   ============================================================ */
+
+.player-bar {
+  height: var(--player-height);
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* ── Left: Track info ── */
+.player-track {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 280px;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.player-art {
+  width: 54px;
+  height: 54px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  animation: float 3s ease-in-out infinite;
+  box-shadow: var(--shadow-medium);
+  overflow: hidden;
+}
+
+.player-track-info { overflow: hidden; flex: 1; }
+
+.player-track-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-base);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.player-track-name:hover { text-decoration: underline; cursor: pointer; }
+
+.player-track-artist {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.player-track-artist:hover { color: var(--text-base); text-decoration: underline; cursor: pointer; }
+
+.player-track-btns {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* ── Center: Controls + Progress ── */
+.player-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── Control buttons ── */
+.ctrl-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  padding: 8px;
+  border-radius: var(--radius-circle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+}
+.ctrl-btn:hover  { color: var(--text-base); transform: scale(1.07); }
+.ctrl-btn.active { color: var(--accent); }
+
+/* ── Main play/pause button ── */
+.play-ctrl-btn {
+  width: 36px;
+  height: 36px;
+  background: var(--text-base);
+  border: none;
+  border-radius: var(--radius-circle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #000;
+  flex-shrink: 0;
+  transition: transform var(--transition-fast), background var(--transition-fast);
+}
+.play-ctrl-btn:hover { transform: scale(1.07); background: #efefef; }
+
+.play-ctrl-btn .play-icon  { display: none; }
+.play-ctrl-btn .pause-icon { display: block; }
+.play-ctrl-btn.paused .play-icon  { display: block; margin-left: 2px; }
+.play-ctrl-btn.paused .pause-icon { display: none; }
+
+/* ── Progress ── */
+.progress-area {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-time {
+  font-size: 11px;
+  color: var(--text-secondary);
+  min-width: 36px;
+  flex-shrink: 0;
+  letter-spacing: 0.3px;
+}
+.progress-time.end { text-align: right; }
+
+.progress-bar {
+  flex: 1;
+  height: 4px;
+  background: #5e5e5e;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  position: relative;
+  transition: height var(--transition-fast);
+}
+.progress-bar:hover { height: 6px; }
+
+.progress-fill {
+  height: 100%;
+  background: var(--text-base);
+  border-radius: var(--radius-full);
+  position: relative;
+  pointer-events: none;
+  transition: width 0.5s linear;
+}
+.progress-bar:hover .progress-fill { background: var(--accent); }
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%) scale(0);
+  width: 12px;
+  height: 12px;
+  background: var(--text-base);
+  border-radius: var(--radius-circle);
+  transition: transform var(--transition-fast);
+}
+.progress-bar:hover .progress-fill::after { transform: translateY(-50%) scale(1); }
+
+/* ── Right: Volume + extras ── */
+.player-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 240px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.volume-area {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.volume-bar {
+  width: 86px;
+  height: 4px;
+  background: #5e5e5e;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: height var(--transition-fast);
+  position: relative;
+}
+.volume-bar:hover { height: 6px; }
+
+.volume-fill {
+  height: 100%;
+  background: var(--text-base);
+  border-radius: var(--radius-full);
+  width: 65%;
+  pointer-events: none;
+  transition: width var(--transition-fast);
+}
+.volume-bar:hover .volume-fill { background: var(--accent); }
+
+/* ── Now Playing indicator (작은 패널 토글) ── */
+.panel-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast);
+  position: relative;
+}
+.panel-toggle-btn:hover { color: var(--text-base); }
+.panel-toggle-btn.active { color: var(--accent); }
+.panel-toggle-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background: var(--accent);
+  border-radius: var(--radius-circle);
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .player-track  { width: auto; }
+  .player-right  { display: none; }
+}

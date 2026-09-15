@@ -1,0 +1,34 @@
+{
+  "text_samples": [
+    {"text": "비 오는 날 창가에서 혼자 커피 마시는 기분",   "emotion": "melancholy"},
+    {"text": "신나게 달리고 싶다 에너지 넘치는 음악",       "emotion": "energetic"},
+    {"text": "조용한 카페에서 집중해서 공부할 때",          "emotion": "calm"},
+    {"text": "사랑하는 사람과 드라이브하는 설레는 기분",    "emotion": "romantic"},
+    {"text": "기분이 너무 좋아서 춤추고 싶은 날",           "emotion": "happy"},
+    {"text": "혼자 있고 싶고 슬픈 감정이 밀려올 때",       "emotion": "sad"},
+    {"text": "밤에 혼자 드라이브하면서 감성에 젖을 때",     "emotion": "dreamy"},
+    {"text": "운동할 때 듣는 강렬하고 파워풀한 음악",       "emotion": "angry"},
+    {"text": "여유로운 주말 아침 햇살이 따뜻한 느낌",       "emotion": "calm"},
+    {"text": "친구들과 파티하며 신나게 노는 기분",          "emotion": "happy"},
+    {"text": "실연 후 혼자 방에서 멍하니 있을 때",         "emotion": "sad"},
+    {"text": "노을이 지는 저녁 감성적인 분위기",            "emotion": "melancholy"},
+    {"text": "첫 만남의 두근거림과 설렘",                  "emotion": "romantic"},
+    {"text": "새벽 감성 혼자 음악 들으며 생각에 잠길 때",   "emotion": "dreamy"},
+    {"text": "격렬한 운동 후 땀 흘리며 한계를 뛰어넘는 느낌", "emotion": "energetic"}
+  ],
+  "emotions": [
+    "happy", "sad", "calm",
+    "energetic", "romantic", "melancholy",
+    "angry", "dreamy"
+  ],
+  "zero_shot_prompts": [
+    "a happy and joyful feeling",
+    "a sad and sorrowful feeling",
+    "a calm and peaceful feeling",
+    "an energetic and powerful feeling",
+    "a romantic and loving feeling",
+    "a melancholy and nostalgic feeling",
+    "an angry and intense feeling",
+    "a dreamy and atmospheric feeling"
+  ]
+}

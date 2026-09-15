@@ -1,0 +1,295 @@
+/* ============================================================
+   SOUNDWAVE — Right Panel Component
+   ============================================================ */
+
+.right-panel {
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.rp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 12px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.rp-tabs { display: flex; gap: 2px; }
+
+.rp-tab {
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  font-family: var(--font);
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+.rp-tab:hover  { color: var(--text-base); background: rgba(255,255,255,0.07); }
+.rp-tab.active { color: var(--text-base); background: rgba(255,255,255,0.12); }
+
+.rp-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  padding: 6px;
+  border-radius: var(--radius-circle);
+  cursor: pointer;
+  display: flex;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+.rp-close:hover { color: var(--text-base); background: rgba(255,255,255,0.07); }
+
+.rp-body { flex: 1; overflow-y: auto; min-height: 0; }
+
+.rp-now-playing {
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.rp-album-art {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 80px;
+  box-shadow: var(--shadow-heavy);
+  animation: float 4s ease-in-out infinite;
+  overflow: hidden;
+  max-width: 240px;
+}
+
+.rp-track-info { width: 100%; }
+
+.rp-track-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.rp-track-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-base);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rp-track-artist {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+.rp-track-artist:hover { color: var(--text-base); text-decoration: underline; cursor: pointer; }
+
+.rp-progress-wrap { width: 100%; }
+
+.rp-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: #5e5e5e;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  margin-bottom: 6px;
+  transition: height var(--transition-fast);
+}
+.rp-progress-bar:hover { height: 6px; }
+
+.rp-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: var(--radius-full);
+  pointer-events: none;
+}
+
+.rp-progress-times {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.rp-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* ── 재생/일시정지 버튼 ─────────────────────────
+   기본(재생 중): ⏸ pause 아이콘 표시
+   .paused 클래스:  ▶ play  아이콘 표시
+   player.js → updatePlayBtn() 이 두 버튼 동시에 토글
+────────────────────────────────────────────── */
+.rp-play-btn {
+  width: 52px;
+  height: 52px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-circle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 24px var(--accent-shadow);
+  transition: transform var(--transition-fast), box-shadow var(--transition-normal);
+  flex-shrink: 0;
+}
+.rp-play-btn:hover {
+  transform: scale(1.07);
+  box-shadow: 0 12px 28px rgba(30,215,96,0.45);
+}
+.rp-play-btn svg { color: #000; }
+
+/* 재생 중 → 일시정지 아이콘 보임 */
+.rp-play-btn .rp-pause-icon { display: block; }
+.rp-play-btn .rp-play-icon  { display: none; margin-left: 2px; }
+
+/* 멈춤 → 재생 아이콘 보임 */
+.rp-play-btn.paused .rp-pause-icon { display: none; }
+.rp-play-btn.paused .rp-play-icon  { display: block; }
+
+/* ── Waveform ── */
+.rp-waveform {
+  width: 100%;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  overflow: hidden;
+  padding: 0 2px;
+}
+
+.wave-bar {
+  flex: 1;
+  border-radius: 2px;
+  background: #4d4d4d;
+  min-width: 3px;
+  transition: background var(--transition-fast);
+  cursor: pointer;
+}
+.wave-bar.played { background: var(--accent); }
+.wave-bar:hover  { background: var(--text-base); }
+
+/* ── Lyrics ── */
+.rp-lyrics {
+  padding: 16px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.rp-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.lyrics-line {
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--text-muted);
+  transition: color var(--transition-fast), font-size var(--transition-fast);
+}
+.lyrics-line.active {
+  color: var(--text-base);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* ── Queue ── */
+.rp-queue {
+  padding: 16px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.queue-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+.queue-item:hover { background: rgba(255,255,255,0.06); }
+
+.queue-art {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.queue-info     { overflow: hidden; flex: 1; }
+.queue-name     { font-size: 13px; font-weight: 700; color: var(--text-base); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.queue-artist   { font-size: 11px; color: var(--text-secondary); }
+.queue-duration { font-size: 12px; color: var(--text-secondary); flex-shrink: 0; }
+
+/* ── Related artists ── */
+.rp-related {
+  padding: 16px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.related-artist {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+.related-artist:hover { background: rgba(255,255,255,0.06); }
+
+.related-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-circle);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.related-info { overflow: hidden; flex: 1; }
+.related-name { font-size: 13px; font-weight: 700; color: var(--text-base); }
+.related-meta { font-size: 11px; color: var(--text-secondary); }
+
+.related-follow {
+  background: transparent;
+  border: 1px solid var(--border-light);
+  color: var(--text-base);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+  flex-shrink: 0;
+}
+.related-follow:hover { border-color: var(--text-base); background: rgba(255,255,255,0.05); }

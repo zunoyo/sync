@@ -1,0 +1,66 @@
+HELP.md
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+# ── API 키 / 시크릿 (절대 커밋 금지) ──
+src/main/resources/application.properties
+
+# ── Node / React ──
+node_modules/
+dist/
+.vite/
+.env
+.env.local
+.env.*.local
+
+# ── Python (FastAPI / CLIP AI) ──
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+*.egg-info/
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+
+# ── 로그 ──
+*.log
+logs/
+
+# ── target (Spring Boot 빌드) ──
+target/

@@ -1,0 +1,522 @@
+/* ============================================================
+   SOUNDWAVE — Friends Page + Friend Modals
+   ============================================================ */
+
+/* ── 헤더 영역 ── */
+.friends-header {
+  background: linear-gradient(135deg, #1e1a3e 0%, #0d0d28 50%, #121212 100%);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.friends-title    { font-size: 26px; font-weight: 900; }
+.friends-subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+
+/* ── 헤더 우측 버튼 그룹 ── */
+.friends-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── 친구 요청 열기 버튼 ── */
+.frm-open-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius-full);
+  color: var(--text-base);
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: background var(--transition-fast);
+}
+.frm-open-btn:hover { background: rgba(255,255,255,0.13); }
+
+.frm-open-btn-badge {
+  background: var(--accent);
+  color: #000;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  min-width: 16px;
+  text-align: center;
+}
+
+/* ── 친구 검색 ── */
+.friend-search {
+  position: relative;
+}
+.friend-search input {
+  width: 200px;
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-full);
+  padding: 8px 14px 8px 34px;
+  font-size: 13px;
+  color: var(--text-base);
+  font-family: var(--font);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+.friend-search input:focus { border-color: var(--accent); }
+.friend-search svg {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+/* ── 섹션 라벨 (온라인 / 오프라인) ── */
+.friends-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.friends-section-label .online-indicator {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+/* ── 친구 그리드 ── */
+.friends-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+/* ── 친구 카드 ── */
+.friend-card {
+  background: var(--bg-mid);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+  border: 1px solid transparent;
+}
+.friend-card:hover {
+  background: #2a2a2a;
+  border-color: rgba(255,255,255,0.07);
+  transform: translateY(-1px);
+}
+.friend-card:hover .friend-card-chevron { color: var(--text-base); transform: translateX(3px); }
+
+.friend-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  font-weight: 700;
+  position: relative;
+}
+
+.online-dot {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 11px;
+  height: 11px;
+  background: var(--accent);
+  border: 2px solid var(--bg-mid);
+  border-radius: 50%;
+}
+.online-dot.offline { background: #535353; }
+
+.friend-info   { flex: 1; overflow: hidden; }
+.friend-name   { font-size: 14px; font-weight: 700; }
+.friend-status {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 3px;
+}
+.friend-status.online { color: var(--accent); }
+
+.friend-card-chevron {
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+}
+
+
+/* ════════════════════════════════════════════════
+   공통 모달 오버레이
+   auth-modal-overlay 와 같은 방식, z-index 8000
+════════════════════════════════════════════════ */
+.friend-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 8000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.18s ease;
+}
+.friend-modal-overlay.hidden { display: none; }
+
+.friend-modal-card {
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.07);
+  animation: fadeInUp 0.26s ease;
+  max-height: 86vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.friend-modal-card--sm { max-width: 400px; }
+
+
+/* ════════════════════════════════════════════════
+   1. FriendDetailModal — 친구 플레이리스트
+════════════════════════════════════════════════ */
+
+/* 헤더 */
+.fdm-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 22px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  flex-shrink: 0;
+}
+.fdm-avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.fdm-name   { font-size: 17px; font-weight: 700; }
+.fdm-status { font-size: 12px; color: var(--text-secondary); margin-top: 3px; }
+.fdm-status.online { color: var(--accent); }
+.fdm-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 7px;
+  border-radius: 50%;
+  display: flex;
+  flex-shrink: 0;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+.fdm-close:hover { color: var(--text-base); background: rgba(255,255,255,0.08); }
+
+/* 플레이리스트 래퍼 */
+.fdm-playlists-wrap {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+.fdm-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  padding: 0 2px;
+}
+
+/* 플레이리스트 아이템 */
+.fdm-playlist {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 8px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.fdm-playlist-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  cursor: pointer;
+  background: var(--bg-mid);
+  transition: background var(--transition-fast);
+  user-select: none;
+}
+.fdm-playlist-header:hover { background: #2a2a2a; }
+
+.fdm-playlist-art {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.fdm-playlist-info  { flex: 1; overflow: hidden; }
+.fdm-playlist-name  { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fdm-playlist-count { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+.fdm-chevron {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  transition: transform var(--transition-normal);
+}
+.fdm-chevron.open { transform: rotate(180deg); }
+
+/* 트랙 리스트 아코디언 */
+.fdm-track-list {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.32s ease;
+  background: var(--bg-card);
+}
+.fdm-track-list.open { max-height: 420px; }
+
+.fdm-track {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+.fdm-track:hover { background: rgba(255,255,255,0.05); }
+.fdm-track:hover .fdm-play-btn { opacity: 1; }
+
+.fdm-track-num {
+  font-size: 12px;
+  color: var(--text-muted);
+  min-width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.fdm-track-art {
+  width: 34px;
+  height: 34px;
+  border-radius: 4px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.fdm-track-info  { flex: 1; overflow: hidden; min-width: 0; }
+.fdm-track-name  { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fdm-track-artist { font-size: 11px; color: var(--text-secondary); }
+.fdm-track-dur   { font-size: 12px; color: var(--text-secondary); flex-shrink: 0; }
+
+.fdm-play-btn {
+  width: 28px;
+  height: 28px;
+  background: var(--accent);
+  border: none;
+  border-radius: 50%;
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  flex-shrink: 0;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+.fdm-play-btn:hover { transform: scale(1.1); }
+
+
+/* ════════════════════════════════════════════════
+   2. AddFriendModal — 친구 추가
+════════════════════════════════════════════════ */
+.afm-body {
+  padding: 28px 28px 24px;
+}
+.afm-title    { font-size: 20px; font-weight: 900; margin-bottom: 6px; }
+.afm-subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: 22px; line-height: 1.5; }
+
+.afm-field { margin-bottom: 16px; }
+.afm-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.afm-field input {
+  width: 100%;
+  background: var(--bg-mid);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  font-size: 14px;
+  color: var(--text-base);
+  font-family: var(--font);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.afm-field input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(30,215,96,0.15);
+}
+.afm-field input::placeholder { color: var(--text-muted); }
+
+.afm-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.04);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.afm-btn {
+  width: 100%;
+  background: var(--accent);
+  border: none;
+  color: #000;
+  padding: 13px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font);
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+.afm-btn:hover    { background: #1bc451; transform: scale(1.01); }
+.afm-btn:disabled { opacity: 0.6; cursor: default; transform: none; }
+
+.afm-error, .afm-success {
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.afm-error   { background: rgba(243,114,127,.1); border: 1px solid rgba(243,114,127,.3); color: var(--negative); }
+.afm-success { background: rgba(30,215,96,.1);   border: 1px solid rgba(30,215,96,.3);   color: var(--accent); }
+
+
+/* ════════════════════════════════════════════════
+   3. FriendRequestsModal — 친구 요청 목록
+════════════════════════════════════════════════ */
+.frm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  flex-shrink: 0;
+}
+.frm-title { font-size: 17px; font-weight: 900; }
+.frm-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 7px;
+  border-radius: 50%;
+  display: flex;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+.frm-close:hover { color: var(--text-base); background: rgba(255,255,255,0.08); }
+
+.frm-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.frm-item {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 12px 10px;
+  border-radius: var(--radius-lg);
+  transition: background var(--transition-fast);
+  animation: fadeIn 0.2s ease;
+}
+.frm-item:hover { background: rgba(255,255,255,0.04); }
+
+.frm-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.frm-info  { flex: 1; overflow: hidden; }
+.frm-name  { font-size: 14px; font-weight: 700; }
+.frm-meta  { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.frm-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+.frm-accept {
+  background: var(--accent);
+  border: none;
+  color: #000;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+.frm-accept:hover { background: #1bc451; transform: scale(1.04); }
+
+.frm-decline {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.18);
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+.frm-decline:hover { border-color: var(--negative); color: var(--negative); }

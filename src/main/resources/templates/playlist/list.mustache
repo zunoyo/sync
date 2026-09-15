@@ -1,0 +1,44 @@
+{{>layouts/header}}
+{{#successMsg}}<script>alert("{{successMsg}}")</script>{{/successMsg}}
+<div class="section">
+  <div class="section-header">
+    <h2 class="section-title">플레이리스트 관리</h2>
+    <form action="/playlists/create" method="post" style="display:flex;gap:8px;align-items:center">
+      <input type="text" name="playlistName" placeholder="새 플레이리스트 이름" required
+             style="background:var(--bg-card);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-full);padding:8px 16px;font-size:13px;color:var(--text-base);font-family:var(--font);outline:none;width:180px">
+      <input type="hidden" name="emoji"    value="🎵">
+      <input type="hidden" name="gradient" value="grad-1">
+      <button type="submit" class="pill-btn accent" style="background:var(--accent);color:#000;border:none;padding:8px 18px;border-radius:var(--radius-full);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">+ 새 플레이리스트</button>
+    </form>
+  </div>
+  <div class="cards-grid">
+    {{#userPlaylists}}
+    <div class="playlist-card" onclick="window.location='/playlists/{{id}}'">
+      <div class="playlist-card-art {{gradient}}">
+        <span style="font-size:52px">{{emoji}}</span>
+        <div class="playlist-card-overlay">
+          <a href="/playlists/{{id}}" onclick="event.stopPropagation()"
+             style="width:44px;height:44px;background:var(--accent);border-radius:50%;color:#000;display:flex;align-items:center;justify-content:center;text-decoration:none">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </a>
+        </div>
+      </div>
+      <a href="/playlists/{{id}}/delete" onclick="event.stopPropagation();return confirm('삭제할까요?')"
+         class="pl-menu-btn icon-btn" style="display:flex;justify-content:flex-end;padding:6px 8px 0;text-decoration:none;color:var(--text-muted)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+      </a>
+      <div class="playlist-card-body">
+        <div class="playlist-card-name">{{playlistName}}</div>
+        <div class="playlist-card-meta">플레이리스트</div>
+      </div>
+    </div>
+    {{/userPlaylists}}
+    {{^userPlaylists}}
+    <div style="grid-column:1/-1;padding:56px;text-align:center;color:var(--text-secondary)">
+      <div style="font-size:36px;margin-bottom:12px">🎵</div>
+      <div>위에서 첫 플레이리스트를 만들어보세요!</div>
+    </div>
+    {{/userPlaylists}}
+  </div>
+</div>
+{{>layouts/footer}}

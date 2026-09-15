@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoundWave</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/components/sidebar.css">
+  <link rel="stylesheet" href="/css/components/topbar.css">
+  <link rel="stylesheet" href="/css/components/player.css">
+  <link rel="stylesheet" href="/css/components/cards.css">
+  <link rel="stylesheet" href="/css/components/right-panel.css">
+  <link rel="stylesheet" href="/css/pages/home.css">
+  <link rel="stylesheet" href="/css/pages/search.css">
+  <link rel="stylesheet" href="/css/pages/friends.css">
+  <link rel="stylesheet" href="/css/pages/sync.css">
+  <link rel="stylesheet" href="/css/pages/playlist.css">
+  <link rel="stylesheet" href="/css/pages/profile.css">
+  <link rel="stylesheet" href="/css/pages/detail.css">
+  <link rel="stylesheet" href="/css/pages/auth.css">
+</head>
+<body>
+<div class="app-wrapper">
+  <div class="app-shell">
+
+    <!-- ══ 사이드바 (sidebar.js 출력과 동일한 HTML 구조) ══ -->
+    <aside class="sidebar">
+      <div class="sidebar-top">
+
+        <a class="logo" href="/">
+          <div class="logo-icon">
+            <svg viewBox="0 0 32 32" fill="#000" width="20" height="20">
+              <circle cx="16" cy="16" r="13" fill="none" stroke="#000" stroke-width="2.5"/>
+              <path d="M12.5 10.5v11l9-5.5-9-5.5z"/>
+            </svg>
+          </div>
+          <span class="logo-text">SoundWave</span>
+        </a>
+
+        <ul class="nav-list">
+          <li class="nav-item" id="nav-home">
+            <a href="/">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+              홈
+            </a>
+          </li>
+          <li class="nav-item" id="nav-search">
+            <a href="/search">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+              검색하기
+            </a>
+          </li>
+          <div class="nav-divider"></div>
+          <li class="nav-item" id="nav-friends">
+            <a href="/friends">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+              친구
+              {{#requestCount}}<span class="nav-badge" id="friend-nav-badge">{{requestCount}}</span>{{/requestCount}}
+            </a>
+          </li>
+          <li class="nav-item" id="nav-sync">
+            <a href="/sync">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+              Sync
+              <span class="nav-badge" style="background:linear-gradient(90deg,var(--accent),var(--info));color:#000">AI</span>
+            </a>
+          </li>
+          <div class="nav-divider"></div>
+          <li class="nav-item" id="nav-playlist">
+            <a href="/playlists">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+              플레이리스트 관리
+            </a>
+          </li>
+          <li class="nav-item" id="nav-profile">
+            <a href="/profile">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+              회원정보
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 내 라이브러리 -->
+      <div class="sidebar-bottom">
+        <div class="library-header">
+          <button class="library-title">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+            </svg>
+            내 라이브러리
+          </button>
+          <a href="/playlists" class="icon-btn" title="새 플레이리스트">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          </a>
+        </div>
+        <div class="library-filters">
+          <button class="filter-pill lib-filter-pill active" onclick="this.parentNode.querySelectorAll('.filter-pill').forEach(b=>b.classList.remove('active'));this.classList.add('active')">전체</button>
+          <button class="filter-pill lib-filter-pill" onclick="this.parentNode.querySelectorAll('.filter-pill').forEach(b=>b.classList.remove('active'));this.classList.add('active')">플레이리스트</button>
+          <button class="filter-pill lib-filter-pill" onclick="this.parentNode.querySelectorAll('.filter-pill').forEach(b=>b.classList.remove('active'));this.classList.add('active')">아티스트</button>
+        </div>
+        <div class="library-list">
+          {{#userPlaylists}}
+          <a class="library-item" href="/playlists/{{id}}" style="text-decoration:none">
+            <div class="library-item-art {{gradient}}">{{emoji}}</div>
+            <div class="library-item-info">
+              <div class="library-item-name">{{playlistName}}</div>
+              <div class="library-item-meta">플레이리스트</div>
+            </div>
+          </a>
+          {{/userPlaylists}}
+          {{^userPlaylists}}
+          <div style="padding:14px 12px;font-size:12px;color:var(--text-muted);text-align:center;line-height:1.6">
+            플레이리스트가 없어요<br>
+            <a href="/playlists" style="color:var(--accent)">만들러 가기</a>
+          </div>
+          {{/userPlaylists}}
+        </div>
+      </div>
+    </aside><!-- end .sidebar -->
+
+    <div class="app-main-area">
+      <main class="main">
+
+        <!-- ══ 상단바 (topbar.js 출력과 동일한 HTML 구조) ══ -->
+        <header class="topbar">
+          <div class="topbar-nav">
+            <button class="nav-arrow-btn" onclick="history.back()" title="뒤로">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            </button>
+            <button class="nav-arrow-btn" onclick="history.forward()" title="앞으로">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+            </button>
+          </div>
+
+          <div class="search-container" id="search-bar" style="display:none">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            <input class="search-input" id="search-input" type="text" placeholder="아티스트, 곡, 팟캐스트 검색...">
+          </div>
+
+          <div class="topbar-right">
+            <button class="topbar-outline-btn">업그레이드</button>
+            <div class="dropdown" id="avatar-dropdown">
+              <div class="avatar" id="avatar-btn" title="{{loginUser.displayName}}">{{initials}}</div>
+              <div class="dropdown-menu">
+                <div style="padding:12px 16px 8px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:4px">
+                  <div style="font-size:13px;font-weight:700;color:var(--text-base)">{{loginUser.displayName}}</div>
+                  <div style="font-size:11px;color:var(--text-secondary);margin-top:2px">{{loginUser.email}}</div>
+                </div>
+                <a class="dropdown-item" href="/profile">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                  설정
+                </a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item danger" href="/logout">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+                  로그아웃
+                </a>
+              </div>
+            </div>
+          </div>
+        </header><!-- end .topbar -->
+
+        <!-- ══ 페이지 콘텐츠 (각 템플릿에서 채움) ══ -->
+        <div class="content">
