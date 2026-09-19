@@ -1,0 +1,454 @@
+/* ============================================================
+   SYNC AI — Signal Field (레퍼런스 sync-flow_1.html 기준)
+   ============================================================ */
+
+/* ── 중앙 컬럼 ── */
+.sync-center-col {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 24px;
+}
+
+.page-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 28px;
+  text-align: center;
+}
+
+/* ── 플레어 오브 ── */
+.sync-flare-hero {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.sync-flare-glow {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, rgba(217,192,143,.22) 0%, rgba(217,192,143,.08) 38%, transparent 68%);
+  filter: blur(6px);
+  transition: transform .6s ease;
+  animation: flareBreath 4s ease-in-out infinite;
+}
+@keyframes flareBreath {
+  0%, 100% { transform: scale(1);    opacity: .7; }
+  50%       { transform: scale(1.14); opacity: 1; }
+}
+.sync-flare-core {
+  position: relative;
+  width: 136px;
+  height: 42px;
+  background: radial-gradient(ellipse 50% 50% at center, #fff 0%, #f3e3c2 22%, rgba(217,192,143,.6) 46%, transparent 74%);
+  filter: blur(1.5px);
+}
+.sync-flare-core::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 300px; height: 1.5px;
+  background: linear-gradient(90deg, transparent 0%, rgba(243,227,194,.9) 50%, transparent 100%);
+}
+.sync-flare-core::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 1.5px; height: 300px;
+  background: linear-gradient(180deg, transparent 0%, rgba(243,227,194,.35) 50%, transparent 100%);
+}
+.sync-flare-hero.state-loading .sync-flare-glow { transform: scale(1.12); animation-duration: 1.2s; }
+.sync-flare-hero.state-loading .sync-flare-core { width: 180px; height: 55px; }
+.sync-flare-hero.state-done .sync-flare-glow { background: radial-gradient(circle at center, rgba(127,201,187,.22) 0%, rgba(127,201,187,.08) 38%, transparent 68%); }
+/* 분석 중에는 궤도 회전 자체가 눈에 띄게 빨라져야 "지금 작동 중"이라는 게 확실히 느껴짐 —
+   기존엔 glow/core만 살짝 바뀌고 궤도 속도는 그대로라 상태 전환이 잘 안 느껴졌음 */
+.sync-flare-hero.state-loading .sync-orbit       { animation-duration: 1.6s; border-color: rgba(217,192,143,.28); }
+.sync-flare-hero.state-loading .sync-orbit.ring2 { animation-duration: 1s;   border-color: rgba(217,192,143,.2); }
+.sync-flare-hero.state-loading .sync-orbit::before { box-shadow: 0 0 14px rgba(217,192,143,1); }
+
+/* ── 결과 영역 로딩 표시 — 디자인 변경 전 있었던 "이중 회전 링 + 이퀄라이저" 애니메이션을
+   복원해 현재 팔레트(--accent 골드 / --info 로즈)에 맞게 재구성. 예전엔 초록/파랑 무지개톤
+   이었지만 지금 톤엔 안 맞아서 색만 골드·로즈 2톤으로 교체하고 나머지 움직임은 그대로 둠 ── */
+.sync-loading-visual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+.sync-loading-orb {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.sync-loading-orb-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: var(--accent);
+  border-right-color: var(--info);
+  animation: syncOrbSpin 1.1s linear infinite;
+}
+.sync-loading-orb-ring.ring2 {
+  inset: 9px;
+  border-top-color: transparent;
+  border-right-color: transparent;
+  border-bottom-color: rgba(179,82,122,.6);
+  border-left-color: rgba(217,192,143,.6);
+  animation: syncOrbSpin 1.6s linear infinite reverse;
+}
+.sync-loading-orb-core {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--info));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  z-index: 2;
+  animation: syncOrbPulse 1.5s ease-in-out infinite;
+}
+@keyframes syncOrbSpin { to { transform: rotate(360deg); } }
+@keyframes syncOrbPulse {
+  0%, 100% { transform: scale(1);    box-shadow: 0 0 12px var(--accent-shadow); }
+  50%      { transform: scale(1.14); box-shadow: 0 0 26px var(--accent-shadow); }
+}
+.sync-analyzing {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 42px;
+  flex-shrink: 0;
+}
+.sync-analyzing .eq-bar {
+  width: 6px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, var(--accent), var(--info));
+  transform-origin: bottom;
+  animation: eqBounceBig .85s ease-in-out infinite;
+}
+.sync-analyzing .eq-bar:nth-child(1) { height: 11px; animation-delay: 0s;   }
+.sync-analyzing .eq-bar:nth-child(2) { height: 20px; animation-delay: .1s; }
+.sync-analyzing .eq-bar:nth-child(3) { height: 32px; animation-delay: .2s; }
+.sync-analyzing .eq-bar:nth-child(4) { height: 42px; animation-delay: .3s; }
+.sync-analyzing .eq-bar:nth-child(5) { height: 32px; animation-delay: .4s; }
+.sync-analyzing .eq-bar:nth-child(6) { height: 20px; animation-delay: .5s; }
+.sync-analyzing .eq-bar:nth-child(7) { height: 11px; animation-delay: .6s; }
+@keyframes eqBounceBig {
+  0%, 100% { transform: scaleY(.25); opacity: .6; }
+  50%      { transform: scaleY(1);   opacity: 1;  }
+}
+
+/* ── 파티클 링 ── */
+.sync-orbit {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px dashed rgba(217,192,143,.12);
+  animation: orbitSpin 8s linear infinite;
+}
+.sync-orbit::before {
+  content: '';
+  position: absolute;
+  top: -3px; left: 50%;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(217,192,143,.8);
+  transform: translateX(-50%);
+}
+.sync-orbit.ring2 {
+  inset: 20px;
+  animation: orbitSpin 5s linear infinite reverse;
+  border-color: rgba(217,192,143,.08);
+}
+@keyframes orbitSpin { to { transform: rotate(360deg); } }
+
+.orb-caption {
+  font-size: 13px;
+  letter-spacing: .03em;
+  color: var(--text-muted);
+  margin-bottom: 36px;
+  text-align: center;
+  min-height: 16px;
+  font-family: ui-monospace, 'SF Mono', monospace;
+}
+.orb-caption.active { color: var(--text-secondary); }
+
+/* ── 컴포저 입력 영역 ── */
+.composer { width: 100%; }
+
+.prompt-box {
+  position: relative;
+  border-bottom: 1px solid rgba(245,238,240,.1);
+  transition: border-color .2s ease;
+}
+.prompt-box:focus-within { border-color: var(--accent); }
+
+.prompt-box textarea {
+  width: 100%;
+  min-height: 58px;
+  max-height: 160px;
+  resize: none;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-base);
+  font-size: 16px;
+  line-height: 1.5;
+  padding: 14px 90px 16px 2px;
+  font-family: var(--font);
+}
+.prompt-box textarea::placeholder { color: rgba(245,238,240,.25); }
+
+.prompt-actions {
+  position: absolute;
+  right: 0;
+  bottom: 13px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.attach-btn {
+  color: rgba(245,238,240,.25);
+  display: flex;
+  align-items: center;
+  transition: color .15s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.attach-btn:hover { color: rgba(245,238,240,.7); }
+.send-btn {
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  transition: transform .15s, opacity .15s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.send-btn:hover { transform: translateX(2px); }
+
+/* ── 이미지 미리보기 ── */
+.img-previews {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.img-chip {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(245,238,240,.1);
+}
+.img-chip img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.img-chip .rm {
+  position: absolute;
+  top: 1px; right: 1px;
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.7);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 7px; color: var(--text-base);
+  border: none; cursor: pointer; padding: 0;
+}
+
+/* ── 무드 칩 ── */
+.mood-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+.mood-chip {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: var(--radius-full);
+  background: transparent;
+  border: 1px solid rgba(245,238,240,.1);
+  color: rgba(245,238,240,.45);
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all .15s;
+}
+.mood-chip:hover { color: var(--text-base); border-color: rgba(245,238,240,.25); }
+.mood-chip.active { border-color: var(--accent); color: var(--accent); }
+
+/* ── 결과 영역 ── */
+.result-area {
+  width: 100%;
+  margin-top: 42px;
+}
+
+.result-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(245,238,240,.1);
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.result-emotion {
+  font-family: var(--font-display);
+  font-size: 27px;
+  font-weight: 700;
+}
+.result-secondary {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  border-left: 1px solid rgba(245,238,240,.1);
+  padding-left: 14px;
+}
+.result-conf {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-family: ui-monospace, monospace;
+}
+
+.track-rec {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(245,238,240,.05);
+  cursor: pointer;
+  transition: padding-left .15s;
+}
+.track-rec:hover { padding-left: 4px; }
+.track-rec .art {
+  width: 46px; height: 46px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  background: var(--bg-card);
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.track-rec .main { flex: 1; min-width: 0; }
+.track-rec .name { font-size: 14.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.track-rec .artist { font-size: 12.5px; color: var(--text-secondary); }
+.track-rec .play { color: rgba(245,238,240,.25); font-size: 12px; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.track-rec:hover .play { color: var(--accent); }
+
+/* ── 최근 감정 분석 통계 (idle 상태를 채우는 실제 데이터 섹션) ── */
+.sync-stats-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+.sync-stats-summary {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 18px;
+}
+.sync-stats-summary b { color: var(--text-base); font-weight: 700; }
+.sync-stats-bars { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.sync-stats-row { display: flex; align-items: center; gap: 8px; }
+.sync-stats-emoji { font-size: 15px; flex-shrink: 0; width: 20px; text-align: center; }
+.sync-stats-label { font-size: 12.5px; color: var(--text-secondary); width: 52px; flex-shrink: 0; }
+.sync-stats-bar-track {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(245,238,240,.06);
+  overflow: hidden;
+}
+.sync-stats-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 4px;
+  transition: width .4s ease;
+}
+.sync-stats-count { font-size: 12px; color: var(--text-muted); width: 18px; text-align: right; flex-shrink: 0; }
+.sync-stats-conf { font-size: 11.5px; color: var(--text-muted); text-align: center; padding-top: 10px; border-top: 1px solid rgba(245,238,240,.07); }
+
+/* ── 로딩 (유지) ── */
+.sync-loading-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+}
+.sync-loading-text {
+  font-size: 13px;
+  font-weight: 700;
+  background: linear-gradient(90deg, var(--accent), var(--info), var(--accent));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: syncTextShimmer 2.2s linear infinite;
+  display: inline-flex;
+  align-items: center;
+  font-family: ui-monospace, monospace;
+  letter-spacing: .03em;
+}
+@keyframes syncTextShimmer { to { background-position: -200% center; } }
+.sync-dots { display: inline-flex; gap: 3px; margin-left: 5px; }
+.sync-dots span {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: dotPulse 1.4s ease-in-out infinite;
+}
+.sync-dots span:nth-child(2) { animation-delay: .2s; }
+.sync-dots span:nth-child(3) { animation-delay: .4s; }
+@keyframes dotPulse {
+  0%,60%,100% { opacity: .25; transform: translateY(0); }
+  30%         { opacity: 1;   transform: translateY(-3px); }
+}
+
+/* ── 결과 등장 ── */
+.sync-results-enter {
+  animation: syncResultsFadeIn .4s ease both;
+}
+@keyframes syncResultsFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── 하단 통계 ── */
+.stats-strip {
+  width: 100%;
+  margin-top: 50px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(245,238,240,.1);
+  text-align: center;
+  font-size: 12.5px;
+  color: rgba(245,238,240,.25);
+  font-family: ui-monospace, monospace;
+  letter-spacing: .02em;
+}
+.stats-strip b { color: rgba(245,238,240,.7); font-weight: 600; }

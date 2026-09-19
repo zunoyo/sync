@@ -1,0 +1,226 @@
+/* ============================================================
+   SYNC — Search Page
+   장르 그리드는 css/components/cards.css의 .genre-grid 사용
+   ============================================================ */
+
+.search-results-section {
+  margin-top: 32px;
+}
+
+.search-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 24px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+.search-empty-icon { font-size: 48px; margin-bottom: 16px; }
+.search-empty-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-base);
+  margin-bottom: 8px;
+}
+
+/* ── 검색 입력 강조 ── */
+.search-input-wrap {
+  position: relative;
+  margin-bottom: 24px;
+}
+.search-input-wrap input {
+  width: 100%;
+  font-size: 16px;
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius-full);
+  padding: 12px 20px 12px 44px;
+  color: var(--text-base);
+  font-family: var(--font);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  box-sizing: border-box;
+}
+.search-input-wrap input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(217,192,143,.2);
+}
+.search-input-wrap svg {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+/* ── 검색 헤더 ── */
+.search-head { margin-bottom: 22px; }
+.search-headline {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+}
+.search-sub { font-size: 12.5px; color: var(--text-secondary); margin-top: 4px; }
+.search-sub b { color: var(--text-base); font-weight: 700; }
+
+/* ── 벤토 비대칭 그리드 ── */
+.search-bento {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 32px;
+}
+
+/* ── 베스트 매치 카드 ── */
+.best-match {
+  position: relative;
+  border-radius: 20px;
+  padding: 26px;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(217,192,143,.14), transparent 60%), var(--bg-card);
+  border: 1px solid rgba(245,238,240,.1);
+}
+.best-match .tag {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #000;
+  background: var(--accent);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  margin-bottom: 14px;
+}
+.best-match-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.best-match-art {
+  width: 160px;
+  height: 160px;
+  border-radius: 14px;
+  flex-shrink: 0;
+  box-shadow: 0 16px 34px rgba(0,0,0,.4);
+  background: var(--bg-mid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.best-match-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 240px;
+}
+.best-match-artist { font-size: 13px; color: var(--text-secondary); }
+.best-match-type { font-size: 11px; color: var(--text-muted); margin-top: 6px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+.best-match-play {
+  margin-left: auto;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #2b0f1f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: none;
+  cursor: pointer;
+  transition: box-shadow .15s;
+}
+.best-match-play:hover { box-shadow: 0 0 0 8px rgba(217,192,143,.26); }
+
+/* ── 아티스트 레일 카드 ── */
+.rail-card {
+  background: var(--bg-card);
+  border-radius: 20px;
+  padding: 18px;
+  border: 1px solid rgba(245,238,240,.1);
+}
+.rail-title {
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+.artist-mini {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 6px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  color: inherit;
+  transition: background .12s;
+}
+.artist-mini:hover { background: var(--bg-mid); }
+.artist-mini-av {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-base);
+  overflow: hidden;
+  background: var(--bg-mid);
+}
+.artist-mini-name { font-size: 13px; font-weight: 600; }
+.artist-mini-role { font-size: 10.5px; color: var(--text-secondary); }
+
+/* ── 하단 트랙 리스트 (장르 클러스터 제거 후 전체 폭 사용) ── */
+.search-lower {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+.track-col-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+/* ── 장르 클러스터 ── */
+.genre-cluster {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.genre-tile {
+  position: relative;
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  min-height: 78px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.genre-tile.big {
+  grid-column: span 2;
+  min-height: 110px;
+}
+.genre-tile-label {
+  position: relative;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0,0,0,.4);
+}

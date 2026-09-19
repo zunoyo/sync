@@ -1,0 +1,218 @@
+/* ============================================================
+   SYNC — Flashlight Landing Page
+   ============================================================ */
+
+.landing-root {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  background: #000;
+  overflow: hidden;
+  cursor: none;
+  transition: opacity 0.65s ease;
+}
+.landing-root.landing-fading {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── 커스텀 커서 ── */
+.landing-cursor {
+  position: fixed;
+  width: 18px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 110;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 18px 4px rgba(255, 255, 255, 0.2);
+  mix-blend-mode: difference;
+  will-change: left, top;
+}
+
+/* ── 플래시라이트 마스크 ── */
+.landing-flashlight {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  -webkit-mask-image: radial-gradient(
+    circle var(--fl) at var(--mx) var(--my),
+    black 0%,
+    rgba(0, 0, 0, 0.8) 45%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    circle var(--fl) at var(--mx) var(--my),
+    black 0%,
+    rgba(0, 0, 0, 0.8) 45%,
+    transparent 100%
+  );
+}
+
+/* ── 컨텐츠 (플래시라이트 안쪽) ── */
+.landing-content {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  position: relative;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.landing-content.is-revealed {
+  opacity: 1;
+}
+
+/* ── 네비 ── */
+.landing-nav {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+.landing-nav-group {
+  display: flex;
+  gap: 3rem;
+  align-items: center;
+}
+.landing-nav-link {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 11px;
+  font-family: 'Syne', 'Noto Sans KR', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.15s ease;
+}
+.landing-nav-link:hover { color: #fff; }
+
+.landing-nav-signup {
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  padding: 7px 20px !important;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.6) !important;
+  transition: background 0.15s ease, color 0.15s ease !important;
+}
+.landing-nav-signup:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff !important;
+}
+
+/* ── 중앙 ── */
+.landing-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  position: relative;
+  z-index: 2;
+}
+.landing-logo {
+  font-family: 'Syne', 'Noto Sans KR', sans-serif;
+  font-weight: 900;
+  font-size: clamp(7rem, 20vw, 15rem);
+  letter-spacing: -0.02em;
+  color: #fff;
+  margin: 0;
+  line-height: 1;
+}
+.landing-logo--clickable {
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+.landing-logo--clickable:hover { opacity: 0.75; }
+.landing-tagline {
+  font-size: 13px;
+  font-weight: 300;
+  font-family: 'Syne', sans-serif;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+  margin: 0;
+}
+.landing-cta {
+  margin-top: 1.2rem;
+  background: rgba(217, 192, 143, 0.1);
+  border: 1px solid rgba(217, 192, 143, 0.4);
+  color: #d9c08f;
+  padding: 14px 52px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-family: 'Syne', 'Noto Sans KR', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.landing-cta:hover {
+  background: rgba(217, 192, 143, 0.2);
+  border-color: rgba(217, 192, 143, 0.7);
+  color: #f0d8a0;
+}
+
+/* ── 푸터 ── */
+.landing-footer {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family: 'Syne', sans-serif;
+  position: relative;
+  z-index: 2;
+}
+.landing-footer p { margin: 0; line-height: 1.9; }
+
+/* ── 링 장식 ── */
+.landing-rings {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 1;
+}
+.landing-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  /* width + paddingBottom으로 정사각형 비율 유지 */
+  height: 0;
+}
+
+/* ── "Find the sound" 힌트 ── */
+.landing-instruction {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  pointer-events: none;
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 12px;
+  font-weight: 300;
+  font-family: 'Syne', sans-serif;
+  letter-spacing: 0.6em;
+  text-transform: uppercase;
+  animation: landing-pulse 2s ease-in-out infinite;
+}
+@keyframes landing-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.25; }
+}

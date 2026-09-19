@@ -1,0 +1,564 @@
+/* ============================================================
+   SYNC — Detail Page + Create Playlist Modal
+   ============================================================ */
+
+/* ── 에디토리얼 상세 히어로 ── */
+.detail-hero {
+  min-height: 340px;
+  display: flex;
+  align-items: flex-end;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(to bottom, var(--bg-surface), var(--bg-base));
+  margin: -24px -24px 0;
+}
+
+.detail-hero-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(60px) brightness(0.4) saturate(1.5);
+  z-index: 0;
+  transform: scale(1.1);
+}
+
+/* 페이지 타입별 그라데이션 오버레이 */
+.detail-hero.h-album::after  {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(165deg, rgba(138,76,19,.55) 0%, rgba(42,24,6,.45) 55%, transparent 100%);
+  pointer-events: none;
+}
+.detail-hero.h-genre::after  {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(165deg, rgba(18,58,52,.55) 0%, rgba(8,28,25,.45) 55%, transparent 100%);
+  pointer-events: none;
+}
+.detail-hero.h-playlist::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(165deg, rgba(156,20,87,.55) 0%, rgba(60,0,40,.45) 55%, transparent 100%);
+  pointer-events: none;
+}
+
+.detail-hero-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 32px;
+  width: 100%;
+}
+
+/* 아트 박스 (앨범 커버 / 이모지) */
+.detail-hero-art {
+  width: 200px;
+  height: 200px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 20px 48px rgba(0,0,0,.6);
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 72px;
+  background: var(--bg-mid);
+}
+
+.detail-hero-info {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 에이바우 (타입 레이블) */
+.detail-hero-type {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.detail-hero-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(28px, 4vw, 52px);
+  line-height: 1.1;
+  color: var(--text-base);
+  margin-bottom: 12px;
+}
+
+.detail-hero-desc {
+  font-size: 13.5px;
+  color: rgba(245,238,240,.75);
+  margin-bottom: 6px;
+}
+
+.detail-hero-meta {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.detail-action-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+/* legacy alias kept for components that still use detail-hero-actions */
+.detail-hero-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* ── 재생 버튼 (히어로) ── */
+.detail-play-btn,
+.play-btn-large {
+  width: 54px;
+  height: 54px;
+  background: var(--accent);
+  border: none;
+  border-radius: 50%;
+  color: #2b0f1f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: box-shadow var(--transition-fast);
+}
+.detail-play-btn:hover,
+.play-btn-large:hover {
+  box-shadow: 0 0 0 9px rgba(217,192,143,.26);
+}
+.detail-play-btn:disabled,
+.play-btn-large:disabled { opacity: .4; cursor: not-allowed; }
+
+/* 서클 액션 버튼 (저장/삭제) */
+.action-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(245,238,240,.25);
+  color: rgba(245,238,240,.7);
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+.action-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── 트랙 목록 ── */
+.track-body {
+  padding: 26px 30px 0;
+}
+
+.track-col-head {
+  display: grid;
+  grid-template-columns: 28px 1fr auto auto;
+  gap: 14px;
+  padding: 0 10px 8px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: rgba(245,238,240,.25);
+  border-bottom: 1px solid rgba(245,238,240,.1);
+  margin-bottom: 6px;
+}
+.track-body.has-art .track-col-head {
+  grid-template-columns: 28px 40px 1fr 1fr auto auto;
+}
+
+.track-list { padding: 16px 4px 0; }
+
+.track-item {
+  display: grid;
+  grid-template-columns: 28px 1fr auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.track-body.has-art .track-item,
+.has-art .track-item {
+  grid-template-columns: 28px 40px 1fr minmax(0, 160px) auto;
+}
+.track-item:hover { background: var(--bg-mid); }
+
+.track-num-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.track-num {
+  font-size: 12.5px;
+  color: rgba(245,238,240,.25);
+  font-variant-numeric: tabular-nums;
+}
+.track-item:hover .track-num { color: var(--accent); }
+.track-play-icon { display: none; }
+.track-item:hover .track-play-icon { display: block; }
+.track-item:hover .track-num-text { display: none; }
+
+.track-art {
+  width: 40px;
+  height: 40px;
+  border-radius: 5px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  overflow: hidden;
+}
+
+.track-info { min-width: 0; }
+.track-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.track-artist {
+  font-size: 12px;
+  color: rgba(245,238,240,.45);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 1px;
+}
+.track-album {
+  font-size: 12px;
+  color: rgba(245,238,240,.45);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.track-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.track-add-btn,
+.track-remove-btn {
+  background: none;
+  border: none;
+  color: rgba(245,238,240,.25);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+.track-item:hover .track-add-btn,
+.track-item:hover .track-remove-btn { color: rgba(245,238,240,.7); }
+.track-duration {
+  font-size: 12px;
+  color: rgba(245,238,240,.45);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+/* ── 아티스트 히어로 ── */
+.artist-hero {
+  min-height: 340px;
+  display: flex;
+  align-items: flex-end;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+  margin: -24px -24px 0;
+  background: linear-gradient(to bottom, var(--bg-surface), var(--bg-base));
+}
+.artist-hero-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(60px) brightness(0.4) saturate(1.5);
+  z-index: 0;
+  transform: scale(1.1);
+}
+.artist-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(165deg, rgba(156,20,87,.55) 0%, rgba(60,0,40,.45) 55%, transparent 100%);
+  pointer-events: none;
+}
+
+.artist-hero-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 32px;
+  width: 100%;
+}
+
+.artist-hero-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.artist-hero-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(28px, 4vw, 52px);
+  line-height: 1.1;
+  letter-spacing: -.01em;
+  margin: 0 0 12px;
+  color: var(--text-base);
+}
+.artist-hero-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 28px;
+}
+.artist-hero-art {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 24px 50px rgba(0,0,0,.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 52px;
+  overflow: hidden;
+  background: var(--bg-mid);
+}
+.artist-hero-meta { flex: 1; min-width: 0; }
+.artist-hero-bio {
+  font-size: 13.5px;
+  color: rgba(245,238,240,.75);
+  max-width: 460px;
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+.artist-hero-stats {
+  font-size: 12px;
+  color: rgba(245,238,240,.5);
+  font-family: ui-monospace, monospace;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+}
+.artist-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.artist-play-lg {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #2b0f1f;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: box-shadow var(--transition-fast);
+}
+.artist-play-lg:hover { box-shadow: 0 0 0 9px rgba(217,192,143,.26); }
+.artist-play-lg:disabled { opacity: .4; cursor: not-allowed; }
+
+.artist-save-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(245,238,240,.25);
+  color: rgba(245,238,240,.7);
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+.artist-save-btn.saved { border-color: var(--accent); color: var(--accent); }
+.artist-save-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── 앨범 레일 ── */
+.album-rail-wrap { padding: 34px 0 0; }
+.album-rail-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.album-rail-title {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 700;
+}
+.album-rail {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 18px;
+  margin-bottom: 8px;
+}
+
+.album-card {
+  cursor: pointer;
+}
+.album-card-art {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  position: relative;
+  box-shadow: 0 14px 30px rgba(0,0,0,.4);
+  transition: transform .18s ease;
+  overflow: hidden;
+  background: var(--bg-mid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 52px;
+}
+.album-card:hover .album-card-art { transform: translateY(-4px); }
+.album-card.active .album-card-art { box-shadow: 0 0 0 3px var(--accent), 0 14px 30px rgba(0,0,0,.4); }
+.album-card-name { font-size: 13.5px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.album-card-meta { font-size: 11px; color: rgba(245,238,240,.45); margin-top: 2px; }
+
+/* ── 앨범 섹션 (아티스트 상세 — 앨범마다 헤더+트랙 목록을 쭉 나열) ── */
+.selected-album {
+  background: var(--bg-mid);
+  border-radius: 18px;
+  padding: 22px 24px;
+  border: 1px solid rgba(245,238,240,.1);
+  margin-top: 16px;
+}
+.selected-album:first-child { margin-top: 0; }
+.sel-album-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.sel-album-art {
+  width: 68px;
+  height: 68px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+}
+.sel-album-name { font-size: 18px; font-weight: 700; }
+.sel-album-meta { font-size: 13px; color: rgba(245,238,240,.45); margin-top: 3px; }
+
+.sel-track-row {
+  display: grid;
+  grid-template-columns: 24px 48px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.sel-track-row:hover { background: var(--bg-card); }
+.sel-track-row .num { font-size: 13px; color: rgba(245,238,240,.3); text-align: center; }
+.sel-track-art {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+.sel-track-row .name { font-size: 14.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sel-track-row .dur { font-size: 13px; color: rgba(245,238,240,.3); font-variant-numeric: tabular-nums; }
+
+.sel-album-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sel-album-save-btn {
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  background: none;
+  border: 1px solid rgba(245,238,240,.25);
+  color: rgba(245,238,240,.7);
+  cursor: pointer;
+  font-family: var(--font);
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+.sel-album-save-btn.saved { border-color: var(--accent); color: var(--accent); }
+.sel-album-save-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── 플레이리스트 생성 모달 ── */
+.cpm-emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 7px;
+  margin-top: 8px;
+}
+.cpm-emoji-btn {
+  width: 44px;
+  height: 44px;
+  background: var(--bg-mid);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+  font-family: var(--font);
+}
+.cpm-emoji-btn:hover  { background: var(--bg-card); }
+.cpm-emoji-btn.active {
+  border-color: var(--accent);
+  background: rgba(217,192,143,0.1);
+}
+.cpm-error {
+  background: rgba(224,99,122,.1);
+  border: 1px solid rgba(224,99,122,.3);
+  border-radius: var(--radius-md);
+  padding: 9px 13px;
+  font-size: 13px;
+  color: var(--negative);
+  margin-bottom: 14px;
+}
