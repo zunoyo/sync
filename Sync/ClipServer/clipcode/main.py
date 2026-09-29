@@ -22,7 +22,7 @@ ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global clip_model
-    logger.info("SoundWave CLIP 서버 시작")
+    logger.info("SYNC AI CLIP 서버 시작")
     clip_model = ClipModel(model_name=settings.CLIP_MODEL)
     logger.info("서버 준비 완료")
     yield
@@ -31,7 +31,7 @@ async def lifespan(app: FastAPI):
 
 # ── FastAPI 앱 ─────────────────────────────────────────────────────────────
 app = FastAPI(
-    title       = "SoundWave CLIP Server (Improved)",
+    title       = "SYNC AI CLIP Server (Improved)",
     description = "8감정 Zero-shot + Russell Circumplex V/A 동적 계산",
     version     = "2.0.0",
     lifespan    = lifespan,
@@ -105,6 +105,7 @@ def _run_analysis(input_type: str,
         clip_embedding    = result["clip_embedding"],
         lastfm_tags       = result["lastfm_tags"],
         input_summary     = summary,
+        model_val_accuracy = result.get("model_val_accuracy"),
     )
 
 

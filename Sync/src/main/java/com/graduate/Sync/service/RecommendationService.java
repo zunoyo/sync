@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RecommendationService {
@@ -59,6 +60,14 @@ public class RecommendationService {
         List<String> tags = parseJsonArray(emotionVector.getLastfmTags());
         if (tags.isEmpty()) return null;
 
+        // ②-1 arousal로 태그 우선순위 보강 — valence는 이미 primary_emotion 분류에
+        //     반영돼 있으므로 여기선 arousal만 본다. 같은 emotion_vector라도 이미지에
+        //     따라 arousal이 다르면(예: 파티 사진 happy vs 혼자 잔잔한 happy) 서로
+        //     다른 곡이 나가도록 함 (문서 13/14장: happy+high arousal→upbeat/dance,
+        //     happy+low arousal→chill/acoustic). 기존 태그는 지우지 않고 앞에만
+        //     붙여서, 이 태그로 곡이 부족하면 자연히 원래 태그로 폴백된다.
+        tags = withArousalRefinement(tags, emotionVector.getArousal());
+
         // ③ Last.fm API로 태그별 트랙 검색
         List<Map<String, String>> lastfmTracks = searchLastFmTracks(tags);
         if (lastfmTracks.isEmpty()) return null;
@@ -78,11 +87,21 @@ public class RecommendationService {
         // ⑦ playlist_track 저장
         savePlaylistTracks(spotifyTracks, playlist);
 
-        // ⑧ recommendation_history 저장
+        // ⑧ recommendation_history 저장 — 원본 emotionVector.getLastfmTags()가
+        //    아니라 arousal 보강까지 반영된 tags(실제 검색에 쓰인 것)를 그대로
+        //    남긴다. 안 그러면 이력에는 옛날 태그만 남고, 실제로 뭘로 검색했는지
+        //    나중에 확인할 방법이 없어짐.
         return saveRecommendationHistory(
                 user, emotionVector, playlist,
-                emotionVector.getLastfmTags(),
+                toJsonArray(tags),
                 spotifyTracks.size());
+    }
+
+    /* ── List<String> → JSON 배열 문자열 (parseJsonArray의 역변환) ───── */
+    private String toJsonArray(List<String> tags) {
+        return "[" + tags.stream()
+                .map(t -> "\"" + t.replace("\"", "\\\"") + "\"")
+                .collect(Collectors.joining(",")) + "]";
     }
 
     /* ── Last.fm 태그별 트랙 검색 ─────────────────────── */
@@ -284,6 +303,24 @@ public class RecommendationService {
         return recommendationHistoryRepository.save(history);
     }
 
+    /* ── arousal 기반 태그 보강 ────────────────────────
+       같은 primary_emotion(예: happy)이라도 이 이미지의 arousal이 높은지
+       낮은지에 따라 다른 수식어 태그를 앞에 붙인다. 장르 전반에 걸쳐
+       흔히 쓰이는 Last.fm 태그로 골랐고(특정 감정 전용 태그가 아님),
+       valence 축은 건드리지 않는다 — 그건 이미 primary_emotion 분류가
+       담당하고 있음. */
+    private List<String> withArousalRefinement(List<String> baseTags, Float arousal) {
+        if (arousal == null) return baseTags;
+
+        List<String> modifiers = (arousal >= 0)
+                ? List.of("upbeat", "dance", "energetic")
+                : List.of("chill", "acoustic", "slow");
+
+        List<String> merged = new ArrayList<>(modifiers);
+        merged.addAll(baseTags);
+        return merged;
+    }
+
     /* ── JSON 배열 문자열 → List<String> 파싱 ─────────── */
     private List<String> parseJsonArray(String json) {
         List<String> result = new ArrayList<>();
@@ -306,4 +343,4 @@ public class RecommendationService {
         }
         return result;
     }
-}
+}

@@ -14,6 +14,7 @@ class AnalyzeResponse(BaseModel):
     clip_embedding:    str
     lastfm_tags:       str
     input_summary:     Optional[str]
+    model_val_accuracy: Optional[float] = None  # 이미지 분석에만 채워짐(텍스트 전용이면 None)
 
 
 class HealthResponse(BaseModel):
