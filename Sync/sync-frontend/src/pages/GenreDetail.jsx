@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { GENRES, GENRE_FILTERS } from '../api/genres';
 import { itunesResultToTrack, searchItunesTracks } from '../api/itunes';
+import { fetchSpotifyGenreTracks } from '../api/spotifyCatalog';
 import { usePlayer } from '../context/PlayerContext';
 import TrackRow from '../components/TrackRow';
 
@@ -34,7 +35,9 @@ export default function GenreDetail() {
         if (filtered.length >= 5) results = filtered;
       }
 
-      const list = results.slice(0, 20).map(itunesResultToTrack);
+      let list = results.slice(0, 20).map(itunesResultToTrack);
+      // iTunes가 막혔거나(403/429) 결과가 없을 때는 Spotify 카탈로그로 보완
+      if (list.length === 0) list = await fetchSpotifyGenreTracks(genreName, q, 20);
       if (cancelled) return;
       setTracks(list);
       // 첫 곡의 앨범아트로 히어로 배경(흐림 처리)을 채워 분위기를 살림 — 프리로드 후
@@ -55,7 +58,7 @@ export default function GenreDetail() {
 
   return (
     <>
-      <div className={`detail-hero ${meta.grad}`} style={{ position: 'relative', overflow: 'hidden' }}>
+      <div className={`detail-hero ${meta.grad}`} style={{ position: 'relative', overflow: 'hidden', gap: 40 }}>
         {heroArt && (
           <div style={{
             position: 'absolute', inset: 0,

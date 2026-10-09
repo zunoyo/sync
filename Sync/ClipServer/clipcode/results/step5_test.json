@@ -1,0 +1,350 @@
+{
+  "tag": "step5_test",
+  "created_at": "2026-10-07T20:56:11",
+  "max_per_class": 300,
+  "split": "test",
+  "checkpoint": "model/emotion_projection.pt",
+  "checkpoint_meta": {
+    "trained_emotions": [
+      "happy",
+      "energetic",
+      "calm",
+      "sad",
+      "angry",
+      "dreamy"
+    ],
+    "val_acc": 0.8222222222222222,
+    "epoch": 4,
+    "hard_negative_margin": 0.1,
+    "hard_negative_weight": 0.0,
+    "hard_negative_pairs": "happy:energetic,energetic:happy,calm:dreamy,dreamy:calm",
+    "max_per_class": 3000,
+    "epochs_requested": 10,
+    "temperature": 0.0411154106259346,
+    "temperature_text": 0.013772239908576012
+  },
+  "hard_negative_applied": false,
+  "temperature_fitted": true,
+  "zero_shot": {
+    "n_samples": 1800,
+    "top2_accuracy": 0.7216666666666667,
+    "first_second_matrix": [
+      [
+        0,
+        163,
+        145,
+        124,
+        30,
+        51
+      ],
+      [
+        85,
+        0,
+        17,
+        5,
+        73,
+        23
+      ],
+      [
+        136,
+        10,
+        0,
+        18,
+        12,
+        213
+      ],
+      [
+        67,
+        10,
+        49,
+        0,
+        133,
+        30
+      ],
+      [
+        37,
+        117,
+        17,
+        76,
+        0,
+        25
+      ],
+      [
+        18,
+        25,
+        61,
+        12,
+        18,
+        0
+      ]
+    ],
+    "second_of_pred": {
+      "happy": {
+        "most_common_second": "energetic",
+        "share": 0.31773879142300193
+      },
+      "energetic": {
+        "most_common_second": "happy",
+        "share": 0.4187192118226601
+      },
+      "calm": {
+        "most_common_second": "dreamy",
+        "share": 0.5475578406169666
+      },
+      "sad": {
+        "most_common_second": "angry",
+        "share": 0.4602076124567474
+      },
+      "angry": {
+        "most_common_second": "energetic",
+        "share": 0.43014705882352944
+      },
+      "dreamy": {
+        "most_common_second": "calm",
+        "share": 0.4552238805970149
+      }
+    },
+    "accuracy": 0.45055555555555554,
+    "macro_f1": 0.4412530811573298,
+    "per_class_recall": {
+      "happy": 0.63,
+      "energetic": 0.39,
+      "calm": 0.35,
+      "sad": 0.5666666666666667,
+      "angry": 0.6733333333333333,
+      "dreamy": 0.09333333333333334
+    },
+    "per_class_f1": {
+      "happy": 0.46494464944649444,
+      "energetic": 0.46520874751491054,
+      "calm": 0.3047895500725689,
+      "sad": 0.5772495755517827,
+      "angry": 0.7062937062937062,
+      "dreamy": 0.12903225806451613
+    },
+    "confusion_matrix": [
+      [
+        189,
+        49,
+        20,
+        11,
+        2,
+        29
+      ],
+      [
+        119,
+        117,
+        10,
+        17,
+        30,
+        7
+      ],
+      [
+        141,
+        2,
+        105,
+        32,
+        2,
+        18
+      ],
+      [
+        5,
+        7,
+        34,
+        170,
+        36,
+        48
+      ],
+      [
+        20,
+        18,
+        8,
+        48,
+        202,
+        4
+      ],
+      [
+        39,
+        10,
+        212,
+        11,
+        0,
+        28
+      ]
+    ],
+    "confusion_pairs": {
+      "happy->energetic": 49,
+      "energetic->happy": 119,
+      "calm->dreamy": 18,
+      "dreamy->calm": 212
+    },
+    "confusion_pairs_total": 398,
+    "ece_raw": 0.2811341956588957,
+    "brier_raw": 0.8300234431464008,
+    "ece_with_T": 0.2811341956588957,
+    "brier_with_T": 0.8300234431464008,
+    "mean_confidence_with_T": 0.16942135989665985,
+    "temperature_used": 1.0
+  },
+  "projection": {
+    "n_samples": 1800,
+    "top2_accuracy": 0.935,
+    "first_second_matrix": [
+      [
+        0,
+        131,
+        113,
+        7,
+        2,
+        13
+      ],
+      [
+        178,
+        0,
+        15,
+        0,
+        93,
+        8
+      ],
+      [
+        158,
+        17,
+        0,
+        45,
+        4,
+        92
+      ],
+      [
+        8,
+        0,
+        95,
+        0,
+        185,
+        39
+      ],
+      [
+        4,
+        164,
+        18,
+        97,
+        0,
+        14
+      ],
+      [
+        25,
+        24,
+        214,
+        22,
+        15,
+        0
+      ]
+    ],
+    "second_of_pred": {
+      "happy": {
+        "most_common_second": "energetic",
+        "share": 0.4924812030075188
+      },
+      "energetic": {
+        "most_common_second": "happy",
+        "share": 0.6054421768707483
+      },
+      "calm": {
+        "most_common_second": "happy",
+        "share": 0.5
+      },
+      "sad": {
+        "most_common_second": "angry",
+        "share": 0.5657492354740061
+      },
+      "angry": {
+        "most_common_second": "energetic",
+        "share": 0.5521885521885522
+      },
+      "dreamy": {
+        "most_common_second": "calm",
+        "share": 0.7133333333333334
+      }
+    },
+    "accuracy": 0.8061111111111111,
+    "macro_f1": 0.8053288812096131,
+    "per_class_recall": {
+      "happy": 0.68,
+      "energetic": 0.7966666666666666,
+      "calm": 0.6733333333333333,
+      "sad": 0.9433333333333334,
+      "angry": 0.9,
+      "dreamy": 0.8433333333333334
+    },
+    "per_class_f1": {
+      "happy": 0.7208480565371025,
+      "energetic": 0.8047138047138047,
+      "calm": 0.6558441558441559,
+      "sad": 0.9027113237639554,
+      "angry": 0.9045226130653267,
+      "dreamy": 0.8433333333333334
+    },
+    "confusion_matrix": [
+      [
+        204,
+        27,
+        53,
+        2,
+        4,
+        10
+      ],
+      [
+        20,
+        239,
+        25,
+        3,
+        9,
+        4
+      ],
+      [
+        32,
+        12,
+        202,
+        18,
+        5,
+        31
+      ],
+      [
+        3,
+        2,
+        5,
+        283,
+        6,
+        1
+      ],
+      [
+        0,
+        9,
+        4,
+        16,
+        270,
+        1
+      ],
+      [
+        7,
+        5,
+        27,
+        5,
+        3,
+        253
+      ]
+    ],
+    "confusion_pairs": {
+      "happy->energetic": 27,
+      "energetic->happy": 20,
+      "calm->dreamy": 31,
+      "dreamy->calm": 27
+    },
+    "confusion_pairs_total": 105,
+    "ece_raw": 0.6127094668812222,
+    "brier_raw": 0.7856438861100526,
+    "ece_with_T": 0.026422012348969792,
+    "brier_with_T": 0.2715301704949401,
+    "mean_confidence_with_T": 0.8099439144134521,
+    "temperature_used": 0.0411154106259346
+  }
+}

@@ -1,0 +1,205 @@
+{
+  "_note": "3차(fresh) — 키워드 사전 확정 이후에 작성한 구어체 문장. 이 결과를 보고 사전을 튜닝하지 않는다(튜닝하면 다시 오염됨).",
+  "items": [
+    {
+      "text": "오늘 기분 최고! 같이 흥얼거릴 노래",
+      "label": "happy",
+      "lang": "ko"
+    },
+    {
+      "text": "월요일인데도 왠지 웃음이 나네",
+      "label": "happy",
+      "lang": "ko"
+    },
+    {
+      "text": "좋은 일 있어서 하루 종일 행복해",
+      "label": "happy",
+      "lang": "ko"
+    },
+    {
+      "text": "여행 가는 날 아침에 듣고 싶은 노래",
+      "label": "happy",
+      "lang": "ko"
+    },
+    {
+      "text": "점심 맛있게 먹고 배불러서 좋다",
+      "label": "happy",
+      "lang": "ko"
+    },
+    {
+      "text": "이별 노래 듣고 펑펑 울고 싶다",
+      "label": "sad",
+      "lang": "ko"
+    },
+    {
+      "text": "너무 힘들어서 아무 말도 안 나와",
+      "label": "sad",
+      "lang": "ko"
+    },
+    {
+      "text": "가슴이 미어지는 발라드 추천",
+      "label": "sad",
+      "lang": "ko"
+    },
+    {
+      "text": "오늘 하루 종일 눈물 날 것 같아",
+      "label": "sad",
+      "lang": "ko"
+    },
+    {
+      "text": "모든 게 다 내 잘못 같아서 괴로워",
+      "label": "sad",
+      "lang": "ko"
+    },
+    {
+      "text": "비 오는 날 카페에서 듣기 좋은 잔잔한 곡",
+      "label": "calm",
+      "lang": "ko"
+    },
+    {
+      "text": "잠이 안 와서 마음 가라앉히고 싶어",
+      "label": "calm",
+      "lang": "ko"
+    },
+    {
+      "text": "공부할 때 방해 안 되는 조용한 음악",
+      "label": "calm",
+      "lang": "ko"
+    },
+    {
+      "text": "주말 아침 느리게 시작하고 싶어",
+      "label": "calm",
+      "lang": "ko"
+    },
+    {
+      "text": "캠핑장 모닥불 앞에서 듣고 싶은 노래",
+      "label": "calm",
+      "lang": "ko"
+    },
+    {
+      "text": "러닝머신 뛸 때 듣는 신나는 노래 줘",
+      "label": "energetic",
+      "lang": "ko"
+    },
+    {
+      "text": "오늘 운동 PR 찍을 거야 파이팅 넘치는 곡",
+      "label": "energetic",
+      "lang": "ko"
+    },
+    {
+      "text": "아침부터 텐션 올려줄 음악",
+      "label": "energetic",
+      "lang": "ko"
+    },
+    {
+      "text": "드라이브하면서 소리 지르며 따라 부를 노래",
+      "label": "energetic",
+      "lang": "ko"
+    },
+    {
+      "text": "신나는 EDM으로 분위기 띄우자",
+      "label": "energetic",
+      "lang": "ko"
+    },
+    {
+      "text": "여자친구랑 기념일 저녁에 들을 노래",
+      "label": "romantic",
+      "lang": "ko"
+    },
+    {
+      "text": "고백하기 전에 설레는 마음을 담은 곡",
+      "label": "romantic",
+      "lang": "ko"
+    },
+    {
+      "text": "첫눈 오는 날 둘이서 듣고 싶어",
+      "label": "romantic",
+      "lang": "ko"
+    },
+    {
+      "text": "결혼식 입장 때 쓸 로맨틱한 곡",
+      "label": "romantic",
+      "lang": "ko"
+    },
+    {
+      "text": "사랑에 빠진 순간을 노래한 곡 추천",
+      "label": "romantic",
+      "lang": "ko"
+    },
+    {
+      "text": "가을밤 혼자 듣기 좋은 쓸쓸한 노래",
+      "label": "melancholy",
+      "lang": "ko"
+    },
+    {
+      "text": "옛날 노래 들으니까 그때가 그리워져",
+      "label": "melancholy",
+      "lang": "ko"
+    },
+    {
+      "text": "오랜만에 고향 가는 길에 듣고 싶어",
+      "label": "melancholy",
+      "lang": "ko"
+    },
+    {
+      "text": "이유 없이 울적하고 센치한 새벽",
+      "label": "melancholy",
+      "lang": "ko"
+    },
+    {
+      "text": "낯익은 골목을 지나다가 추억이 떠올라",
+      "label": "melancholy",
+      "lang": "ko"
+    },
+    {
+      "text": "상사 때문에 화나서 터질 것 같아",
+      "label": "angry",
+      "lang": "ko"
+    },
+    {
+      "text": "빡치는 하루였어 스트레스 풀리는 노래",
+      "label": "angry",
+      "lang": "ko"
+    },
+    {
+      "text": "나를 무시한 그 사람 때문에 분하다",
+      "label": "angry",
+      "lang": "ko"
+    },
+    {
+      "text": "억울해서 잠이 안 와",
+      "label": "angry",
+      "lang": "ko"
+    },
+    {
+      "text": "짜증 나서 헤비메탈 듣고 싶어",
+      "label": "angry",
+      "lang": "ko"
+    },
+    {
+      "text": "몽환적인 신스팝 들으면서 멍 때리고 싶어",
+      "label": "dreamy",
+      "lang": "ko"
+    },
+    {
+      "text": "현실이 아닌 것 같은 기분이야",
+      "label": "dreamy",
+      "lang": "ko"
+    },
+    {
+      "text": "우주를 떠다니는 느낌의 앰비언트",
+      "label": "dreamy",
+      "lang": "ko"
+    },
+    {
+      "text": "꿈에서 막 깬 것처럼 몽롱해",
+      "label": "dreamy",
+      "lang": "ko"
+    },
+    {
+      "text": "별이 가득한 밤하늘 같은 노래",
+      "label": "dreamy",
+      "lang": "ko"
+    }
+  ]
+}

@@ -1,10 +1,31 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { GENRES } from '../api/genres';
 import { hiResArt, itunesResultToTrack, searchItunesArtists, searchItunesTracks } from '../api/itunes';
 import { searchSpotifyArtistsFallback, searchSpotifyTracksFallback } from '../api/spotifyCatalog';
 import { usePlayer } from '../context/PlayerContext';
 import TrackRow from '../components/TrackRow';
+
+// 아티스트 이미지가 없을 때(iTunes 아티스트 검색은 사진이 없음) 대표곡 앨범아트로 보강
+function useArtistImages(artists) {
+  const [images, setImages] = useState({});
+  useEffect(() => {
+    let cancelled = false;
+    artists.forEach(async (a) => {
+      if (a.image) return;
+      try {
+        const res = await fetch(`/api/itunes-proxy/search?term=${encodeURIComponent(a.name)}&media=music&entity=song&limit=1`, { cache: 'no-store' });
+        const data = await res.json();
+        const art = hiResArt(data.results?.[0]?.artworkUrl100, 200);
+        if (art && !cancelled) setImages((prev) => ({ ...prev, [a.name]: art }));
+      } catch {
+        // 이미지 보강 실패는 무시 — 기본 이니셜/아이콘으로 표시됨
+      }
+    });
+    return () => { cancelled = true; };
+  }, [artists]);
+  return images;
+}
 
 export default function Search() {
   const [searchParams] = useSearchParams();
@@ -14,6 +35,7 @@ export default function Search() {
   const [artists, setArtists] = useState([]);
   const [error, setError] = useState(false);
   const debounceRef = useRef(null);
+  const artistImages = useArtistImages(artists);
 
   useEffect(() => {
     clearTimeout(debounceRef.current);
@@ -100,6 +122,7 @@ export default function Search() {
     );
   }
 
+  const bestArtist = artists[0] || null;
   const bestMatch = tracks[0] || null;
   const restTracks = tracks.slice(1);
 
@@ -110,12 +133,15 @@ export default function Search() {
         <div className="search-sub"><b>{tracks.length}곡</b>{artists.length ? ` · 아티스트 ${artists.length}명` : ''}</div>
       </div>
 
-      {(bestMatch || artists.length > 0) && (
+      {(bestArtist || bestMatch) && (
         <div className="search-bento">
-          {bestMatch && <BestMatch track={bestMatch} queue={tracks} />}
-          {artists.length > 0 && <ArtistRail artists={artists} />}
+          {bestArtist
+            ? <BestMatchArtist artist={bestArtist} image={artistImages[bestArtist.name] || bestArtist.image} tracks={tracks} />
+            : <BestMatch track={bestMatch} queue={tracks} />}
         </div>
       )}
+
+      {artists.length > 0 && <ArtistShelf artists={artists} images={artistImages} />}
 
       <div className="search-lower">
         {restTracks.length > 0 && (
@@ -126,6 +152,38 @@ export default function Search() {
             </div>
           </>
         )}
+      </div>
+    </div>
+  );
+}
+
+function BestMatchArtist({ artist, image, tracks }) {
+  const { playTrack } = usePlayer();
+  const navigate = useNavigate();
+  const goArtist = () => navigate(`/artist/${encodeURIComponent(artist.name)}`);
+  function onPlay(e) {
+    e.stopPropagation();
+    const key = String(artist.name).toLowerCase();
+    const mine = tracks.filter((t) => String(t.artist).toLowerCase().includes(key));
+    if (mine.length) playTrack(mine[0], mine);
+    else goArtist(); // 검색된 곡 중 이 아티스트의 곡이 없으면 아티스트 페이지로
+  }
+  return (
+    <div className="best-match" style={{ cursor: 'pointer' }} onClick={goArtist}>
+      <div className="tag">베스트 매치</div>
+      <div className="best-match-row">
+        <div className="best-match-art" style={{ borderRadius: '50%' }}>
+          {image
+            ? <img src={image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none'; }} />
+            : <span style={{ fontSize: 40 }}>🎤</span>}
+        </div>
+        <div style={{ minWidth: 0 }}>
+          <div className="best-match-title">{artist.name}</div>
+          <div className="best-match-type">아티스트</div>
+        </div>
+        <button className="best-match-play" title="이 아티스트의 곡 재생" onClick={onPlay}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+        </button>
       </div>
     </div>
   );
@@ -155,45 +213,27 @@ function BestMatch({ track, queue }) {
   );
 }
 
-function ArtistRail({ artists }) {
-  const [images, setImages] = useState({});
-
-  useEffect(() => {
-    let cancelled = false;
-    artists.forEach(async (a) => {
-      if (a.image) return; // 이미 이미지가 있으면(Spotify 폴백) iTunes 재조회 생략
-      try {
-        const res = await fetch(`/api/itunes-proxy/search?term=${encodeURIComponent(a.name)}&media=music&entity=song&limit=1`, { cache: 'no-store' });
-        const data = await res.json();
-        const art = hiResArt(data.results?.[0]?.artworkUrl100, 200);
-        if (art && !cancelled) setImages((prev) => ({ ...prev, [a.name]: art }));
-      } catch {
-        // 이미지 보강 실패는 무시 — 기본 이니셜로 표시됨
-      }
-    });
-    return () => { cancelled = true; };
-  }, [artists]);
-
+/* 홈 "지금 인기있는 아티스트"와 같은 원형 카드 배치 (cards-shelf artist-grid) */
+function ArtistShelf({ artists, images }) {
   return (
-    <div className="rail-card">
-      <div className="rail-title">아티스트</div>
-      {artists.map((a) => {
-        const img = images[a.name] || a.image;
-        const initials = String(a.name).slice(0, 2).toUpperCase();
-        return (
-          <Link key={a.id || a.name} to={`/artist/${encodeURIComponent(a.name)}`} className="artist-mini">
-            <div className="artist-mini-av">
-              {img
-                ? <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none'; }} />
-                : initials}
-            </div>
-            <div>
-              <div className="artist-mini-name">{a.name}</div>
-              <div className="artist-mini-role">아티스트</div>
-            </div>
-          </Link>
-        );
-      })}
+    <div className="section search-artists">
+      <div className="section-header"><h2 className="section-title">아티스트</h2></div>
+      <div className="cards-shelf artist-grid">
+        {artists.map((a, i) => {
+          const img = images[a.name] || a.image;
+          return (
+            <Link className="card artist" key={a.id || a.name} to={`/artist/${encodeURIComponent(a.name)}`} state={{ externalId: a.id }} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <div className="card-art">
+                {img
+                  ? <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} onError={(e) => { e.target.style.display = 'none'; }} />
+                  : <div className={`card-art-inner grad-${(i % 8) + 1}`}>🎤</div>}
+              </div>
+              <div className="card-title">{a.name}</div>
+              <div className="card-subtitle">아티스트</div>
+            </Link>
+          );
+        })}
+      </div>
     </div>
   );
 }

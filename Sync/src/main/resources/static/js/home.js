@@ -493,27 +493,24 @@ const HomePage = (() => {
     const color = _artistColor(artistName);
 
     // 히어로 로딩 상태
-    hero.className = 'artist-hero';
+    hero.className = 'ad-hero';
     hero.style.cssText = '';
     hero.innerHTML = `
-      <div class="artist-hero-bg" id="artist-hero-bg" style="background:linear-gradient(180deg,${color} 0%,var(--bg-base) 100%)"></div>
-      <div class="artist-hero-bg-photo" id="artist-hero-bg-photo"></div>
-      <div class="artist-hero-content">
-        <div class="artist-hero-row">
-          <div id="artist-img-box" class="artist-hero-art" style="background:${color}">🎤</div>
-          <div class="artist-hero-meta">
-            <div class="artist-hero-eyebrow">아티스트</div>
-            <h1 class="artist-hero-name">${artistName}</h1>
-            <div id="artist-bio-txt" class="artist-hero-bio" style="display:none"></div>
-            <div id="artist-meta-txt" class="artist-hero-stats">불러오는 중...</div>
-            <div class="artist-hero-actions">
-              <button id="artist-play-all" class="artist-play-lg">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-              </button>
-              <button id="artist-save-btn" class="artist-save-btn" title="아티스트 저장">♡</button>
-            </div>
+      <div class="ad-hero-bg" id="artist-hero-bg-photo"></div>
+      <div class="ad-hero-inner">
+        <div id="artist-img-box" class="ad-art" style="background:${color}">🎤</div>
+        <div class="ad-hero-main">
+          <div class="ad-eyebrow">ARTIST</div>
+          <h1 class="ad-name">${artistName}</h1>
+          <div id="artist-bio-txt" class="ad-sub">불러오는 중...</div>
+          <div class="ad-actions">
+            <button id="artist-save-btn" class="ad-follow">＋ 팔로우</button>
+            <button id="artist-play-all" class="ad-play" title="아티스트 전체 재생">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </button>
           </div>
         </div>
+        <div class="ad-stats" id="artist-stats" style="display:none"></div>
       </div>`;
 
     tracks.innerHTML =
@@ -586,7 +583,7 @@ const HomePage = (() => {
     const saveBtn = document.getElementById('artist-save-btn');
     if (saveBtn && typeof SavedLibrary !== 'undefined') {
       const _setSaveBtn = saved => {
-        saveBtn.textContent = saved ? '♥' : '♡';
+        saveBtn.textContent = saved ? '✓ 팔로잉' : '＋ 팔로우';
         saveBtn.classList.toggle('saved', saved);
       };
       _setSaveBtn(SavedLibrary.isArtistSaved(artistName));
@@ -605,7 +602,7 @@ const HomePage = (() => {
         .replace(/<a[^>]*>.*?<\/a>/gi,'').replace(/<[^>]+>/g,'')
         .replace(/Read more on Last\.fm\.?/gi,'').trim().slice(0,120);
       const bioEl = document.getElementById('artist-bio-txt');
-      if (bioEl && bio) { bioEl.textContent = bio + (bio.length>=120 ? '...' : ''); bioEl.style.display = ''; }
+      if (bioEl && bio) { bioEl.textContent = bio + (bio.length>=120 ? '...' : ''); bioEl.dataset.hasBio = '1'; }
     }
 
     /* ── 트랙 가공 + 앨범 그룹화 (Spotify 폴백이 있으면 그걸 그대로 사용) ── */
@@ -659,8 +656,13 @@ const HomePage = (() => {
 
     /* 메타 업데이트 */
     const totalMin = Math.floor(flatTracks.reduce((s,t) => s + t.durationMs, 0) / 60000);
-    const metaEl   = document.getElementById('artist-meta-txt');
-    if (metaEl) metaEl.textContent = `${flatTracks.length} TRACKS · ${totalMin} MIN`;
+    const bioFallbackEl = document.getElementById('artist-bio-txt');
+    if (bioFallbackEl && !bioFallbackEl.dataset.hasBio) bioFallbackEl.textContent = `${flatTracks.length}곡 · ${totalMin}분`;
+    const statsEl = document.getElementById('artist-stats');
+    if (statsEl) {
+      statsEl.innerHTML = `<div><b>${albums.length}</b><span>앨범</span></div><div><b>${flatTracks.length}</b><span>곡</span></div><div><b>${totalMin}</b><span>분</span></div>`;
+      statsEl.style.display = '';
+    }
 
     const playBtn = document.getElementById('artist-play-all');
     if (playBtn) playBtn.onclick = () =>
@@ -673,75 +675,125 @@ const HomePage = (() => {
     }
 
     window._artistAlbums = albums;
+    window._artistSelAlbumId = albums.length ? albums[0].id : null;
     tracks.className = '';
     _renderAlbumSections(tracks);
   }
 
-  /* ── 아티스트 상세: 앨범별로 (아트+이름+저장버튼) 헤더와 전체 트랙 목록을 그대로 쭉 나열 ── */
+  /* 넘치는 글자만 마키 대상으로 표시 (.is-marq + 이동 거리/시간 CSS 변수) — 크기·폰트 변화에도 다시 측정 */
+  let _mqRO = null;
+  function _initMarquee(root) {
+    if (_mqRO) _mqRO.disconnect();
+    if (typeof ResizeObserver === 'undefined') return;
+    const measure = wrap => {
+      const inner = wrap.firstElementChild;
+      if (!inner) return;
+      const over = Math.ceil(inner.scrollWidth - wrap.clientWidth);
+      if (over > 2) {
+        wrap.classList.add('is-marq');
+        wrap.style.setProperty('--mq-dist', `-${over}px`);
+        wrap.style.setProperty('--mq-time', `${Math.max(6, over / 25 + 3)}s`);
+      } else {
+        wrap.classList.remove('is-marq');
+      }
+    };
+    _mqRO = new ResizeObserver(entries => entries.forEach(e => measure(e.target.classList.contains('ad-marq') ? e.target : e.target.parentElement)));
+    root.querySelectorAll('.ad-marq').forEach(w => { measure(w); _mqRO.observe(w); if (w.firstElementChild) _mqRO.observe(w.firstElementChild); });
+  }
+
+  /* ── 아티스트 상세: 좌(앨범 목록) / 우(선택한 앨범 + 트랙) 분할 뷰 ── */
   function _renderAlbumSections(tracksEl) {
     const albums     = window._artistAlbums || [];
     const flatTracks = window._artistAllTracks || [];
+    if (!albums.length) return;
+    const sel = albums.find(a => String(a.id) === String(window._artistSelAlbumId)) || albums[0];
+    const selSaved = typeof SavedLibrary !== 'undefined' && SavedLibrary.isAlbumSaved(sel.id);
+    const selMin = Math.floor(sel.tracks.reduce((s, t) => s + (t.durationMs || 0), 0) / 60000);
+    const artName = (sel.artistName || '').replace(/</g, '&lt;');
+    const _attr = v => String(v == null ? '' : v).replace(/"/g, '&quot;');
 
-    const sections = albums.map(album => {
-      const albumSaved = typeof SavedLibrary !== 'undefined' && SavedLibrary.isAlbumSaved(album.id);
+    const albumList = albums.map(album => `
+      <div class="ad-album${String(album.id) === String(sel.id) ? ' active' : ''}"
+           onclick="HomePage._selectArtistAlbum('${album.id}')">
+        <div class="ad-album-art">
+          ${album.art ? `<img src="${album.art}" onerror="this.style.display='none'">` : '💿'}
+        </div>
+        <div class="ad-album-info">
+          <div class="ad-album-name ad-marq hover" title="${_attr(album.name)}"><span class="ad-marq-in">${album.name}</span></div>
+          <div class="ad-album-meta">${[album.year || '', `${album.tracks.length}곡`].filter(Boolean).join(' · ')}</div>
+        </div>
+      </div>`).join('');
+
+    const trackRows = sel.tracks.map((t, i) => {
+      const idx = flatTracks.indexOf(t);
       return `
-      <div class="selected-album">
-        <div class="sel-album-head" onclick="HomePage._toggleAlbumTracks('${album.id}')">
-          <div class="sel-album-art">
-            ${album.art
-              ? `<img src="${album.art}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">`
-              : '💿'}
-          </div>
-          <div style="flex:1;min-width:0">
-            <div class="sel-album-name">${album.name}</div>
-            <div class="sel-album-meta">${[album.year || '', album.tracks.length ? `${album.tracks.length}곡` : ''].filter(Boolean).join(' · ')}</div>
-          </div>
-          <div class="sel-album-actions">
-            <button class="sel-album-save-btn${albumSaved ? ' saved' : ''}"
-                    onclick="event.stopPropagation();HomePage._toggleAlbumSave(window._artistAlbums.find(a=>a.id=='${album.id}'), this)">
-              ${albumSaved ? '✓ 저장됨' : '+ 저장'}
-            </button>
-            <button class="sel-album-chevron" id="album-chevron-${album.id}" aria-label="트랙 펼치기/접기"
-                    onclick="event.stopPropagation();HomePage._toggleAlbumTracks('${album.id}')">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </button>
-          </div>
-        </div>
-        <div class="sel-album-tracks" id="album-tracks-${album.id}">
-        ${album.tracks.map(t => {
-          const idx = flatTracks.indexOf(t);
-          return `
-            <div class="sel-track-row" onclick="Player.playTrack(window._artistAllTracks[${idx}],window._artistAllTracks,${idx})">
-              <span class="num">${t.trackNumber !== 99 ? t.trackNumber : idx+1}</span>
-              <div class="sel-track-art">
-                ${t.albumArtSm
-                  ? `<img src="${t.albumArtSm}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.textContent='🎵'">`
-                  : '🎵'}
-              </div>
-              <div class="name">${t.name}
-                <div style="font-size:11.5px;color:rgba(245,238,240,.4);margin-top:1px">${t.artist}</div>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px">
-                <button onclick="event.stopPropagation();PlaylistPicker.open(window._artistAllTracks[${idx}], this)"
-                        title="플레이리스트에 추가"
-                        style="background:none;border:none;color:rgba(245,238,240,.3);cursor:pointer;display:flex;align-items:center;padding:0">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                </button>
-                <span class="dur">${t.duration}</span>
-              </div>
-            </div>`;
-        }).join('')}
-        </div>
-      </div>`;
+        <div class="ad-track" onclick="Player.playTrack(window._artistAllTracks[${idx}],window._artistAllTracks,${idx})">
+          <span class="num">${i + 1}</span>
+          <div class="name ad-marq hover" title="${_attr(t.name)}"><span class="ad-marq-in">${t.name}</span></div>
+          <button class="add" title="플레이리스트에 추가"
+                  onclick="event.stopPropagation();PlaylistPicker.open(window._artistAllTracks[${idx}], this)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          </button>
+          <span class="dur">${t.duration}</span>
+        </div>`;
     }).join('');
 
-    tracksEl.innerHTML = `<div class="album-rail-wrap">${sections}</div>`;
+    tracksEl.innerHTML = `
+      <div class="ad-body">
+        <div class="ad-albums">
+          <div class="ad-albums-title">ALBUMS · ${albums.length}</div>
+          ${albumList}
+        </div>
+        <div class="ad-detail">
+          <div class="ad-album-head">
+            <div class="ad-cover">
+              ${sel.art ? `<img src="${sel.art}" onerror="this.style.display='none'">` : '💿'}
+            </div>
+            <div style="min-width:0">
+              <div class="ad-album-label">ALBUM</div>
+              <div class="ad-album-title ad-marq" title="${_attr(sel.name)}"><span class="ad-marq-in">${sel.name}</span></div>
+              <div class="ad-album-sub">${[artName, sel.year || '', `${sel.tracks.length}곡`, selMin ? `${selMin}분` : ''].filter(Boolean).join(' · ')}</div>
+              <div class="ad-album-actions">
+                <button class="ad-btn primary" onclick="HomePage._playArtistAlbum()">▶ 전체 재생</button>
+                <button class="ad-btn${selSaved ? ' saved' : ''}"
+                        onclick="HomePage._toggleAlbumSave(window._artistAlbums.find(a=>String(a.id)==window._artistSelAlbumId), this)">
+                  ${selSaved ? '✓ 보관함에 저장됨' : '+ 보관함'}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="ad-tracks">${trackRows}</div>
+        </div>
+      </div>`;
+    _initMarquee(tracksEl);
+  }
+
+  /* 좌측 앨범 목록에서 앨범 선택 → 우측만 다시 그림 */
+  function _selectArtistAlbum(albumId) {
+    window._artistSelAlbumId = albumId;
+    const tracksEl = document.getElementById('detail-track-list');
+    if (!tracksEl) return;
+    // 전체를 다시 그리면 왼쪽 목록 스크롤이 맨 위로 돌아가므로 위치를 저장했다가 복원
+    const listEl = tracksEl.querySelector('.ad-albums');
+    const prevScroll = listEl ? listEl.scrollTop : 0;
+    _renderAlbumSections(tracksEl);
+    const newList = tracksEl.querySelector('.ad-albums');
+    if (newList) newList.scrollTop = prevScroll;
+  }
+
+  /* 선택한 앨범 전체 재생 (큐는 아티스트 전체 곡 기준 — 곡 클릭과 동일) */
+  function _playArtistAlbum() {
+    const albums = window._artistAlbums || [];
+    const flat = window._artistAllTracks || [];
+    const sel = albums.find(a => String(a.id) === String(window._artistSelAlbumId));
+    if (!sel || !sel.tracks.length) return;
+    Player.playTrack(sel.tracks[0], flat, flat.indexOf(sel.tracks[0]));
   }
 
   /* ── 앨범 저장 토글 후 저장 버튼 상태만 갱신 (전체 다시 그리지 않음) ── */
   function _refreshAlbumSections() {
     const tracksEl = document.getElementById('detail-track-list');
-    if (tracksEl && tracksEl.querySelector('.album-rail-wrap')) _renderAlbumSections(tracksEl);
+    if (tracksEl && tracksEl.querySelector('.ad-body')) _renderAlbumSections(tracksEl);
   }
 
   /* ── 앨범 헤더 클릭 시 그 앨범의 트랙 목록만 접었다/폈다 (다른 앨범엔 영향 없음) ── */
@@ -765,7 +817,7 @@ const HomePage = (() => {
     if (btnEl) {
       btnEl.disabled = false;
       btnEl.classList.toggle('saved', saved);
-      btnEl.textContent = saved ? '✓ 저장됨' : '+ 저장';
+      btnEl.textContent = saved ? '✓ 보관함에 저장됨' : '+ 보관함';
     }
     if (typeof LibraryFilter !== 'undefined') LibraryFilter.refresh();
   }
@@ -1031,7 +1083,7 @@ const HomePage = (() => {
   }
 
   return {
-    init, refresh, _playChart, _showArtistDetail, _toggleAlbumSave, _toggleAlbumTracks, _recentTracks: [],
+    init, refresh, _playChart, _showArtistDetail, _toggleAlbumSave, _toggleAlbumTracks, _selectArtistAlbum, _playArtistAlbum, _recentTracks: [],
     _playCountryChart, _selectCountry, _playGenreTrack, _selectGenre,
   };
 })();

@@ -38,19 +38,55 @@ public class SpotifyCatalogApiController {
         if (token == null) { out.put("tracks", List.of()); return ResponseEntity.ok(out); }
 
         try {
-            String url = "https://api.spotify.com/v1/search?q=" + enc(q)
-                    + "&type=track&limit=" + Math.min(Math.max(limit, 1), 50) + "&market=KR";
-            Map<String, Object> body = get(url, token);
-            List<Map<String, Object>> items = itemsFrom(body, "tracks");
-
-            List<Map<String, Object>> tracks = new ArrayList<>();
-            for (Map<String, Object> item : items) tracks.add(toTrack(item));
+            List<Map<String, Object>> tracks = searchTracks(q, limit, token);
             out.put("tracks", tracks);
         } catch (Exception e) {
             System.err.println("[Spotify Catalog] 검색 실패 [" + q + "]: " + e.getMessage());
             out.put("tracks", List.of());
         }
         return ResponseEntity.ok(out);
+    }
+
+    /* ── 장르별 곡 폴백 — iTunes가 막혔을 때 장르 화면용 ── */
+    private static final Map<String, String> GENRE_TAGS = Map.ofEntries(
+            Map.entry("K-Pop", "k-pop"), Map.entry("힙합", "hip hop"), Map.entry("인디", "indie"),
+            Map.entry("R&B", "r&b"), Map.entry("팝", "pop"), Map.entry("Lo-Fi", "lo-fi"),
+            Map.entry("클래식", "classical"), Map.entry("재즈", "jazz"), Map.entry("발라드", "k-ballad"),
+            Map.entry("전자음악", "edm"), Map.entry("어쿠스틱", "acoustic"), Map.entry("트로트", "trot"));
+
+    @GetMapping("/genre")
+    public ResponseEntity<Map<String, Object>> genre(@RequestParam String name,
+                                                       @RequestParam(required = false) String q,
+                                                       @RequestParam(defaultValue = "20") int limit) {
+        Map<String, Object> out = new HashMap<>();
+        out.put("tracks", List.of());
+        String token = tokenService.getToken();
+        if (token == null) return ResponseEntity.ok(out);
+        try {
+            String tag = GENRE_TAGS.getOrDefault(name, name);
+            List<Map<String, Object>> tracks = List.of();
+            try { tracks = searchTracks("genre:\"" + tag + "\"", limit, token); }
+            catch (Exception ignore) { /* 장르 필터 실패 → 일반 검색으로 */ }
+            if (tracks.isEmpty()) tracks = searchTracks(q != null && !q.isBlank() ? q : name, limit, token);
+            out.put("tracks", tracks);
+        } catch (Exception e) {
+            System.err.println("[Spotify Catalog] 장르 검색 실패 [" + name + "]: " + e.getMessage());
+        }
+        return ResponseEntity.ok(out);
+    }
+
+    /** Spotify는 검색 limit 상한이 작아졌으므로(초과 시 "Invalid limit") 10개씩 나눠서 요청 */
+    private List<Map<String, Object>> searchTracks(String q, int limit, String token) {
+        int want = Math.min(Math.max(limit, 1), 50);
+        List<Map<String, Object>> tracks = new ArrayList<>();
+        for (int offset = 0; offset < want; offset += 10) {
+            String url = "https://api.spotify.com/v1/search?q=" + enc(q)
+                    + "&type=track&market=KR&limit=" + Math.min(10, want - offset) + "&offset=" + offset;
+            List<Map<String, Object>> items = itemsFrom(get(url, token), "tracks");
+            for (Map<String, Object> item : items) tracks.add(toTrack(item));
+            if (items.size() < 10) break;
+        }
+        return tracks;
     }
 
     /* ── 아티스트 검색 폴백 ── */
@@ -119,8 +155,15 @@ public class SpotifyCatalogApiController {
 
             // 2) 아티스트 앨범 목록 (동일 앨범의 여러 마켓판 중복 제거, 최대 10개)
             String albumsUrl = "https://api.spotify.com/v1/artists/" + artistId
-                    + "/albums?include_groups=album,single&market=KR&limit=20";
-            Map<String, Object> albumsBody = get(albumsUrl, token);
+                    + "/albums?include_groups=album,single&market=KR&limit=10";
+            Map<String, Object> albumsBody;
+            try {
+                albumsBody = get(albumsUrl, token);
+            } catch (Exception limitEx) {
+                // Spotify가 limit 값을 거부("Invalid limit")하는 경우 — limit 없이 기본값으로 재시도
+                albumsBody = get("https://api.spotify.com/v1/artists/" + artistId
+                        + "/albums?include_groups=album,single&market=KR", token);
+            }
             List<Map<String, Object>> albumItems = listOf(albumsBody.get("items"));
 
             LinkedHashMap<String, String> idByName = new LinkedHashMap<>();

@@ -222,12 +222,57 @@ const ProfilePage = (() => {
 })();
 
 
+/* ══ SyncGenres — Sync AI 장르 선택(선택 사항) ═════════════
+   하나도 고르지 않으면 서버가 모든 장르에서 추천한다. key는 Last.fm 태그 그대로 전송. */
+const SyncGenres = (() => {
+  const GENRES = [
+    ['k-pop','K-POP'], ['k-ballad','K-발라드'], ['pop','팝'], ['hip-hop','힙합'], ['rnb','R&B'], ['rock','록'],
+    ['indie','인디'], ['electronic','일렉트로닉'], ['jazz','재즈'], ['classical','클래식'],
+    ['ballad','해외 발라드'], ['acoustic','어쿠스틱'], ['lo-fi','로파이'], ['metal','메탈'],
+    ['country','컨트리'], ['latin','라틴'],
+  ];
+  const _sel = new Set();
+
+  function render() {
+    const c = document.getElementById('sync-genres');
+    if (!c) return;
+    c.innerHTML = GENRES.map(([k, label]) =>
+      `<button class="sync-genre-chip${_sel.has(k) ? ' active' : ''}" data-genre="${k}" aria-pressed="${_sel.has(k)}">${label}</button>`
+    ).join('');
+    c.querySelectorAll('.sync-genre-chip').forEach(btn => {
+      btn.addEventListener('click', () => toggle(btn.dataset.genre));
+    });
+    _syncHint();
+  }
+
+  function toggle(key) {
+    _sel.has(key) ? _sel.delete(key) : _sel.add(key);
+    render();
+  }
+
+  function clear() { _sel.clear(); render(); }
+
+  function _syncHint() {
+    const hint = document.getElementById('sync-genres-hint');
+    const clr  = document.getElementById('sync-genres-clear');
+    if (hint) hint.textContent = _sel.size > 0
+      ? `${_sel.size}개 선택됨 — 이 장르 안에서 추천해요`
+      : '선택 사항 · 고르지 않으면 모든 장르에서 추천해요';
+    if (clr) clr.style.display = _sel.size > 0 ? '' : 'none';
+  }
+
+  function selected() { return Array.from(_sel); }
+
+  return { render, toggle, clear, selected };
+})();
+
+
 /* ══ SyncPage ════════════════════════════════════════════ */
 const SyncPage = (() => {
   let initialized = false;
 
   function init() {
-    if (!initialized) { _renderMoods(); initialized = true; }
+    if (!initialized) { SyncGenres.render(); initialized = true; }
     SyncPage.renderIdle(); // 방문할 때마다 최근 감정 기록을 새로 불러옴 (sync-api.js가 실제 구현으로 덮어씀)
   }
 

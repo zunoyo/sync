@@ -1,0 +1,500 @@
+{
+  "n_items": 96,
+  "t_image_current": 0.0411154106259346,
+  "t_text_fit_half": 0.0049993428401649,
+  "t_text_all": 0.004111540503799915,
+  "route_accuracy": {
+    "keyword": {
+      "correct": 58,
+      "n": 64
+    },
+    "english": {
+      "correct": 28,
+      "n": 32
+    }
+  },
+  "test_half": {
+    "current_T": {
+      "n_samples": 48,
+      "accuracy": 0.8958333333333334,
+      "macro_f1": 0.889102564102564,
+      "per_class_recall": {
+        "happy": 1.0,
+        "sad": 1.0,
+        "calm": 1.0,
+        "energetic": 0.5,
+        "romantic": 1.0,
+        "melancholy": 0.6666666666666666,
+        "angry": 1.0,
+        "dreamy": 1.0
+      },
+      "per_class_f1": {
+        "happy": 0.9230769230769231,
+        "sad": 1.0,
+        "calm": 0.9230769230769231,
+        "energetic": 0.6666666666666666,
+        "romantic": 1.0,
+        "melancholy": 0.8,
+        "angry": 0.8,
+        "dreamy": 1.0
+      },
+      "confusion_matrix": [
+        [
+          6,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          6,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          6,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          3,
+          0,
+          0,
+          2,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          6,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0,
+          0,
+          4,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          6,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          6
+        ]
+      ],
+      "confusion_pairs": {
+        "happy->energetic": 0,
+        "energetic->happy": 1,
+        "calm->dreamy": 0,
+        "dreamy->calm": 0
+      },
+      "confusion_pairs_total": 1,
+      "ece_raw": 0.7670682718356451,
+      "brier_raw": 0.8675817895357213,
+      "ece_with_T": 0.6513899983838201,
+      "brier_with_T": 0.6653800684007198,
+      "mean_confidence_with_T": 0.24444334208965302,
+      "temperature_used": 0.0411154106259346
+    },
+    "text_T": {
+      "n_samples": 48,
+      "accuracy": 0.8958333333333334,
+      "macro_f1": 0.889102564102564,
+      "per_class_recall": {
+        "happy": 1.0,
+        "sad": 1.0,
+        "calm": 1.0,
+        "energetic": 0.5,
+        "romantic": 1.0,
+        "melancholy": 0.6666666666666666,
+        "angry": 1.0,
+        "dreamy": 1.0
+      },
+      "per_class_f1": {
+        "happy": 0.9230769230769231,
+        "sad": 1.0,
+        "calm": 0.9230769230769231,
+        "energetic": 0.6666666666666666,
+        "romantic": 1.0,
+        "melancholy": 0.8,
+        "angry": 0.8,
+        "dreamy": 1.0
+      },
+      "confusion_matrix": [
+        [
+          6,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          6,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          6,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          3,
+          0,
+          0,
+          2,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          6,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0,
+          0,
+          4,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          6,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          6
+        ]
+      ],
+      "confusion_pairs": {
+        "happy->energetic": 0,
+        "energetic->happy": 1,
+        "calm->dreamy": 0,
+        "dreamy->calm": 0
+      },
+      "confusion_pairs_total": 1,
+      "ece_raw": 0.7670682718356451,
+      "brier_raw": 0.8675817895357213,
+      "ece_with_T": 0.07153340304891269,
+      "brier_with_T": 0.12432886812861253,
+      "mean_confidence_with_T": 0.8523283004760742,
+      "temperature_used": 0.0049993428401649
+    }
+  },
+  "all": {
+    "current_T": {
+      "n_samples": 96,
+      "accuracy": 0.8958333333333334,
+      "macro_f1": 0.8952722851860783,
+      "per_class_recall": {
+        "happy": 1.0,
+        "sad": 0.8333333333333334,
+        "calm": 1.0,
+        "energetic": 0.6666666666666666,
+        "romantic": 0.8333333333333334,
+        "melancholy": 0.8333333333333334,
+        "angry": 1.0,
+        "dreamy": 1.0
+      },
+      "per_class_f1": {
+        "happy": 0.9230769230769231,
+        "sad": 0.9090909090909091,
+        "calm": 0.96,
+        "energetic": 0.8,
+        "romantic": 0.9090909090909091,
+        "melancholy": 0.8333333333333334,
+        "angry": 0.8275862068965517,
+        "dreamy": 1.0
+      },
+      "confusion_matrix": [
+        [
+          12,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          10,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          12,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          8,
+          0,
+          0,
+          3,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          10,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0,
+          0,
+          10,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          12,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          12
+        ]
+      ],
+      "confusion_pairs": {
+        "happy->energetic": 0,
+        "energetic->happy": 1,
+        "calm->dreamy": 0,
+        "dreamy->calm": 0
+      },
+      "confusion_pairs_total": 1,
+      "ece_raw": 0.7670398404200872,
+      "brier_raw": 0.8676528385428842,
+      "ece_with_T": 0.6506506979155043,
+      "brier_with_T": 0.6677434415998048,
+      "mean_confidence_with_T": 0.24518263339996338,
+      "temperature_used": 0.0411154106259346
+    },
+    "text_T": {
+      "n_samples": 96,
+      "accuracy": 0.8958333333333334,
+      "macro_f1": 0.8952722851860783,
+      "per_class_recall": {
+        "happy": 1.0,
+        "sad": 0.8333333333333334,
+        "calm": 1.0,
+        "energetic": 0.6666666666666666,
+        "romantic": 0.8333333333333334,
+        "melancholy": 0.8333333333333334,
+        "angry": 1.0,
+        "dreamy": 1.0
+      },
+      "per_class_f1": {
+        "happy": 0.9230769230769231,
+        "sad": 0.9090909090909091,
+        "calm": 0.96,
+        "energetic": 0.8,
+        "romantic": 0.9090909090909091,
+        "melancholy": 0.8333333333333334,
+        "angry": 0.8275862068965517,
+        "dreamy": 1.0
+      },
+      "confusion_matrix": [
+        [
+          12,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          10,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          12,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          8,
+          0,
+          0,
+          3,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          10,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0,
+          0,
+          10,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          12,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          12
+        ]
+      ],
+      "confusion_pairs": {
+        "happy->energetic": 0,
+        "energetic->happy": 1,
+        "calm->dreamy": 0,
+        "dreamy->calm": 0
+      },
+      "confusion_pairs_total": 1,
+      "ece_raw": 0.7670398404200872,
+      "brier_raw": 0.8676528385428842,
+      "ece_with_T": 0.05414500397940476,
+      "brier_with_T": 0.13843053174127581,
+      "mean_confidence_with_T": 0.887305498123169,
+      "temperature_used": 0.004111540503799915
+    }
+  }
+}

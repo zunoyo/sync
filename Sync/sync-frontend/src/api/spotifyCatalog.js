@@ -28,6 +28,16 @@ export async function searchSpotifyTracksFallback(q, limit = 20) {
   }
 }
 
+/** 장르별 곡 폴백 — iTunes가 막혀 결과가 없을 때 장르 화면에서 호출 */
+export async function fetchSpotifyGenreTracks(name, q, limit = 20) {
+  try {
+    const data = await api.get(`/api/spotify/catalog/genre?name=${encodeURIComponent(name)}&q=${encodeURIComponent(q || name)}&limit=${limit}`);
+    return (data?.tracks || []).map(normalizeSpotifyTrack);
+  } catch {
+    return [];
+  }
+}
+
 /** 아티스트 검색 폴백 — iTunes 검색 결과가 0건일 때만 호출 */
 export async function searchSpotifyArtistsFallback(q, limit = 6) {
   try {

@@ -490,6 +490,7 @@ const PlaylistPage = (() => {
 
   let _filter = 'all';
   const _plCounts = {};   // playlistId → 트랙 수 캐시
+  const _plCovers = {};   // playlistId → 랜덤 선정된 표지(앨범아트) URL (방문 중 유지)
 
   const GRADS  = _PL_GRADS;
   const EMOJIS = _PL_EMOJIS;
@@ -581,8 +582,11 @@ const PlaylistPage = (() => {
       const grad  = pl.gradient || _hashPick('g' + pl.id, GRADS);
       const count = _plCounts[pl.id] ?? 0;
       const tag   = pl.public ? '공유중' : '내 플레이리스트';
+      const cover = _plCovers[pl.id];
+      const coverUrl = cover ? cover.replace(/\d+x\d+bb/, '600x600bb') : '';
       return `
-        <div class="pl-feat-card ${grad}" onclick="DetailPage.showPlaylist(${pl.id})">
+        <div class="pl-feat-card ${grad}${coverUrl ? ' has-cover' : ''}" onclick="DetailPage.showPlaylist(${pl.id})">
+          ${coverUrl ? `<img class="pl-feat-cover" src="${coverUrl}" alt="" onerror="this.style.display='none'">` : ''}
           <span class="pl-feat-tag">${tag}</span>
           <div class="pl-feat-name">${pl.playlistName}</div>
           <div class="pl-feat-meta">${count}곡</div>
@@ -614,6 +618,10 @@ const PlaylistPage = (() => {
         const r  = await fetch(`/api/playlists/${pl.id}/tracks`, { credentials: 'include' });
         const tr = r.ok ? await r.json() : [];
         _plCounts[pl.id] = tr.length;
+        // 곡 중 앨범아트가 있는 것을 랜덤으로 골라 표지로 사용
+        const arts = tr.map(t => t.spotifyAlbumArtUrl).filter(Boolean);
+        if (arts.length) _plCovers[pl.id] = arts[Math.floor(Math.random() * arts.length)];
+        else delete _plCovers[pl.id];
       } catch (e) { _plCounts[pl.id] = 0; }
     }));
     return playlists;

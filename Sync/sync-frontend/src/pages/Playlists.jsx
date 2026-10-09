@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchPlaylists, fetchPlaylistTracks, deletePlaylist, plGradient, plEmoji, serverTrackToApp } from '../api/playlists';
+import { hiResArt } from '../api/itunes';
 import { fetchSavedArtists, fetchSavedAlbums, unsaveArtist, unsaveAlbum } from '../api/savedLibrary';
 import { usePlaylistPicker } from '../context/PlaylistPickerContext';
 import { useToast } from '../context/ToastContext';
@@ -21,6 +22,8 @@ export default function Playlists() {
   const [playlists, setPlaylists] = useState([]);
   const [counts, setCounts] = useState({});
   const [plTracks, setPlTracks] = useState({});
+  const [covers, setCovers] = useState({});      // playlistId → 랜덤 선정된 표지(앨범아트) URL
+  const coverCache = useRef({});                  // 같은 방문 중에는 표지가 바뀌지 않도록 유지
   const [artists, setArtists] = useState([]);
   const [albums, setAlbums] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -60,6 +63,18 @@ export default function Playlists() {
       }));
       setCounts((prev) => ({ ...prev, ...Object.fromEntries(entries.map(([id, tr]) => [id, tr.length])) }));
       setPlTracks((prev) => ({ ...prev, ...Object.fromEntries(entries) }));
+
+      // 플레이리스트 안의 곡 중 앨범아트가 있는 곡을 랜덤으로 골라 표지로 쓴다.
+      // 이미 고른 곡이 아직 목록에 있으면 그대로 유지(재렌더·필터 전환 때 깜빡임 방지).
+      const picked = {};
+      for (const [id, tr] of entries) {
+        const arts = tr.map((t) => t.albumArt).filter(Boolean);
+        if (!arts.length) continue;
+        const prev = coverCache.current[id];
+        picked[id] = arts.includes(prev) ? prev : arts[Math.floor(Math.random() * arts.length)];
+      }
+      coverCache.current = { ...coverCache.current, ...picked };
+      setCovers((prev) => ({ ...prev, ...picked }));
     }
     setLoading(false);
   }
@@ -138,7 +153,7 @@ export default function Playlists() {
 
       <div id="playlist-hero-wrap">
         {!loading && showPl && (
-          <PlaylistHero playlists={visiblePlaylists} counts={counts} plTracks={plTracks} onCreate={() => setModalOpen(true)} />
+          <PlaylistHero playlists={visiblePlaylists} counts={counts} plTracks={plTracks} covers={covers} onCreate={() => setModalOpen(true)} />
         )}
       </div>
 
@@ -179,7 +194,7 @@ export default function Playlists() {
 }
 
 /** 대표 플레이리스트 히어로 배너 + Featured 카드(상위 2개) + 생성 타일 */
-function PlaylistHero({ playlists, counts, plTracks, onCreate }) {
+function PlaylistHero({ playlists, counts, plTracks, covers, onCreate }) {
   const first = playlists[0];
   const featured = playlists.slice(0, 2);
 
@@ -206,7 +221,10 @@ function PlaylistHero({ playlists, counts, plTracks, onCreate }) {
 
       <div className="pl-featured">
         {featured.map((pl) => (
-          <Link key={pl.id} to={`/playlists/${pl.id}`} className={`pl-feat-card ${plGradient(pl)}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+          <Link key={pl.id} to={`/playlists/${pl.id}`} className={`pl-feat-card ${plGradient(pl)}${covers[pl.id] ? ' has-cover' : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+            {covers[pl.id] && (
+              <img className="pl-feat-cover" src={hiResArt(covers[pl.id], 600) || covers[pl.id]} alt="" onError={(e) => { e.target.style.display = 'none'; }} />
+            )}
             <span className="pl-feat-tag">{pl.public ? '공유중' : '내 플레이리스트'}</span>
             <div className="pl-feat-name">{pl.playlistName}</div>
             <div className="pl-feat-meta">{counts[pl.id] ?? 0}곡</div>

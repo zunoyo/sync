@@ -42,7 +42,7 @@ from sklearn.metrics import accuracy_score
 from model.emotion_classifier import EmotionProjection, VAHead
 from model.emotion_va_map import TRAINED_SYNC_EMOTIONS
 from model.emotion_prompts import build_prompt_ensemble_anchors
-from emoset_dataset import EmoSetForSync
+from feature_cache import get_features
 from evaluate_projection import compute_calibration
 
 
@@ -127,12 +127,13 @@ def main():
     projection.load_state_dict(ckpt["projection_state_dict"])
     projection.eval()
 
-    val_set = EmoSetForSync("val", preprocess, max_per_class=args.max_per_class,
-                             hf_dataset=args.hf_dataset)
-    val_loader = torch.utils.data.DataLoader(val_set, batch_size=64, shuffle=False, num_workers=2)
-    logits_val, labels_val = collect_logits(clip_model, projection, text_anchors, val_loader, device)
+    vf, vy, _ = get_features("val", args.max_per_class, clip_model, preprocess, device,
+                             args.hf_dataset, args.clip_model)
+    with torch.no_grad():
+        logits_val = (projection(vf.to(device)) @ text_anchors.T).cpu()
+    labels_val = vy
 
-    print(f"\n=== T 학습 전 (val, {len(val_set)}장) ===")
+    print(f"\n=== T 학습 전 (val, {len(labels_val)}장) ===")
     report("보정 전", logits_val, labels_val, temperature=1.0)
 
     temperature = fit_temperature(logits_val.clone(), labels_val)
@@ -145,10 +146,11 @@ def main():
 
     if args.eval_split == "test":
         print(f"\n=== 최종 검증 (test split — T를 학습할 때 쓰지 않은 데이터) ===")
-        test_set = EmoSetForSync("test", preprocess, max_per_class=args.max_per_class,
-                                  hf_dataset=args.hf_dataset)
-        test_loader = torch.utils.data.DataLoader(test_set, batch_size=64, shuffle=False, num_workers=2)
-        logits_test, labels_test = collect_logits(clip_model, projection, text_anchors, test_loader, device)
+        tf, ty, _ = get_features("test", args.max_per_class, clip_model, preprocess, device,
+                                 args.hf_dataset, args.clip_model)
+        with torch.no_grad():
+            logits_test = (projection(tf.to(device)) @ text_anchors.T).cpu()
+        labels_test = ty
         report("보정 전", logits_test, labels_test, temperature=1.0)
         report("보정 후", logits_test, labels_test, temperature=temperature)
 

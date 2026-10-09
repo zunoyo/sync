@@ -136,6 +136,22 @@ const SearchPage = (() => {
       </div>`;
   }
 
+  /* 홈 "지금 인기있는 아티스트"와 같은 원형 카드 (cards-shelf artist-grid > card artist) */
+  function _artistCard(a, i) {
+    const nameEsc = String(a.name).replace(/'/g, "\\'");
+    const emoji   = '🎤';
+    return `
+      <div class="card artist" style="cursor:pointer" onclick="HomePage._showArtistDetail('${nameEsc}')">
+        <div class="card-art" id="srch-artist-art-${i}">${
+          a.image
+            ? `<img src="${a.image}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.outerHTML='<div class=&quot;card-art-inner grad-${(i % 8) + 1}&quot;>${emoji}</div>'">`
+            : `<div class="card-art-inner grad-${(i % 8) + 1}">${emoji}</div>`
+        }</div>
+        <div class="card-title">${a.name}</div>
+        <div class="card-subtitle">아티스트</div>
+      </div>`;
+  }
+
   function _enrichArtistImages(artists) {
     artists.forEach(async (a, i) => {
       if (a.image) return; // 이미 이미지가 있으면(Spotify 폴백) 덮어쓰지 않음
@@ -144,9 +160,12 @@ const SearchPage = (() => {
         const data = await res.json();
         const art  = data.results?.[0]?.artworkUrl100?.replace('100x100bb','200x200bb');
         if (!art) return;
+        if (i === 0) {
+          const best = document.getElementById('srch-best-art');
+          if (best) best.innerHTML = `<img src="${art}" style="width:100%;height:100%;object-fit:cover">`;
+        }
         const el = document.getElementById(`srch-artist-art-${i}`);
-        if (el) el.innerHTML = `<img src="${art}" style="width:100%;height:100%;object-fit:cover"
-                                      onerror="this.parentElement.textContent='${String(a.name).slice(0,2).toUpperCase()}'">`;
+        if (el) el.innerHTML = `<img src="${art}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
       } catch (e) {}
     });
   }
@@ -213,6 +232,14 @@ const SearchPage = (() => {
         artists = fallback.artists;
       }
       window._srchTracks = tracks;
+      // 베스트 매치(아티스트) ▶ — 검색된 곡 중 그 아티스트의 곡이 있으면 재생, 없으면 아티스트 페이지로 이동
+      window._srchBestPlay = () => {
+        const a = artists[0];
+        if (!a) return;
+        const mine = tracks.filter(t => String(t.artist).toLowerCase().includes(String(a.name).toLowerCase()));
+        if (mine.length && typeof Player !== 'undefined') Player.playTrack(mine[0], mine, 0);
+        else HomePage._showArtistDetail(a.name);
+      };
 
       if (!tracks.length && !artists.length) {
         page.innerHTML = `
@@ -233,7 +260,25 @@ const SearchPage = (() => {
         </div>
         ${(tracks[0] || artists.length) ? `
           <div class="search-bento">
-            ${tracks[0] ? `
+            ${artists[0] ? `
+              <div class="best-match" style="cursor:pointer" onclick="HomePage._showArtistDetail('${String(artists[0].name).replace(/'/g, "\\'")}')">
+                <div class="tag">베스트 매치</div>
+                <div class="best-match-row">
+                  <div class="best-match-art" id="srch-best-art" style="border-radius:50%">${
+                    artists[0].image
+                      ? `<img src="${artists[0].image}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">`
+                      : `<span style="font-size:40px">🎤</span>`
+                  }</div>
+                  <div style="min-width:0">
+                    <div class="best-match-title">${artists[0].name}</div>
+                    <div class="best-match-type">아티스트</div>
+                  </div>
+                  <button class="best-match-play" title="이 아티스트의 곡 재생"
+                          onclick="event.stopPropagation();window._srchBestPlay()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                  </button>
+                </div>
+              </div>` : tracks[0] ? `
               <div class="best-match">
                 <div class="tag">베스트 매치</div>
                 <div class="best-match-row">
@@ -248,11 +293,13 @@ const SearchPage = (() => {
                   </button>
                 </div>
               </div>` : ''}
-            ${artists.length ? `
-              <div class="rail-card">
-                <div class="rail-title">아티스트</div>
-                ${artists.map((a,i) => _artistMini(a,i)).join('')}
-              </div>` : ''}
+          </div>` : ''}
+        ${artists.length ? `
+          <div class="section search-artists">
+            <div class="section-header"><h2 class="section-title">아티스트</h2></div>
+            <div class="cards-shelf artist-grid">
+              ${artists.map((a,i) => _artistCard(a,i)).join('')}
+            </div>
           </div>` : ''}
         <div class="search-lower">
           ${tracks.length > 1 ? `
@@ -332,7 +379,22 @@ const SearchPage = (() => {
         if (filtered.length >= 5) results = filtered;
       }
 
-      const tracks = results.slice(0, 20).map(_toTrack);
+      let tracks = results.slice(0, 20).map(_toTrack);
+      // iTunes가 막혔거나(403/429) 결과가 없을 때는 Spotify 카탈로그로 보완
+      if (!tracks.length) {
+        try {
+          const r = await fetch(`/api/spotify/catalog/genre?name=${encodeURIComponent(genreName)}&q=${encodeURIComponent(q)}&limit=20`, { credentials: 'include' });
+          const d = await r.json();
+          tracks = (d.tracks || []).map((t, i) => ({
+            _id: t._id || `sp_${t.spotifyId || i}`,
+            name: t.name || '알 수 없는 곡', artist: t.artist || '', album: t.album || '',
+            albumArt: t.albumArt || null, durationMs: t.durationMs || 0,
+            duration: t.duration || _fmtMs(t.durationMs),
+            previewUrl: t.previewUrl || null, spotifyId: t.spotifyId || null,
+            gradient: GRADS[i % GRADS.length], emoji: EMOJIS[i % EMOJIS.length],
+          }));
+        } catch (e) {}
+      }
       window._genreTracks = tracks;
 
       const metaEl   = document.getElementById('genre-meta');

@@ -224,3 +224,8 @@
   color: #fff;
   text-shadow: 0 2px 8px rgba(0,0,0,.4);
 }
+
+/* 베스트 매치는 한 줄 전체, 아티스트는 그 아래 홈 스타일 카드 선반 */
+.search-bento { grid-template-columns: 1fr; }
+.search-artists { margin-bottom: 32px; }
+.search-artists .section-header { margin-bottom: 12px; }

@@ -1,0 +1,485 @@
+{
+ "_note": "텍스트 전용 temperature 보정/평가용. 라벨은 작성자(Claude) 초안 — 모호하면 직접 수정할 것. 서비스 8감정 순서/이름은 data/emotion_tags.json 기준.",
+ "items": [
+  {
+   "text": "오늘 시험 합격해서 너무 기분 좋아",
+   "label": "happy",
+   "lang": "ko"
+  },
+  {
+   "text": "친구들이랑 웃고 떠들었더니 하루가 즐거웠어",
+   "label": "happy",
+   "lang": "ko"
+  },
+  {
+   "text": "월급날이라 발걸음이 가벼워",
+   "label": "happy",
+   "lang": "ko"
+  },
+  {
+   "text": "좋아하는 사람한테 칭찬받아서 입꼬리가 안 내려가",
+   "label": "happy",
+   "lang": "ko"
+  },
+  {
+   "text": "맛있는 거 먹고 행복한 일요일 오후",
+   "label": "happy",
+   "lang": "ko"
+  },
+  {
+   "text": "강아지랑 산책하는데 세상이 다 예뻐 보여",
+   "label": "happy",
+   "lang": "ko"
+  },
+  {
+   "text": "오랜만에 여행 간다니까 벌써부터 신나",
+   "label": "happy",
+   "lang": "ko"
+  },
+  {
+   "text": "아침부터 좋은 일이 연달아 생겨서 웃음이 나",
+   "label": "happy",
+   "lang": "ko"
+  },
+  {
+   "text": "I'm so happy today, everything is going great",
+   "label": "happy",
+   "lang": "en"
+  },
+  {
+   "text": "Feeling cheerful and full of joy",
+   "label": "happy",
+   "lang": "en"
+  },
+  {
+   "text": "Just got great news and I can't stop smiling",
+   "label": "happy",
+   "lang": "en"
+  },
+  {
+   "text": "A bright, feel-good sunny morning",
+   "label": "happy",
+   "lang": "en"
+  },
+  {
+   "text": "오늘 너무 슬퍼서 눈물이 계속 나",
+   "label": "sad",
+   "lang": "ko"
+  },
+  {
+   "text": "이별하고 나서 아무것도 하기 싫어",
+   "label": "sad",
+   "lang": "ko"
+  },
+  {
+   "text": "마음이 아프고 울고 싶은 밤이야",
+   "label": "sad",
+   "lang": "ko"
+  },
+  {
+   "text": "소중한 사람을 떠나보내고 가슴이 먹먹해",
+   "label": "sad",
+   "lang": "ko"
+  },
+  {
+   "text": "하루 종일 우울해서 힘이 하나도 없어",
+   "label": "sad",
+   "lang": "ko"
+  },
+  {
+   "text": "혼자 남겨진 것 같아서 너무 서러워",
+   "label": "sad",
+   "lang": "ko"
+  },
+  {
+   "text": "실패하고 나니 자꾸 눈물이 나",
+   "label": "sad",
+   "lang": "ko"
+  },
+  {
+   "text": "위로받고 싶은데 아무도 없는 기분",
+   "label": "sad",
+   "lang": "ko"
+  },
+  {
+   "text": "I feel so sad and I just want to cry",
+   "label": "sad",
+   "lang": "en"
+  },
+  {
+   "text": "My heart is broken after the breakup",
+   "label": "sad",
+   "lang": "en"
+  },
+  {
+   "text": "Crying alone tonight, everything hurts",
+   "label": "sad",
+   "lang": "en"
+  },
+  {
+   "text": "Deep sadness and tears I can't hold back",
+   "label": "sad",
+   "lang": "en"
+  },
+  {
+   "text": "아무 생각 없이 조용히 쉬고 싶어",
+   "label": "calm",
+   "lang": "ko"
+  },
+  {
+   "text": "고요한 숲속에서 마음이 편안해지는 느낌",
+   "label": "calm",
+   "lang": "ko"
+  },
+  {
+   "text": "따뜻한 차 한 잔 마시며 평온한 오후",
+   "label": "calm",
+   "lang": "ko"
+  },
+  {
+   "text": "잠들기 전에 차분하게 마음을 가라앉히고 싶어",
+   "label": "calm",
+   "lang": "ko"
+  },
+  {
+   "text": "바닷가에서 파도 소리 들으며 여유로운 시간",
+   "label": "calm",
+   "lang": "ko"
+  },
+  {
+   "text": "느긋하게 책 읽는 주말 아침",
+   "label": "calm",
+   "lang": "ko"
+  },
+  {
+   "text": "복잡한 하루 끝에 편안하게 숨 돌리는 중",
+   "label": "calm",
+   "lang": "ko"
+  },
+  {
+   "text": "명상하듯 잔잔하고 평화로운 기분",
+   "label": "calm",
+   "lang": "ko"
+  },
+  {
+   "text": "I want to relax and feel peaceful",
+   "label": "calm",
+   "lang": "en"
+  },
+  {
+   "text": "Quiet, calm and serene evening at home",
+   "label": "calm",
+   "lang": "en"
+  },
+  {
+   "text": "A slow, gentle morning with no rush",
+   "label": "calm",
+   "lang": "en"
+  },
+  {
+   "text": "Soothing and tranquil, just breathing easy",
+   "label": "calm",
+   "lang": "en"
+  },
+  {
+   "text": "운동할 때 들을 힘찬 음악이 필요해",
+   "label": "energetic",
+   "lang": "ko"
+  },
+  {
+   "text": "에너지가 넘쳐서 가만히 있을 수가 없어",
+   "label": "energetic",
+   "lang": "ko"
+  },
+  {
+   "text": "달리기 하면서 텐션 확 올리고 싶어",
+   "label": "energetic",
+   "lang": "ko"
+  },
+  {
+   "text": "헬스장에서 한계까지 밀어붙이는 중이야",
+   "label": "energetic",
+   "lang": "ko"
+  },
+  {
+   "text": "아침부터 의욕이 폭발해서 다 해낼 수 있을 것 같아",
+   "label": "energetic",
+   "lang": "ko"
+  },
+  {
+   "text": "파티에서 밤새 춤추고 싶은 기분",
+   "label": "energetic",
+   "lang": "ko"
+  },
+  {
+   "text": "심장이 쿵쿵 뛰고 몸이 저절로 움직여",
+   "label": "energetic",
+   "lang": "ko"
+  },
+  {
+   "text": "파워풀하고 빠른 비트로 달리고 싶어",
+   "label": "energetic",
+   "lang": "ko"
+  },
+  {
+   "text": "I need pumped up music for my workout",
+   "label": "energetic",
+   "lang": "en"
+  },
+  {
+   "text": "Full of energy and ready to go all out",
+   "label": "energetic",
+   "lang": "en"
+  },
+  {
+   "text": "Fast, intense and powerful, let's dance",
+   "label": "energetic",
+   "lang": "en"
+  },
+  {
+   "text": "Hyped up and can't sit still",
+   "label": "energetic",
+   "lang": "en"
+  },
+  {
+   "text": "좋아하는 사람 생각하면 가슴이 두근거려",
+   "label": "romantic",
+   "lang": "ko"
+  },
+  {
+   "text": "연인이랑 데이트 가는 길이라 설레",
+   "label": "romantic",
+   "lang": "ko"
+  },
+  {
+   "text": "첫사랑처럼 풋풋하고 달콤한 기분",
+   "label": "romantic",
+   "lang": "ko"
+  },
+  {
+   "text": "사랑하는 사람에게 고백하고 싶은 밤",
+   "label": "romantic",
+   "lang": "ko"
+  },
+  {
+   "text": "둘이서 손잡고 걷는 노을 진 저녁",
+   "label": "romantic",
+   "lang": "ko"
+  },
+  {
+   "text": "그 사람 연락 올 때마다 심장이 간질간질해",
+   "label": "romantic",
+   "lang": "ko"
+  },
+  {
+   "text": "기념일에 분위기 있게 듣고 싶어",
+   "label": "romantic",
+   "lang": "ko"
+  },
+  {
+   "text": "사랑에 빠진 것 같아서 하루 종일 설레",
+   "label": "romantic",
+   "lang": "ko"
+  },
+  {
+   "text": "I'm in love and my heart flutters",
+   "label": "romantic",
+   "lang": "en"
+  },
+  {
+   "text": "A romantic candlelit dinner for two",
+   "label": "romantic",
+   "lang": "en"
+  },
+  {
+   "text": "Sweet, tender feelings for someone special",
+   "label": "romantic",
+   "lang": "en"
+  },
+  {
+   "text": "Falling in love on a date night",
+   "label": "romantic",
+   "lang": "en"
+  },
+  {
+   "text": "비 오는 날 창밖을 보며 쓸쓸해지는 기분",
+   "label": "melancholy",
+   "lang": "ko"
+  },
+  {
+   "text": "가을 저녁 괜히 센치해지고 옛 생각이 나",
+   "label": "melancholy",
+   "lang": "ko"
+  },
+  {
+   "text": "지나간 시절이 그리워서 마음이 허전해",
+   "label": "melancholy",
+   "lang": "ko"
+  },
+  {
+   "text": "혼자 걷는 밤거리에서 느껴지는 아련함",
+   "label": "melancholy",
+   "lang": "ko"
+  },
+  {
+   "text": "오래된 사진을 보니 그리움이 밀려와",
+   "label": "melancholy",
+   "lang": "ko"
+  },
+  {
+   "text": "텅 빈 방에서 멍하니 추억에 잠겼어",
+   "label": "melancholy",
+   "lang": "ko"
+  },
+  {
+   "text": "쓸쓸하고 공허한데 이상하게 싫지만은 않아",
+   "label": "melancholy",
+   "lang": "ko"
+  },
+  {
+   "text": "새벽 감성에 젖어 괜히 지난날을 곱씹는 중",
+   "label": "melancholy",
+   "lang": "ko"
+  },
+  {
+   "text": "Rainy and nostalgic, thinking of the past",
+   "label": "melancholy",
+   "lang": "en"
+  },
+  {
+   "text": "A lonely, wistful autumn evening",
+   "label": "melancholy",
+   "lang": "en"
+  },
+  {
+   "text": "Bittersweet longing for days gone by",
+   "label": "melancholy",
+   "lang": "en"
+  },
+  {
+   "text": "Quiet melancholy on a gray empty night",
+   "label": "melancholy",
+   "lang": "en"
+  },
+  {
+   "text": "열받아서 미치겠어 진짜 화가 나",
+   "label": "angry",
+   "lang": "ko"
+  },
+  {
+   "text": "너무 짜증나서 다 부숴버리고 싶어",
+   "label": "angry",
+   "lang": "ko"
+  },
+  {
+   "text": "억울하고 분해서 참을 수가 없어",
+   "label": "angry",
+   "lang": "ko"
+  },
+  {
+   "text": "상사한테 시달려서 분노가 치밀어",
+   "label": "angry",
+   "lang": "ko"
+  },
+  {
+   "text": "나를 무시한 사람 때문에 속이 부글부글 끓어",
+   "label": "angry",
+   "lang": "ko"
+  },
+  {
+   "text": "화가 머리끝까지 나서 소리 지르고 싶어",
+   "label": "angry",
+   "lang": "ko"
+  },
+  {
+   "text": "불공평한 일을 당해서 너무 화나",
+   "label": "angry",
+   "lang": "ko"
+  },
+  {
+   "text": "스트레스 폭발 직전이라 시끄러운 음악이 듣고 싶어",
+   "label": "angry",
+   "lang": "ko"
+  },
+  {
+   "text": "I'm furious and I can't calm down",
+   "label": "angry",
+   "lang": "en"
+  },
+  {
+   "text": "So angry I want to scream",
+   "label": "angry",
+   "lang": "en"
+  },
+  {
+   "text": "Rage and frustration boiling inside me",
+   "label": "angry",
+   "lang": "en"
+  },
+  {
+   "text": "I'm fed up and really pissed off",
+   "label": "angry",
+   "lang": "en"
+  },
+  {
+   "text": "구름 위를 둥둥 떠다니는 것처럼 몽환적인 기분",
+   "label": "dreamy",
+   "lang": "ko"
+  },
+  {
+   "text": "꿈속을 거니는 듯 비현실적인 새벽",
+   "label": "dreamy",
+   "lang": "ko"
+  },
+  {
+   "text": "별이 쏟아지는 밤하늘을 보며 몽상에 잠겼어",
+   "label": "dreamy",
+   "lang": "ko"
+  },
+  {
+   "text": "안개 낀 아침, 현실감이 흐릿한 느낌",
+   "label": "dreamy",
+   "lang": "ko"
+  },
+  {
+   "text": "환상적이고 신비로운 분위기에 빠지고 싶어",
+   "label": "dreamy",
+   "lang": "ko"
+  },
+  {
+   "text": "잠들기 직전 반쯤 꿈꾸는 것 같은 상태",
+   "label": "dreamy",
+   "lang": "ko"
+  },
+  {
+   "text": "우주를 유영하는 듯 아득하고 몽롱해",
+   "label": "dreamy",
+   "lang": "ko"
+  },
+  {
+   "text": "네온 불빛 속에서 붕 떠 있는 듯한 기분",
+   "label": "dreamy",
+   "lang": "ko"
+  },
+  {
+   "text": "Floating through a surreal, dreamy haze",
+   "label": "dreamy",
+   "lang": "en"
+  },
+  {
+   "text": "Ethereal and otherworldly like a daydream",
+   "label": "dreamy",
+   "lang": "en"
+  },
+  {
+   "text": "Drifting among stars in a hazy dream",
+   "label": "dreamy",
+   "lang": "en"
+  },
+  {
+   "text": "A mystical, dreamlike night sky",
+   "label": "dreamy",
+   "lang": "en"
+  }
+ ]
+}

@@ -5,6 +5,8 @@ import com.graduate.Sync.entity.UserEntity;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 public class EmotionVectorDTO {
@@ -24,6 +26,10 @@ public class EmotionVectorDTO {
     // DB에 저장 안 함(EmotionVectorEntity엔 없는 필드) — EmoSet으로 학습된
     // 모델의 전반적 검증 정확도를 이번 응답에만 실어 보내기 위한 용도
     private Float modelValAccuracy;
+
+    // 사용자가 고른 선호 장르(Last.fm 태그, 예: "k-pop", "jazz"). 선택하지 않으면 null/빈 리스트.
+    // 요청에만 쓰이고 DB에는 저장하지 않음.
+    private List<String> genres;
 
     public EmotionVectorEntity toEntity(UserEntity user) {
         return new EmotionVectorEntity(

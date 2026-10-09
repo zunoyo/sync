@@ -229,8 +229,6 @@
                 <div class="sync-orbit ring2"></div>
                 <div class="sync-flare-core"></div>
               </div>
-              <p class="orb-caption" id="sync-orb-caption">지금 기분이나 상황을 알려주세요</p>
-
               <div class="composer">
                 <div class="prompt-box">
                   <textarea id="sync-textarea" placeholder="예: 비 오는 날 카페에서 공부할 때 듣기 좋은 음악"></textarea>
@@ -243,7 +241,14 @@
                 <div class="img-previews" id="sync-image-previews"></div>
               </div>
 
-              <div class="mood-chips" id="sync-moods"></div>
+              <div class="sync-genres">
+                <div class="sync-genres-head">
+                  <span class="sync-genres-title">장르</span>
+                  <span class="sync-genres-hint" id="sync-genres-hint">선택 사항 · 고르지 않으면 모든 장르에서 추천해요</span>
+                  <button class="sync-genres-clear" id="sync-genres-clear" style="display:none" onclick="SyncGenres.clear()">선택 해제</button>
+                </div>
+                <div class="sync-genre-chips" id="sync-genres"></div>
+              </div>
 
               <div id="sync-results"></div>
 

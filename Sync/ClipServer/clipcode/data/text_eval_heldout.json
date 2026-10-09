@@ -1,0 +1,245 @@
+{
+  "_note": "한국어 키워드/번역 경로 평가용 held-out 세트. 키워드 사전을 확장하기 전에 작성했고, 사전 튜닝에는 쓰지 않는다(작성자: Claude, 라벨 모호하면 직접 수정). text_eval_set.json 은 개발용(dev)으로 이미 사전 설계에 참고돼서 낙관적일 수 있음.",
+  "items": [
+    {
+      "text": "방금 받은 선물이 너무 마음에 들어서 계속 웃게 돼",
+      "label": "happy",
+      "lang": "ko"
+    },
+    {
+      "text": "오늘은 모든 게 술술 풀리는 날이야",
+      "label": "happy",
+      "lang": "ko"
+    },
+    {
+      "text": "친구한테 좋은 소식을 들으니까 나까지 덩달아 기뻐",
+      "label": "happy",
+      "lang": "ko"
+    },
+    {
+      "text": "맛집 줄 서서 먹었는데 기대 이상이라 완전 만족",
+      "label": "happy",
+      "lang": "ko"
+    },
+    {
+      "text": "햇살 좋은 날 콧노래가 절로 나와",
+      "label": "happy",
+      "lang": "ko"
+    },
+    {
+      "text": "드디어 프로젝트를 끝내서 홀가분하고 뿌듯해",
+      "label": "happy",
+      "lang": "ko"
+    },
+    {
+      "text": "오늘 하루 종일 마음이 무겁고 눈앞이 뿌옇게 흐려져",
+      "label": "sad",
+      "lang": "ko"
+    },
+    {
+      "text": "오래 키운 강아지가 떠나서 가슴이 찢어질 것 같아",
+      "label": "sad",
+      "lang": "ko"
+    },
+    {
+      "text": "아무도 내 마음을 몰라주는 것 같아서 서글퍼",
+      "label": "sad",
+      "lang": "ko"
+    },
+    {
+      "text": "시험에 또 떨어져서 자책만 하게 돼",
+      "label": "sad",
+      "lang": "ko"
+    },
+    {
+      "text": "울다 지쳐서 잠들고 싶은 밤이야",
+      "label": "sad",
+      "lang": "ko"
+    },
+    {
+      "text": "사랑하던 사람과 끝나고 나니 세상이 텅 빈 것 같아",
+      "label": "sad",
+      "lang": "ko"
+    },
+    {
+      "text": "창문 열어 두고 커피 향 맡으면서 쉬고 싶어",
+      "label": "calm",
+      "lang": "ko"
+    },
+    {
+      "text": "복잡한 생각 다 내려놓고 마음 편히 숨 쉬고 싶은 저녁",
+      "label": "calm",
+      "lang": "ko"
+    },
+    {
+      "text": "잔잔한 피아노 소리 들으며 책장을 넘기는 시간",
+      "label": "calm",
+      "lang": "ko"
+    },
+    {
+      "text": "비 그친 뒤 숲길을 천천히 걷는 기분",
+      "label": "calm",
+      "lang": "ko"
+    },
+    {
+      "text": "이불 속에서 포근하게 늘어지는 일요일",
+      "label": "calm",
+      "lang": "ko"
+    },
+    {
+      "text": "아무 일정 없는 하루, 마음이 한없이 느슨해졌어",
+      "label": "calm",
+      "lang": "ko"
+    },
+    {
+      "text": "운동 전에 심장 박동 확 끌어올려 줄 곡 추천해줘",
+      "label": "energetic",
+      "lang": "ko"
+    },
+    {
+      "text": "지금 당장이라도 뛰쳐나가서 뭐든 해보고 싶어",
+      "label": "energetic",
+      "lang": "ko"
+    },
+    {
+      "text": "클럽처럼 신나게 몸을 흔들고 싶은 밤",
+      "label": "energetic",
+      "lang": "ko"
+    },
+    {
+      "text": "시험 끝났다! 텐션 최대로 끌어올릴 노래",
+      "label": "energetic",
+      "lang": "ko"
+    },
+    {
+      "text": "막판 스퍼트 내야 하는데 힘이 나는 음악이 필요해",
+      "label": "energetic",
+      "lang": "ko"
+    },
+    {
+      "text": "빠른 템포에 맞춰 달리면 기분이 날아갈 것 같아",
+      "label": "energetic",
+      "lang": "ko"
+    },
+    {
+      "text": "처음 손 잡았을 때처럼 가슴이 뛰는 밤",
+      "label": "romantic",
+      "lang": "ko"
+    },
+    {
+      "text": "오늘 그 사람이랑 저녁 약속이 있어서 하루 종일 들떠",
+      "label": "romantic",
+      "lang": "ko"
+    },
+    {
+      "text": "프러포즈 준비하면서 분위기 있는 노래를 찾고 있어",
+      "label": "romantic",
+      "lang": "ko"
+    },
+    {
+      "text": "서로 눈만 마주쳐도 웃음이 나는 우리 사이",
+      "label": "romantic",
+      "lang": "ko"
+    },
+    {
+      "text": "달콤한 말을 속삭이고 싶은 와인 한 잔의 저녁",
+      "label": "romantic",
+      "lang": "ko"
+    },
+    {
+      "text": "짝사랑하는 사람 생각에 잠 못 드는 밤",
+      "label": "romantic",
+      "lang": "ko"
+    },
+    {
+      "text": "해 질 녘 빈 놀이터를 보니 어린 시절이 문득 그리워",
+      "label": "melancholy",
+      "lang": "ko"
+    },
+    {
+      "text": "오래전 헤어진 친구가 갑자기 생각나서 마음이 아릿해",
+      "label": "melancholy",
+      "lang": "ko"
+    },
+    {
+      "text": "지나간 계절을 돌아보면 조금 쓸쓸하고 조금 따뜻해",
+      "label": "melancholy",
+      "lang": "ko"
+    },
+    {
+      "text": "낡은 일기장을 펼쳐 보니 묘하게 가슴이 시큰해",
+      "label": "melancholy",
+      "lang": "ko"
+    },
+    {
+      "text": "겨울 새벽 혼자 깨어 있으니 지난 일들이 떠올라",
+      "label": "melancholy",
+      "lang": "ko"
+    },
+    {
+      "text": "이제는 돌아갈 수 없는 시절이라 더 애틋하게 느껴져",
+      "label": "melancholy",
+      "lang": "ko"
+    },
+    {
+      "text": "계속 반복되는 거짓말에 속이 뒤집힐 지경이야",
+      "label": "angry",
+      "lang": "ko"
+    },
+    {
+      "text": "약속 어기고 사과도 없는 사람 때문에 폭발하기 직전",
+      "label": "angry",
+      "lang": "ko"
+    },
+    {
+      "text": "억지로 참았더니 터져 나올 것 같아 소리치고 싶어",
+      "label": "angry",
+      "lang": "ko"
+    },
+    {
+      "text": "무례한 말을 듣고 나서 분이 안 풀려",
+      "label": "angry",
+      "lang": "ko"
+    },
+    {
+      "text": "너무 열이 올라서 다 집어던지고 싶은 기분",
+      "label": "angry",
+      "lang": "ko"
+    },
+    {
+      "text": "부당한 대우를 받고 나니 이를 악물게 돼",
+      "label": "angry",
+      "lang": "ko"
+    },
+    {
+      "text": "안개 속을 걷는 것처럼 모든 게 아득하고 흐릿해",
+      "label": "dreamy",
+      "lang": "ko"
+    },
+    {
+      "text": "잠이 들락 말락 하는 새벽에 현실과 꿈이 섞여",
+      "label": "dreamy",
+      "lang": "ko"
+    },
+    {
+      "text": "달빛 아래 물 위를 떠다니는 듯한 기분",
+      "label": "dreamy",
+      "lang": "ko"
+    },
+    {
+      "text": "오로라를 보는 것처럼 비현실적이고 신비로워",
+      "label": "dreamy",
+      "lang": "ko"
+    },
+    {
+      "text": "환상 속에 빠져서 시간이 멈춘 것 같은 느낌",
+      "label": "dreamy",
+      "lang": "ko"
+    },
+    {
+      "text": "솜사탕 같은 구름 사이를 떠다니는 상상을 해",
+      "label": "dreamy",
+      "lang": "ko"
+    }
+  ]
+}

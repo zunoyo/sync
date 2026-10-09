@@ -1,0 +1,194 @@
+{
+  "tag": "step2_n1000",
+  "created_at": "2026-10-07T16:39:29",
+  "max_per_class": 300,
+  "checkpoint": "model/proj_n1000.pt",
+  "checkpoint_meta": {
+    "trained_emotions": [
+      "happy",
+      "energetic",
+      "calm",
+      "sad",
+      "angry",
+      "dreamy"
+    ],
+    "val_acc": 0.8111111111111111,
+    "epoch": 9,
+    "hard_negative_margin": 0.1,
+    "hard_negative_weight": 0.0,
+    "hard_negative_pairs": "happy:energetic,energetic:happy,calm:dreamy,dreamy:calm",
+    "max_per_class": 1000,
+    "epochs_requested": 10,
+    "temperature": 0.0411154106259346
+  },
+  "hard_negative_applied": false,
+  "temperature_fitted": true,
+  "zero_shot": {
+    "n_samples": 1800,
+    "accuracy": 0.4266666666666667,
+    "macro_f1": 0.41921548005210035,
+    "per_class_recall": {
+      "happy": 0.6066666666666667,
+      "energetic": 0.37333333333333335,
+      "calm": 0.32666666666666666,
+      "sad": 0.5166666666666667,
+      "angry": 0.6533333333333333,
+      "dreamy": 0.08333333333333333
+    },
+    "per_class_f1": {
+      "happy": 0.4328180737217598,
+      "energetic": 0.459958932238193,
+      "calm": 0.27880512091038406,
+      "sad": 0.5281090289608177,
+      "angry": 0.6962699822380106,
+      "dreamy": 0.11933174224343675
+    },
+    "confusion_matrix": [
+      [
+        182,
+        40,
+        28,
+        15,
+        5,
+        30
+      ],
+      [
+        114,
+        112,
+        12,
+        31,
+        23,
+        8
+      ],
+      [
+        156,
+        6,
+        98,
+        24,
+        4,
+        12
+      ],
+      [
+        21,
+        1,
+        49,
+        155,
+        31,
+        43
+      ],
+      [
+        22,
+        17,
+        15,
+        49,
+        196,
+        1
+      ],
+      [
+        46,
+        11,
+        201,
+        13,
+        4,
+        25
+      ]
+    ],
+    "confusion_pairs": {
+      "happy->energetic": 40,
+      "energetic->happy": 114,
+      "calm->dreamy": 12,
+      "dreamy->calm": 201
+    },
+    "confusion_pairs_total": 367,
+    "ece_raw": 0.25722280601660413,
+    "brier_raw": 0.8301196859680531,
+    "ece_with_T": 0.25722280601660413,
+    "brier_with_T": 0.8301196859680531,
+    "mean_confidence_with_T": 0.16944386065006256,
+    "temperature_used": 1.0
+  },
+  "projection": {
+    "n_samples": 1800,
+    "accuracy": 0.8111111111111111,
+    "macro_f1": 0.8109582039126964,
+    "per_class_recall": {
+      "happy": 0.6733333333333333,
+      "energetic": 0.8233333333333334,
+      "calm": 0.7133333333333334,
+      "sad": 0.9066666666666666,
+      "angry": 0.8966666666666666,
+      "dreamy": 0.8533333333333334
+    },
+    "per_class_f1": {
+      "happy": 0.7214285714285714,
+      "energetic": 0.801948051948052,
+      "calm": 0.691437802907916,
+      "sad": 0.8991735537190083,
+      "angry": 0.9165247018739353,
+      "dreamy": 0.835236541598695
+    },
+    "confusion_matrix": [
+      [
+        202,
+        33,
+        48,
+        3,
+        3,
+        11
+      ],
+      [
+        26,
+        247,
+        18,
+        0,
+        3,
+        6
+      ],
+      [
+        23,
+        15,
+        214,
+        12,
+        6,
+        30
+      ],
+      [
+        2,
+        2,
+        11,
+        272,
+        6,
+        7
+      ],
+      [
+        2,
+        8,
+        6,
+        12,
+        269,
+        3
+      ],
+      [
+        5,
+        11,
+        22,
+        6,
+        0,
+        256
+      ]
+    ],
+    "confusion_pairs": {
+      "happy->energetic": 33,
+      "energetic->happy": 26,
+      "calm->dreamy": 30,
+      "dreamy->calm": 22
+    },
+    "confusion_pairs_total": 111,
+    "ece_raw": 0.6177834844423666,
+    "brier_raw": 0.7863452832173675,
+    "ece_with_T": 0.020666299578216328,
+    "brier_with_T": 0.2779073275881827,
+    "mean_confidence_with_T": 0.8122282028198242,
+    "temperature_used": 0.0411154106259346
+  }
+}

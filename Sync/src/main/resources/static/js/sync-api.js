@@ -52,11 +52,6 @@
             '<div class="result-area">',
                 '<div class="sync-loading-stage">',
                     '<div class="sync-loading-visual">',
-                        '<div class="sync-loading-orb">',
-                            '<div class="sync-loading-orb-ring"></div>',
-                            '<div class="sync-loading-orb-ring ring2"></div>',
-                            '<div class="sync-loading-orb-core">🎧</div>',
-                        '</div>',
                         '<div class="sync-analyzing">',
                             '<div class="eq-bar"></div>',
                             '<div class="eq-bar"></div>',
@@ -470,7 +465,8 @@
         var req = {
             inputType: inputType,
             inputText: text || null,
-            imageUrl:  imgs.length > 0 ? imgs[0].src : null
+            imageUrl:  imgs.length > 0 ? imgs[0].src : null,
+            genres:    (typeof SyncGenres !== 'undefined' && SyncGenres.selected().length) ? SyncGenres.selected() : null
         };
 
         if (ta) ta.value = '';

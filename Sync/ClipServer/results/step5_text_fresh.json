@@ -1,0 +1,972 @@
+{
+  "n_items": 40,
+  "t_image_current": 0.0411154106259346,
+  "t_text_fit_half": 0.012841039337217808,
+  "t_text_all": 0.013601918704807758,
+  "route_accuracy": {
+    "classifier": {
+      "correct": 6,
+      "n": 11
+    },
+    "keyword": {
+      "correct": 25,
+      "n": 28
+    },
+    "fallback": {
+      "correct": 0,
+      "n": 1
+    }
+  },
+  "test_half": {
+    "current_T": {
+      "n_samples": 16,
+      "top2_accuracy": 0.875,
+      "first_second_matrix": [
+        [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          3,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          3,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "second_of_pred": {
+        "happy": {
+          "most_common_second": "energetic",
+          "share": 0.6666666666666666
+        },
+        "sad": {
+          "most_common_second": "angry",
+          "share": 1.0
+        },
+        "calm": {
+          "most_common_second": "angry",
+          "share": 1.0
+        },
+        "energetic": {
+          "most_common_second": "angry",
+          "share": 1.0
+        },
+        "romantic": {
+          "most_common_second": "angry",
+          "share": 1.0
+        },
+        "melancholy": {
+          "most_common_second": "calm",
+          "share": 0.5
+        },
+        "angry": {
+          "most_common_second": "energetic",
+          "share": 1.0
+        },
+        "dreamy": {
+          "most_common_second": "calm",
+          "share": 1.0
+        }
+      },
+      "accuracy": 0.8125,
+      "macro_f1": 0.8,
+      "per_class_recall": {
+        "happy": 1.0,
+        "sad": 1.0,
+        "calm": 0.5,
+        "energetic": 0.5,
+        "romantic": 1.0,
+        "melancholy": 1.0,
+        "angry": 1.0,
+        "dreamy": 0.5
+      },
+      "per_class_f1": {
+        "happy": 0.8,
+        "sad": 0.8,
+        "calm": 0.6666666666666666,
+        "energetic": 0.6666666666666666,
+        "romantic": 1.0,
+        "melancholy": 1.0,
+        "angry": 0.8,
+        "dreamy": 0.6666666666666666
+      },
+      "confusion_matrix": [
+        [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "confusion_pairs": {
+        "happy->energetic": 0,
+        "energetic->happy": 0,
+        "calm->dreamy": 0,
+        "dreamy->calm": 0
+      },
+      "confusion_pairs_total": 0,
+      "ece_raw": 0.6830293536186218,
+      "brier_raw": 0.8684965671701507,
+      "ece_with_T": 0.537251359783113,
+      "brier_with_T": 0.7035869063063067,
+      "mean_confidence_with_T": 0.275248646736145,
+      "temperature_used": 0.0411154106259346
+    },
+    "text_T": {
+      "n_samples": 16,
+      "top2_accuracy": 0.875,
+      "first_second_matrix": [
+        [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          3,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          3,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "second_of_pred": {
+        "happy": {
+          "most_common_second": "energetic",
+          "share": 0.6666666666666666
+        },
+        "sad": {
+          "most_common_second": "angry",
+          "share": 1.0
+        },
+        "calm": {
+          "most_common_second": "angry",
+          "share": 1.0
+        },
+        "energetic": {
+          "most_common_second": "angry",
+          "share": 1.0
+        },
+        "romantic": {
+          "most_common_second": "angry",
+          "share": 1.0
+        },
+        "melancholy": {
+          "most_common_second": "calm",
+          "share": 0.5
+        },
+        "angry": {
+          "most_common_second": "energetic",
+          "share": 1.0
+        },
+        "dreamy": {
+          "most_common_second": "calm",
+          "share": 1.0
+        }
+      },
+      "accuracy": 0.8125,
+      "macro_f1": 0.8,
+      "per_class_recall": {
+        "happy": 1.0,
+        "sad": 1.0,
+        "calm": 0.5,
+        "energetic": 0.5,
+        "romantic": 1.0,
+        "melancholy": 1.0,
+        "angry": 1.0,
+        "dreamy": 0.5
+      },
+      "per_class_f1": {
+        "happy": 0.8,
+        "sad": 0.8,
+        "calm": 0.6666666666666666,
+        "energetic": 0.6666666666666666,
+        "romantic": 1.0,
+        "melancholy": 1.0,
+        "angry": 0.8,
+        "dreamy": 0.6666666666666666
+      },
+      "confusion_matrix": [
+        [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "confusion_pairs": {
+        "happy->energetic": 0,
+        "energetic->happy": 0,
+        "calm->dreamy": 0,
+        "dreamy->calm": 0
+      },
+      "confusion_pairs_total": 0,
+      "ece_raw": 0.6830293536186218,
+      "brier_raw": 0.8684965671701507,
+      "ece_with_T": 0.34503355249762535,
+      "brier_with_T": 0.5138511886373425,
+      "mean_confidence_with_T": 0.6440269947052002,
+      "temperature_used": 0.012841039337217808
+    }
+  },
+  "all": {
+    "current_T": {
+      "n_samples": 40,
+      "top2_accuracy": 0.825,
+      "first_second_matrix": [
+        [
+          0,
+          0,
+          0,
+          6,
+          0,
+          0,
+          3,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          7,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          2,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0
+        ],
+        [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          6,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          3,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "second_of_pred": {
+        "happy": {
+          "most_common_second": "energetic",
+          "share": 0.6666666666666666
+        },
+        "sad": {
+          "most_common_second": "angry",
+          "share": 1.0
+        },
+        "calm": {
+          "most_common_second": "angry",
+          "share": 0.5
+        },
+        "energetic": {
+          "most_common_second": "angry",
+          "share": 0.6666666666666666
+        },
+        "romantic": {
+          "most_common_second": "angry",
+          "share": 1.0
+        },
+        "melancholy": {
+          "most_common_second": "happy",
+          "share": 0.25
+        },
+        "angry": {
+          "most_common_second": "energetic",
+          "share": 1.0
+        },
+        "dreamy": {
+          "most_common_second": "calm",
+          "share": 1.0
+        }
+      },
+      "accuracy": 0.775,
+      "macro_f1": 0.7723665223665224,
+      "per_class_recall": {
+        "happy": 1.0,
+        "sad": 1.0,
+        "calm": 0.6,
+        "energetic": 0.6,
+        "romantic": 0.8,
+        "melancholy": 0.6,
+        "angry": 1.0,
+        "dreamy": 0.6
+      },
+      "per_class_f1": {
+        "happy": 0.7142857142857143,
+        "sad": 0.8333333333333334,
+        "calm": 0.6666666666666666,
+        "energetic": 0.75,
+        "romantic": 0.8888888888888888,
+        "melancholy": 0.6666666666666666,
+        "angry": 0.9090909090909091,
+        "dreamy": 0.75
+      },
+      "confusion_matrix": [
+        [
+          5,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          5,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          3,
+          0,
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          3,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          4,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          1,
+          0,
+          0,
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          5,
+          0
+        ],
+        [
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          3
+        ]
+      ],
+      "confusion_pairs": {
+        "happy->energetic": 0,
+        "energetic->happy": 1,
+        "calm->dreamy": 0,
+        "dreamy->calm": 0
+      },
+      "confusion_pairs_total": 1,
+      "ece_raw": 0.6455998957157135,
+      "brier_raw": 0.8684831108396984,
+      "ece_with_T": 0.5045581027865411,
+      "brier_with_T": 0.7016420053134025,
+      "mean_confidence_with_T": 0.2704419195652008,
+      "temperature_used": 0.0411154106259346
+    },
+    "text_T": {
+      "n_samples": 40,
+      "top2_accuracy": 0.825,
+      "first_second_matrix": [
+        [
+          0,
+          0,
+          0,
+          6,
+          0,
+          0,
+          3,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          7,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          2,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0
+        ],
+        [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          6,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          3,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "second_of_pred": {
+        "happy": {
+          "most_common_second": "energetic",
+          "share": 0.6666666666666666
+        },
+        "sad": {
+          "most_common_second": "angry",
+          "share": 1.0
+        },
+        "calm": {
+          "most_common_second": "angry",
+          "share": 0.5
+        },
+        "energetic": {
+          "most_common_second": "angry",
+          "share": 0.6666666666666666
+        },
+        "romantic": {
+          "most_common_second": "angry",
+          "share": 1.0
+        },
+        "melancholy": {
+          "most_common_second": "happy",
+          "share": 0.25
+        },
+        "angry": {
+          "most_common_second": "energetic",
+          "share": 1.0
+        },
+        "dreamy": {
+          "most_common_second": "calm",
+          "share": 1.0
+        }
+      },
+      "accuracy": 0.775,
+      "macro_f1": 0.7723665223665224,
+      "per_class_recall": {
+        "happy": 1.0,
+        "sad": 1.0,
+        "calm": 0.6,
+        "energetic": 0.6,
+        "romantic": 0.8,
+        "melancholy": 0.6,
+        "angry": 1.0,
+        "dreamy": 0.6
+      },
+      "per_class_f1": {
+        "happy": 0.7142857142857143,
+        "sad": 0.8333333333333334,
+        "calm": 0.6666666666666666,
+        "energetic": 0.75,
+        "romantic": 0.8888888888888888,
+        "melancholy": 0.6666666666666666,
+        "angry": 0.9090909090909091,
+        "dreamy": 0.75
+      },
+      "confusion_matrix": [
+        [
+          5,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          5,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          3,
+          0,
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          3,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          4,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          1,
+          0,
+          0,
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          5,
+          0
+        ],
+        [
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          3
+        ]
+      ],
+      "confusion_pairs": {
+        "happy->energetic": 0,
+        "energetic->happy": 1,
+        "calm->dreamy": 0,
+        "dreamy->calm": 0
+      },
+      "confusion_pairs_total": 1,
+      "ece_raw": 0.6455998957157135,
+      "brier_raw": 0.8684831108396984,
+      "ece_with_T": 0.2810616444796324,
+      "brier_with_T": 0.4963530426999393,
+      "mean_confidence_with_T": 0.6100581288337708,
+      "temperature_used": 0.013601918704807758
+    }
+  }
+}

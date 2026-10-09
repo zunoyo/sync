@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { artistColor, fetchArtistDetail, fetchArtistDetailById } from '../api/artist';
 import { fetchSavedArtists, fetchSavedAlbums, saveArtist, unsaveArtist, saveAlbum, unsaveAlbum } from '../api/savedLibrary';
@@ -7,6 +7,37 @@ import { usePlaylistPicker } from '../context/PlaylistPickerContext';
 import { useAuth } from '../context/AuthContext';
 import { useLibrary } from '../context/LibraryContext';
 import { useToast } from '../context/ToastContext';
+
+// 넘치는 글자만 좌우로 흐르게 하는 한 줄 텍스트 (hover=true면 마우스를 올렸을 때만 이동)
+function Marquee({ text, className = '', hover = false }) {
+  const wrapRef = useRef(null);
+  const innerRef = useRef(null);
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    const inner = innerRef.current;
+    if (!wrap || !inner) return undefined;
+    const measure = () => {
+      const over = Math.ceil(inner.scrollWidth - wrap.clientWidth);
+      if (over > 2) {
+        wrap.classList.add('is-marq');
+        wrap.style.setProperty('--mq-dist', `-${over}px`);
+        wrap.style.setProperty('--mq-time', `${Math.max(6, over / 25 + 3)}s`);
+      } else {
+        wrap.classList.remove('is-marq');
+      }
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(wrap);
+    ro.observe(inner);
+    return () => ro.disconnect();
+  }, [text]);
+  return (
+    <div ref={wrapRef} className={`ad-marq${hover ? ' hover' : ''} ${className}`} title={text}>
+      <span ref={innerRef} className="ad-marq-in">{text}</span>
+    </div>
+  );
+}
 
 export default function ArtistDetail() {
   const { name } = useParams();
@@ -20,7 +51,7 @@ function ArtistDetailInner() {
   const location = useLocation();
   const artistName = decodeURIComponent(name);
   const knownExternalId = location.state?.externalId || null;
-  const { playTrack } = usePlayer();
+  const { playTrack, currentTrack } = usePlayer();
   const { openPicker } = usePlaylistPicker();
   const { isLoggedIn } = useAuth();
   const { bump } = useLibrary();
@@ -31,15 +62,7 @@ function ArtistDetailInner() {
   const [savedAlbumIds, setSavedAlbumIds] = useState(new Map()); // externalId(String) -> saved-entry id
   const [artistBusy, setArtistBusy] = useState(false);
   const [bgLoaded, setBgLoaded] = useState(false); // 백드롭 사진이 실제로 디코딩 끝났는지 — 페이드인 트리거용
-  const [openAlbums, setOpenAlbums] = useState(() => new Set()); // 트랙 목록이 펼쳐진 앨범 id들
-
-  function toggleAlbumOpen(albumId) {
-    setOpenAlbums((prev) => {
-      const next = new Set(prev);
-      if (next.has(albumId)) next.delete(albumId); else next.add(albumId);
-      return next;
-    });
-  }
+  const [selectedAlbumId, setSelectedAlbumId] = useState(null); // 우측에 트랙을 보여줄 앨범 (null이면 첫 앨범)
 
   useEffect(() => {
     let cancelled = false;
@@ -114,149 +137,129 @@ function ArtistDetailInner() {
 
   const color = artistColor(artistName);
   const flatTracks = data?.flatTracks || [];
+  const albums = data?.albums || [];
   const totalMin = Math.floor(flatTracks.reduce((s, t) => s + t.durationMs, 0) / 60000);
+  const selAlbum = albums.find((a) => String(a.id) === String(selectedAlbumId)) || albums[0] || null;
+  const selMin = selAlbum ? Math.floor(selAlbum.tracks.reduce((s, t) => s + t.durationMs, 0) / 60000) : 0;
+  const selSaved = selAlbum ? savedAlbumIds.has(String(selAlbum.id)) : false;
+  const following = !!savedArtistEntry;
 
   return (
     <>
-      <div style={{
-        background: `linear-gradient(180deg,${color} 0%,#1a1a1a 100%)`,
-        padding: '40px 32px 32px', position: 'relative', borderRadius: '16px 16px 0 0', margin: '-24px -24px 0',
-        overflow: 'hidden',
-      }}>
+      <div className="ad-hero">
         {data?.image && (
-          <div style={{
-            position: 'absolute', inset: 0,
-            backgroundImage: `url(${data.image})`, backgroundSize: 'cover', backgroundPosition: 'center',
-            filter: 'blur(60px) brightness(.4) saturate(1.5)', transform: 'scale(1.1)',
-            opacity: bgLoaded ? 1 : 0, transition: 'opacity .5s ease',
-          }} />
+          <div
+            className={`ad-hero-bg${bgLoaded ? ' is-visible' : ''}`}
+            style={{ backgroundImage: `url(${data.image})` }}
+          />
         )}
-        {data?.image && (
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(165deg, rgba(156,20,87,.55) 0%, rgba(60,0,40,.45) 55%, transparent 100%)' }} />
-        )}
-        <div style={{ position: 'relative', zIndex: 1 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 24 }}>
-          <div style={{
-            width: 140, height: 140, borderRadius: '50%', flexShrink: 0, background: color,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 56,
-            boxShadow: '0 8px 32px rgba(0,0,0,.5)', overflow: 'hidden',
-          }}>
+        <div className="ad-hero-inner">
+          <div className="ad-art" style={{ background: color }}>
             {data?.image
-              ? <img src={data.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none'; }} />
+              ? <img src={data.image} alt="" onError={(e) => { e.target.style.display = 'none'; }} />
               : '🎤'}
           </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,.7)', marginBottom: 6, textTransform: 'uppercase' }}>아티스트</div>
-            <div style={{ fontSize: 'clamp(28px,4vw,60px)', fontWeight: 900, color: '#fff', lineHeight: 1, marginBottom: 10 }}>{artistName}</div>
-            {data?.bio && (
-              <div style={{ fontSize: 13, color: 'rgba(255,255,255,.6)', maxWidth: 440, marginBottom: 4 }}>{data.bio}</div>
-            )}
-            <div style={{ fontSize: 12, color: 'rgba(255,255,255,.45)' }}>
-              {data ? `${flatTracks.length}곡 · ${totalMin}분` : '불러오는 중...'}
+          <div className="ad-hero-main">
+            <div className="ad-eyebrow">ARTIST</div>
+            <h1 className="ad-name" title={artistName}>{artistName}</h1>
+            <div className="ad-sub">
+              {data ? (data.bio || `${flatTracks.length}곡 · ${totalMin}분`) : '불러오는 중...'}
+            </div>
+            <div className="ad-actions">
+              <button className={`ad-follow${following ? ' saved' : ''}`} onClick={toggleArtistSave} disabled={artistBusy}>
+                {following ? '✓ 팔로잉' : '＋ 팔로우'}
+              </button>
+              <button
+                className="ad-play"
+                title="아티스트 전체 재생"
+                disabled={!flatTracks.length}
+                onClick={() => flatTracks.length && playTrack(flatTracks[0], flatTracks)}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+              </button>
             </div>
           </div>
-        </div>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginTop: 24 }}>
-          <button
-            onClick={() => flatTracks.length && playTrack(flatTracks[0], flatTracks)}
-            disabled={!flatTracks.length}
-            style={{ width: 52, height: 52, borderRadius: '50%', background: 'var(--accent)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 4px 12px rgba(217,192,143,.4)' }}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="#000"><path d="M8 5v14l11-7z" /></svg>
-          </button>
-          <button
-            onClick={toggleArtistSave}
-            disabled={artistBusy}
-            title="아티스트 저장"
-            style={{
-              width: 36, height: 36, borderRadius: '50%', background: 'none',
-              border: `1px solid ${savedArtistEntry ? 'var(--accent)' : 'rgba(255,255,255,.3)'}`,
-              color: savedArtistEntry ? 'var(--accent)' : 'rgba(255,255,255,.7)',
-              fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}
-          >
-            {savedArtistEntry ? '♥' : '♡'}
-          </button>
-        </div>
+          {data && (
+            <div className="ad-stats">
+              <div><b>{albums.length}</b><span>앨범</span></div>
+              <div><b>{flatTracks.length}</b><span>곡</span></div>
+              <div><b>{totalMin}</b><span>분</span></div>
+            </div>
+          )}
         </div>
       </div>
 
-      {!data && (
-        <div style={{ padding: 20, textAlign: 'center', color: 'rgba(255,255,255,.4)' }}>곡 불러오는 중...</div>
-      )}
-      {data && flatTracks.length === 0 && (
-        <div style={{ padding: 40, textAlign: 'center', color: 'rgba(255,255,255,.4)' }}>곡 정보를 찾을 수 없어요</div>
-      )}
+      {!data && <div className="ad-empty">곡 불러오는 중...</div>}
+      {data && flatTracks.length === 0 && <div className="ad-empty">곡 정보를 찾을 수 없어요</div>}
 
-      {data && data.albums.map((album) => {
-        const saved = savedAlbumIds.has(String(album.id));
-        const isOpen = openAlbums.has(album.id);
-        return (
-          <div key={album.id} style={{ marginBottom: 32 }}>
-            <div
-              onClick={() => toggleAlbumOpen(album.id)}
-              style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '12px 16px 8px', borderBottom: '1px solid rgba(255,255,255,.07)', marginBottom: 4, cursor: 'pointer' }}
-            >
-              {album.art
-                ? <img src={album.art} alt="" style={{ width: 56, height: 56, borderRadius: 6, objectFit: 'cover', flexShrink: 0 }} onError={(e) => { e.target.style.display = 'none'; }} />
-                : <div style={{ width: 56, height: 56, borderRadius: 6, flexShrink: 0, background: 'rgba(255,255,255,.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>💿</div>}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 15, fontWeight: 700, color: '#fff' }}>{album.name}</div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,.45)', marginTop: 3 }}>{album.year || ''} · {album.tracks.length}곡</div>
-              </div>
-              <button
-                className={`album-save-btn ${saved ? 'saved' : ''}`}
-                onClick={(e) => { e.stopPropagation(); toggleAlbumSave(album); }}
-                style={{
-                  flexShrink: 0, background: 'none', border: `1px solid ${saved ? 'var(--accent)' : 'rgba(255,255,255,.3)'}`,
-                  color: saved ? 'var(--accent)' : 'rgba(255,255,255,.7)', borderRadius: 50, padding: '6px 14px',
-                  fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-                }}
-              >
-                {saved ? '✓ 저장됨' : '+ 저장'}
-              </button>
-              <button
-                onClick={(e) => { e.stopPropagation(); toggleAlbumOpen(album.id); }}
-                aria-label="트랙 펼치기/접기"
-                style={{
-                  flexShrink: 0, width: 30, height: 30, borderRadius: '50%', background: 'none',
-                  border: '1px solid rgba(255,255,255,.15)', color: 'rgba(255,255,255,.6)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-                  transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform .3s ease',
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
-              </button>
-            </div>
-
-            <div style={{ overflow: 'hidden', maxHeight: isOpen ? 4000 : 0, transition: 'max-height .35s ease' }}>
-            {album.tracks.map((t, i) => (
+      {data && selAlbum && (
+        <div className="ad-body">
+          <div className="ad-albums">
+            <div className="ad-albums-title">ALBUMS · {albums.length}</div>
+            {albums.map((album) => (
               <div
-                key={t._id}
-                onClick={() => playTrack(t, flatTracks)}
-                style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 16px', borderRadius: 6, cursor: 'pointer' }}
+                key={album.id}
+                className={`ad-album${String(album.id) === String(selAlbum.id) ? ' active' : ''}`}
+                onClick={() => setSelectedAlbumId(album.id)}
               >
-                <span style={{ width: 24, textAlign: 'center', fontSize: 13, color: 'rgba(255,255,255,.4)', flexShrink: 0 }}>{i + 1}</span>
-                {t.albumArtSm
-                  ? <img src={t.albumArtSm} alt="" style={{ width: 36, height: 36, borderRadius: 4, objectFit: 'cover', flexShrink: 0 }} onError={(e) => { e.target.style.display = 'none'; }} />
-                  : <div style={{ width: 36, height: 36, borderRadius: 4, flexShrink: 0, background: 'rgba(255,255,255,.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>{t.emoji}</div>}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 14, fontWeight: 500, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</div>
+                <div className="ad-album-art">
+                  {album.art
+                    ? <img src={album.art} alt="" onError={(e) => { e.target.style.display = 'none'; }} />
+                    : '💿'}
                 </div>
-                <button
-                  onClick={(e) => { e.stopPropagation(); openPicker(t, e.currentTarget); }}
-                  title="플레이리스트에 추가"
-                  style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.55)', cursor: 'pointer', display: 'flex', alignItems: 'center', flexShrink: 0 }}
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" /></svg>
-                </button>
-                <span style={{ fontSize: 13, color: 'rgba(255,255,255,.45)', flexShrink: 0 }}>{t.duration}</span>
+                <div className="ad-album-info">
+                  <Marquee className="ad-album-name" text={album.name} hover />
+                  <div className="ad-album-meta">{[album.year || '', `${album.tracks.length}곡`].filter(Boolean).join(' · ')}</div>
+                </div>
               </div>
             ))}
+          </div>
+
+          <div className="ad-detail">
+            <div className="ad-album-head">
+              <div className="ad-cover">
+                {selAlbum.art
+                  ? <img src={selAlbum.art} alt="" onError={(e) => { e.target.style.display = 'none'; }} />
+                  : '💿'}
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div className="ad-album-label">ALBUM</div>
+                <Marquee className="ad-album-title" text={selAlbum.name} />
+                <div className="ad-album-sub">
+                  {[artistName, selAlbum.year || '', `${selAlbum.tracks.length}곡`, selMin ? `${selMin}분` : ''].filter(Boolean).join(' · ')}
+                </div>
+                <div className="ad-album-actions">
+                  <button className="ad-btn primary" onClick={() => selAlbum.tracks.length && playTrack(selAlbum.tracks[0], selAlbum.tracks)}>▶ 전체 재생</button>
+                  <button className={`ad-btn${selSaved ? ' saved' : ''}`} onClick={() => toggleAlbumSave(selAlbum)}>
+                    {selSaved ? '✓ 보관함에 저장됨' : '+ 보관함'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="ad-tracks">
+              {selAlbum.tracks.map((t, i) => (
+                <div
+                  key={t._id}
+                  className={`ad-track${currentTrack && (currentTrack._id || currentTrack.id) === t._id ? ' playing' : ''}`}
+                  onClick={() => playTrack(t, flatTracks)}
+                >
+                  <span className="num">{currentTrack && (currentTrack._id || currentTrack.id) === t._id ? '▶' : i + 1}</span>
+                  <Marquee className="name" text={t.name} hover />
+                  <button
+                    className="add"
+                    title="플레이리스트에 추가"
+                    onClick={(e) => { e.stopPropagation(); openPicker(t, e.currentTarget); }}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" /></svg>
+                  </button>
+                  <span className="dur">{t.duration}</span>
+                </div>
+              ))}
             </div>
           </div>
-        );
-      })}
+        </div>
+      )}
     </>
   );
 }

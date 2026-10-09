@@ -7,6 +7,7 @@ import re
 from functools import lru_cache
 from PIL import Image
 from .emotion_mapper import EmotionMapper
+from .ko_keywords import KEYWORDS as KO_KEYWORDS, translate_keywords
 from .emotion_classifier import EmotionProjection, VAHead
 from .emotion_prompts import build_prompt_ensemble_anchors, EMOTION_PROMPTS
 from .korean_emotion import classify_korean_emotion
@@ -28,79 +29,9 @@ _VA_ANCHORS = [
     "a calm, peaceful and relaxing feeling",                   # A- 중
 ]
 
-# ── 한국어 → 영어 번역 사전 ────────────────────────────────────────────────
-# 긴 키워드가 먼저 매칭되도록 _SORTED_KEYWORDS에서 정렬 후 사용
-_KO_EMOTION_KEYWORDS = {
-    # ── 복합어 우선 (오매칭 방지) ─────────────────────────
-    "밤 드라이브": "night drive and atmospheric",
-    "기분 좋":    "feel good and happy",
-    "비 오":      "rainy and melancholy",
-    "빗소리":     "rain sound and nostalgic",
-    "몽환":       "dreamy and ethereal",
-    "설레":       "exciting and romantic",
-    "두근":       "heart flutter and excitement",
-    "로맨":       "romantic and loving",
-    "연인":       "lover and romantic",
-    "데이트":     "date and romantic",
-    "에너지":     "energy and dynamic",
-    "활기":       "energetic and vibrant",
-    "파워":       "powerful and strong",
-    "달리":       "running and energetic",
-    "헬스":       "gym and fitness",
-    "운동":       "workout and exercise",
-    "행복":       "happy and cheerful",
-    "즐거":       "joyful and fun",
-    "파티":       "party and celebration",
-    "신나":       "exciting and joyful",
-    "슬프":       "sad and sorrowful",
-    "우울":       "depressed and gloomy",
-    "눈물":       "tears and crying",
-    "혼자":       "alone and lonely",
-    "실연":       "heartbreak and breakup",
-    "이별":       "farewell and goodbye",
-    "외로":       "lonely and isolated",
-    "그리":       "miss and longing",
-    "조용":       "quiet and peaceful",
-    "차분":       "calm and serene",
-    "휴식":       "rest and relax",
-    "카페":       "calm cafe atmosphere",
-    "공부":       "focus and concentrate",
-    "명상":       "meditation and peace",
-    "여유":       "leisurely and relaxed",
-    "평온":       "tranquil and peaceful",
-    "사랑":       "love and romance",
-    "감성":       "sentimental and emotional",
-    "노을":       "sunset and nostalgic",
-    "추억":       "memory and nostalgia",
-    "그날":       "that day and reminisce",
-    "창가":       "window and contemplative",
-    "분노":       "rage and furious",
-    "격렬":       "intense and fierce",
-    "강렬":       "powerful and aggressive",
-    "새벽":       "late night and dreamy",
-    "공상":       "fantasy and dreamy",
-    "상상":       "imagination and dreamy",
-    "감상":       "contemplative and atmospheric",
-    # ── 1글자 (맨 마지막 — 형태소 경계 체크 적용) ─────────
-    "춤":         "dance and celebrate",
-    "웃":         "laugh and smile",
-    "화":         "angry and intense",   # "운동화" 오매칭 방지 → _is_standalone 으로 처리
-}
-
-# 긴 키워드 우선 정렬 (모듈 로드 시 1회)
-_SORTED_KEYWORDS = sorted(_KO_EMOTION_KEYWORDS.keys(), key=len, reverse=True)
-
-
-def _is_standalone(text: str, start: int, end: int) -> bool:
-    """
-    1글자 키워드 오매칭 방지.
-    바로 앞 문자가 한글이면 단어 중간(예: 운동'화')이므로 False 반환.
-    """
-    if end - start == 1:
-        before = text[start - 1] if start > 0 else ""
-        if re.match(r"[가-힣]", before):
-            return False
-    return True
+# ── 한국어 → 영어 번역 사전: model/ko_keywords.py 로 분리(감정 태그 포함, torch 없이 단독 테스트 가능) ──
+# calibrate_gate.py 호환용으로 예전 이름(키워드 → 영어 표현)도 유지한다.
+_KO_EMOTION_KEYWORDS = {k: v[0] for k, v in KO_KEYWORDS.items()}
 
 
 def _translate_korean(text: str) -> str:
@@ -118,31 +49,10 @@ def _translate_korean(text: str) -> str:
        걸리면(모델 미로드/저확신/매핑 없는 라벨) 최종 fallback 영어 문장
        반환 (한국어 원문을 CLIP에 직접 입력하면 정확도 급락)
     """
-    matched: list[str] = []
-    used_spans: list[tuple[int, int]] = []
-
-    for keyword in _SORTED_KEYWORDS:
-        start = text.find(keyword)
-        if start == -1:
-            continue
-        end = start + len(keyword)
-
-        # 겹침 체크
-        if any(s < end and start < e for s, e in used_spans):
-            continue
-
-        # 1글자 형태소 경계 체크
-        if not _is_standalone(text, start, end):
-            continue
-
-        matched.append(_KO_EMOTION_KEYWORDS[keyword])
-        used_spans.append((start, end))
-        if len(matched) >= 3:
-            break
-
-    if matched:
-        result = ", ".join(matched)
-        logger.info(f"번역: '{text[:20]}' → '{result}'")
+    kw = translate_keywords(text)
+    if kw is not None:
+        result, dominant = kw
+        logger.info(f"번역: '{text[:20]}' → '{result}' (키워드 감정={dominant})")
         return result
 
     # 키워드 미매칭 → 가벼운 한국어 감정분류로 한 번 더 시도
@@ -220,6 +130,12 @@ class ClipModel:
         # 없으면(아직 보정 안 한 구버전 체크포인트) 1.0으로 두어 기존 동작과
         # 완전히 동일하게(no-op) 유지한다.
         self.temperature = 1.0
+        # 텍스트 전용 T — calibrate_text_temperature.py 가 저장. 없으면 이미지 기준 T 를 그대로 사용(기존 동작)
+        self.temperature_text = None
+        # 텍스트 앵커 편향 보정(probe_text_bias.py 가 저장) — 특정 감정 앵커가 모든 문장과 두루 가까워
+        # 2순위를 독차지하는 '허브' 현상을 줄인다. 없으면 None(기존 동작).
+        self.text_bias = None
+        self.text_scale = None
         if not os.path.exists(self.EMOTION_PROJECTION_PATH):
             logger.info("emotion_projection.pt 없음 — 순수 zero-shot으로 동작")
             return
@@ -236,6 +152,16 @@ class ClipModel:
             self.has_projection = True
             self.projection_val_acc = ckpt.get("val_acc")  # EmoSet 검증셋 기준 학습 시점 정확도
             self.temperature = ckpt.get("temperature", 1.0)  # calibrate_temperature.py가 fit한 값
+            self.temperature_text = ckpt.get("temperature_text")  # calibrate_text_temperature.py가 fit한 값(없으면 None)
+            tb = ckpt.get("text_bias")
+            if tb is not None and self.temperature_text:
+                if list(ckpt.get("text_bias_emotions", self.emotions)) == list(self.emotions):
+                    self.text_bias = torch.tensor(tb, dtype=torch.float32, device=self.device)
+                    ts = ckpt.get("text_scale")
+                    self.text_scale = (torch.tensor(ts, dtype=torch.float32, device=self.device)
+                                       if ts is not None else torch.ones_like(self.text_bias))
+                else:
+                    logger.warning("text_bias 의 감정 순서가 서비스와 달라 무시합니다")
             logger.info(
                 f"emotion_projection.pt 로드 완료 "
                 f"(val_acc={ckpt.get('val_acc', '?')}, epoch={ckpt.get('epoch', '?')}, "
@@ -291,6 +217,23 @@ class ClipModel:
             return round(float(va[0]), 4), round(float(va[1]), 4)
         return self._compute_va(corrected_feat.cpu().numpy()[0])
 
+    def _text_va(self, probs: np.ndarray):
+        """
+        텍스트 V/A = 감정 확률 × 감정별 기준 좌표의 가중평균.
+        기존 방식(앵커 8개와의 코사인 차이)은 텍스트 임베딩에서 값이 ±0.02 안쪽으로 몰려
+        어떤 문장이든 좌표가 정중앙(중립/보통)에 찍혔다. 이미지 쪽 VAHead 가 학습한 것과
+        같은 좌표계(model/emotion_va_map.SERVICE_VA_ANCHOR)를 써서 두 경로의 스케일을 맞춘다.
+        좌표표를 못 읽으면 None → _build_result 가 기존 방식으로 폴백한다.
+        """
+        try:
+            from .emotion_va_map import SERVICE_VA_ANCHOR
+            v = sum(float(p) * SERVICE_VA_ANCHOR[e][0] for p, e in zip(probs, self.emotions))
+            a = sum(float(p) * SERVICE_VA_ANCHOR[e][1] for p, e in zip(probs, self.emotions))
+            return round(v, 4), round(a, 4)
+        except Exception as e:  # 감정 이름이 표에 없는 경우 등
+            logger.warning(f"텍스트 V/A 좌표 계산 실패, 기존 방식으로 폴백: {e}")
+            return None
+
     # ── 분석 메서드 ─────────────────────────────────────────────────────────
     def analyze_text(self, text: str) -> dict:
         logger.info(f"텍스트 분석: {text[:30]}...")
@@ -299,9 +242,21 @@ class ClipModel:
             token = clip.tokenize([english_text], truncate=True).to(self.device)
             feat  = self.model.encode_text(token)
             feat  = feat / feat.norm(dim=-1, keepdim=True)
-            probs = (feat @ self.emotion_features.T) \
-                    .squeeze().softmax(dim=-1).cpu().numpy()
-        return self._build_result(feat.cpu().numpy()[0], probs)
+            logits = (feat @ self.emotion_features.T).squeeze()
+            if self.text_bias is not None:
+                logits = (logits - self.text_bias) / self.text_scale
+            # [수정 5] analyze_image()/analyze_both()에는 있고 여기엔 빠져
+            # 있던 temperature 스케일링을 동일하게 적용. 이게 없으면 raw
+            # cosine similarity(보통 0.2~0.35대로 서로 비슷비슷함)가 그대로
+            # softmax에 들어가서, 번역/분류 품질과 무관하게 입력마다 거의
+            # 균등분포(8개 클래스 기준 ~12.5%)로 뭉개져 버린다 — 실측으로도
+            # 서로 다른 문장 4개가 전부 12.87~13.30%로 몰리는 현상 확인됨.
+            if self.has_projection:
+                # 텍스트 경로는 projection 이 없는 zero-shot 이라 logit 분포가 이미지와 다르다 →
+                # 텍스트 전용 T 가 보정돼 있으면 그걸 쓰고, 없으면 기존처럼 이미지 기준 T 사용
+                logits = logits / (self.temperature_text or self.temperature)
+            probs = logits.softmax(dim=-1).cpu().numpy()
+        return self._build_result(feat.cpu().numpy()[0], probs, va=self._text_va(probs))
 
     def analyze_image(self, image: Image.Image) -> dict:
         logger.info("이미지 분석 시작")

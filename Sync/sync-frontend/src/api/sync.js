@@ -11,6 +11,18 @@ export const SYNC_MOODS = [
   '🚗 드라이브', '📚 집중할 때', '🎉 파티 분위기', '☕ 여유로운 아침',
 ];
 
+/* 장르 선택(선택 사항) — key는 백엔드가 Last.fm 태그로 그대로 쓰는 값 */
+export const SYNC_GENRES = [
+  { key: 'k-pop', label: 'K-POP' }, { key: 'k-ballad', label: 'K-발라드' }, { key: 'pop', label: '팝' },
+  { key: 'hip-hop', label: '힙합' }, { key: 'rnb', label: 'R&B' },
+  { key: 'rock', label: '록' }, { key: 'indie', label: '인디' },
+  { key: 'electronic', label: '일렉트로닉' }, { key: 'jazz', label: '재즈' },
+  { key: 'classical', label: '클래식' }, { key: 'ballad', label: '해외 발라드' },
+  { key: 'acoustic', label: '어쿠스틱' }, { key: 'lo-fi', label: '로파이' },
+  { key: 'metal', label: '메탈' }, { key: 'country', label: '컨트리' },
+  { key: 'latin', label: '라틴' },
+];
+
 export function fmtMs(ms) {
   if (!ms) return '--:--';
   const s = Math.floor(ms / 1000);
@@ -39,7 +51,7 @@ export function arLabel(v) {
 }
 
 /** 감정 분석 요청 — text/image(base64 data URL)/both */
-export async function fullRecommend({ text, imageUrl }) {
+export async function fullRecommend({ text, imageUrl, genres }) {
   let inputType = 'text';
   if (text && imageUrl) inputType = 'both';
   else if (imageUrl) inputType = 'image';
@@ -48,6 +60,7 @@ export async function fullRecommend({ text, imageUrl }) {
     inputType,
     inputText: text || null,
     imageUrl: imageUrl || null,
+    genres: genres && genres.length ? genres : null,
   });
 }
 

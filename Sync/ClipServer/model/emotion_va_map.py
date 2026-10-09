@@ -58,6 +58,16 @@ SYNC_VA_ANCHOR: Dict[str, Tuple[float, float]] = {
     "dreamy":    (0.4, 0.0),
 }
 
+# 텍스트 분석용 — 서비스의 8감정 전부의 (valence, arousal) 좌표.
+# 앞의 6개는 위 SYNC_VA_ANCHOR(= 이미지 VAHead 가 학습한 스케일)와 동일하고,
+# EmoSet 에 대응이 없는 romantic/melancholy 는 Russell Circumplex 상의 위치를 참고한 근사값이다.
+# 텍스트 경로는 이 좌표를 감정 확률로 가중평균해서 V/A 를 낸다(clip_model.analyze_text).
+SERVICE_VA_ANCHOR: Dict[str, Tuple[float, float]] = {
+    **SYNC_VA_ANCHOR,
+    "romantic":   (0.6, 0.1),
+    "melancholy": (-0.5, -0.5),
+}
+
 
 def get_sync_label(emoset_category: str) -> Optional[str]:
     """EmoSet 카테고리명 → SYNC 카테고리명. 매핑 없으면(disgust/fear) None."""

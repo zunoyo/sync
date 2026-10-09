@@ -1,0 +1,238 @@
+{
+  "emotions": [
+    "happy",
+    "sad",
+    "calm",
+    "energetic",
+    "romantic",
+    "melancholy",
+    "angry",
+    "dreamy"
+  ],
+  "n_fit": 144,
+  "n_eval": 40,
+  "variants": {
+    "none": {
+      "variant": "none",
+      "bias": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "T": 0.013601918704807758,
+      "accuracy": 0.775,
+      "top2_accuracy": 0.825,
+      "macro_f1": 0.7723665223665224,
+      "per_class_recall": {
+        "happy": 1.0,
+        "sad": 1.0,
+        "calm": 0.6,
+        "energetic": 0.6,
+        "romantic": 0.8,
+        "melancholy": 0.6,
+        "angry": 1.0,
+        "dreamy": 0.6
+      },
+      "angry_second_share": 0.5588235294117647,
+      "angry_second_hits": 19,
+      "angry_second_denominator": 34,
+      "second_of_pred": {
+        "happy": {
+          "most_common_second": "energetic",
+          "share": 0.6666666666666666
+        },
+        "sad": {
+          "most_common_second": "angry",
+          "share": 1.0
+        },
+        "calm": {
+          "most_common_second": "angry",
+          "share": 0.5
+        },
+        "energetic": {
+          "most_common_second": "angry",
+          "share": 0.6666666666666666
+        },
+        "romantic": {
+          "most_common_second": "angry",
+          "share": 1.0
+        },
+        "melancholy": {
+          "most_common_second": "happy",
+          "share": 0.25
+        },
+        "angry": {
+          "most_common_second": "energetic",
+          "share": 1.0
+        },
+        "dreamy": {
+          "most_common_second": "calm",
+          "share": 1.0
+        }
+      }
+    },
+    "center": {
+      "variant": "center",
+      "bias": [
+        0.8898854851722717,
+        0.8691449761390686,
+        0.8886799812316895,
+        0.8861685991287231,
+        0.8828535676002502,
+        0.885439395904541,
+        0.8971186876296997,
+        0.8835526704788208
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "T": 0.01300183404237032,
+      "accuracy": 0.775,
+      "top2_accuracy": 0.85,
+      "macro_f1": 0.7753968253968254,
+      "per_class_recall": {
+        "happy": 1.0,
+        "sad": 1.0,
+        "calm": 0.6,
+        "energetic": 0.6,
+        "romantic": 0.8,
+        "melancholy": 0.8,
+        "angry": 0.8,
+        "dreamy": 0.6
+      },
+      "angry_second_share": 0.14285714285714285,
+      "angry_second_hits": 5,
+      "angry_second_denominator": 35,
+      "second_of_pred": {
+        "happy": {
+          "most_common_second": "energetic",
+          "share": 1.0
+        },
+        "sad": {
+          "most_common_second": "melancholy",
+          "share": 0.5714285714285714
+        },
+        "calm": {
+          "most_common_second": "sad",
+          "share": 0.3333333333333333
+        },
+        "energetic": {
+          "most_common_second": "happy",
+          "share": 0.5
+        },
+        "romantic": {
+          "most_common_second": "happy",
+          "share": 0.25
+        },
+        "melancholy": {
+          "most_common_second": "dreamy",
+          "share": 0.4
+        },
+        "angry": {
+          "most_common_second": "energetic",
+          "share": 0.8
+        },
+        "dreamy": {
+          "most_common_second": "calm",
+          "share": 0.3333333333333333
+        }
+      }
+    },
+    "zscore": {
+      "variant": "zscore",
+      "bias": [
+        0.8898854851722717,
+        0.8691449761390686,
+        0.8886799812316895,
+        0.8861685991287231,
+        0.8828535676002502,
+        0.885439395904541,
+        0.8971186876296997,
+        0.8835526704788208
+      ],
+      "scale": [
+        0.026299698278307915,
+        0.034739308059215546,
+        0.02789725549519062,
+        0.027877504006028175,
+        0.02547636814415455,
+        0.026723532006144524,
+        0.02665930613875389,
+        0.026317328214645386
+      ],
+      "T": 0.42064225673675537,
+      "accuracy": 0.775,
+      "top2_accuracy": 0.85,
+      "macro_f1": 0.7753968253968254,
+      "per_class_recall": {
+        "happy": 1.0,
+        "sad": 1.0,
+        "calm": 0.6,
+        "energetic": 0.6,
+        "romantic": 0.8,
+        "melancholy": 0.8,
+        "angry": 0.8,
+        "dreamy": 0.6
+      },
+      "angry_second_share": 0.14285714285714285,
+      "angry_second_hits": 5,
+      "angry_second_denominator": 35,
+      "second_of_pred": {
+        "happy": {
+          "most_common_second": "energetic",
+          "share": 1.0
+        },
+        "sad": {
+          "most_common_second": "melancholy",
+          "share": 0.5714285714285714
+        },
+        "calm": {
+          "most_common_second": "sad",
+          "share": 0.3333333333333333
+        },
+        "energetic": {
+          "most_common_second": "happy",
+          "share": 0.5
+        },
+        "romantic": {
+          "most_common_second": "happy",
+          "share": 0.25
+        },
+        "melancholy": {
+          "most_common_second": "romantic",
+          "share": 0.6
+        },
+        "angry": {
+          "most_common_second": "energetic",
+          "share": 0.8
+        },
+        "dreamy": {
+          "most_common_second": "calm",
+          "share": 0.3333333333333333
+        }
+      }
+    }
+  }
+}

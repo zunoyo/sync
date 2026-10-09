@@ -30,6 +30,28 @@ SYNC_IDX = {name: i for i, name in enumerate(TRAINED_SYNC_EMOTIONS)}
 _HF_SPLIT = {"train": "train", "val": "val", "test": "test"}
 
 
+def iter_emoset_rows(split: str, max_per_class: int = None, hf_dataset: str = "Woleek/EmoSet-118K"):
+    """
+    EmoSetForSync 와 똑같은 선택/필터 규칙으로 (PIL 이미지, sync_idx, valence, arousal)을 하나씩 내보낸다.
+    리스트에 쌓지 않으므로 클래스당 수천 장 이상에서도 메모리가 늘지 않는다(feature_cache 가 사용).
+    """
+    stream = load_dataset(hf_dataset, split=_HF_SPLIT[split], streaming=True)
+    per_class_count = {name: 0 for name in TRAINED_SYNC_EMOTIONS}
+    for row in stream:
+        sync_emotion = get_sync_label(row["emotion"])
+        if sync_emotion is None:
+            continue
+        if max_per_class is not None and per_class_count[sync_emotion] >= max_per_class:
+            if all(c >= max_per_class for c in per_class_count.values()):
+                break
+            continue
+        valence, arousal = get_va(sync_emotion)
+        per_class_count[sync_emotion] += 1
+        yield row["image"].convert("RGB"), SYNC_IDX[sync_emotion], valence, arousal
+    total = sum(per_class_count.values())
+    print(f"[EmoSet] split={split}: 총 {total}장 처리 " + ", ".join(f"{k}={v}" for k, v in per_class_count.items()))
+
+
 class EmoSetForSync(Dataset):
     """
     split: "train" | "val" | "test"

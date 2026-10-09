@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { usePlayer } from '../context/PlayerContext';
 import { useLibrary } from '../context/LibraryContext';
-import { EMOTION_LABELS, SYNC_MOODS, arLabel, fetchEmotionHistory, fmtMs, fullRecommend, sendFeedback, syncTrackToApp, vaLabel } from '../api/sync';
+import { EMOTION_LABELS, SYNC_GENRES, arLabel, fetchEmotionHistory, fmtMs, fullRecommend, sendFeedback, syncTrackToApp, vaLabel } from '../api/sync';
 import { fetchItunesTrack } from '../api/itunes';
 import AnalysisDetail from '../components/SyncAnalysis';
 
@@ -34,7 +34,7 @@ export default function Sync() {
   const { bump } = useLibrary();
   const [text, setText] = useState('');
   const [images, setImages] = useState([]); // { name, src(base64) } — 서버로는 첫 장만 전송
-  const [activeMoods, setActiveMoods] = useState(new Set());
+  const [activeGenres, setActiveGenres] = useState(new Set()); // 선택 사항 — 비어 있으면 전체 장르에서 추천
   const [status, setStatus] = useState('idle'); // idle | loading | finishing | error | done
   const [errorMsg, setErrorMsg] = useState('');
   const [result, setResult] = useState(null); // { emotion, tracks, historyId }
@@ -54,10 +54,10 @@ export default function Sync() {
     return () => { cancelled = true; };
   }, [isLoggedIn]);
 
-  function toggleMood(mood) {
-    setActiveMoods((prev) => {
+  function toggleGenre(key) {
+    setActiveGenres((prev) => {
       const next = new Set(prev);
-      next.has(mood) ? next.delete(mood) : next.add(mood);
+      next.has(key) ? next.delete(key) : next.add(key);
       return next;
     });
   }
@@ -87,7 +87,11 @@ export default function Sync() {
     setStatus('loading');
     setResult(null);
     setFeedbackSent(false);
-    const payload = { text: trimmed || null, imageUrl: images.length > 0 ? images[0].src : null };
+    const payload = {
+      text: trimmed || null,
+      imageUrl: images.length > 0 ? images[0].src : null,
+      genres: [...activeGenres],
+    };
     setText('');
     setImages([]);
 
@@ -132,13 +136,6 @@ export default function Sync() {
   }
 
   const orbState = status === 'loading' ? ' state-loading' : (status === 'finishing' || status === 'done') ? ' state-done' : '';
-  const captionActive = status === 'loading' || status === 'finishing' || status === 'done';
-  const captionText =
-    status === 'loading' ? '감정을 분석하고 있어요' :
-    status === 'finishing' ? '분석 완료' :
-    status === 'error' ? errorMsg :
-    '지금 기분이나 상황을 알려주세요';
-
   return (
     <div className="sync-center-col">
       <div className="page-eyebrow">Sync AI</div>
@@ -149,7 +146,6 @@ export default function Sync() {
         <div className="sync-orbit ring2"></div>
         <div className="sync-flare-core"></div>
       </div>
-      <p className={`orb-caption${captionActive ? ' active' : ''}`}>{captionText}</p>
 
       <div className="composer">
         <div className="prompt-box">
@@ -183,12 +179,28 @@ export default function Sync() {
         )}
       </div>
 
-      <div className="mood-chips">
-        {SYNC_MOODS.map((m) => (
-          <button key={m} className={`mood-chip ${activeMoods.has(m) ? 'active' : ''}`} onClick={() => toggleMood(m)}>
-            {m}
-          </button>
-        ))}
+      <div className="sync-genres">
+        <div className="sync-genres-head">
+          <span className="sync-genres-title">장르</span>
+          <span className="sync-genres-hint">
+            {activeGenres.size > 0 ? `${activeGenres.size}개 선택됨 — 이 장르 안에서 추천해요` : '선택 사항 · 고르지 않으면 모든 장르에서 추천해요'}
+          </span>
+          {activeGenres.size > 0 && (
+            <button className="sync-genres-clear" onClick={() => setActiveGenres(new Set())}>선택 해제</button>
+          )}
+        </div>
+        <div className="sync-genre-chips">
+          {SYNC_GENRES.map((g) => (
+            <button
+              key={g.key}
+              className={`sync-genre-chip ${activeGenres.has(g.key) ? 'active' : ''}`}
+              aria-pressed={activeGenres.has(g.key)}
+              onClick={() => toggleGenre(g.key)}
+            >
+              {g.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div id="sync-results" style={{ width: '100%' }}>
@@ -212,11 +224,6 @@ export default function Sync() {
           <div className="result-area">
             <div className="sync-loading-stage">
               <div className="sync-loading-visual">
-                <div className="sync-loading-orb">
-                  <div className="sync-loading-orb-ring"></div>
-                  <div className="sync-loading-orb-ring ring2"></div>
-                  <div className="sync-loading-orb-core">🎧</div>
-                </div>
                 <div className="sync-analyzing">
                   <div className="eq-bar"></div>
                   <div className="eq-bar"></div>
