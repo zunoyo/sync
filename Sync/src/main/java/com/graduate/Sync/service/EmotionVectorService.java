@@ -47,6 +47,7 @@ public class EmotionVectorService {
         );
         dto.setInputSummary(clip.getInputSummary());
         dto.setModelValAccuracy(clip.getModelValAccuracy());
+        dto.setReliability(clip.getReliability());
 
         // 3. DB 저장
         return emotionVectorRepository.save(dto.toEntity(user));

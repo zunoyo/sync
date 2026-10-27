@@ -3,12 +3,10 @@ import { useAuth } from '../context/AuthContext';
 import Landing from './Landing';
 import Splash from './Splash';
 
-const LANDING_SEEN_KEY = 'sync_landing_seen';
-
 /**
  * 앱 진입 시퀀스:
- * - 비로그인 + 처음 접속(이 브라우저에서 랜딩을 본 적 없음) → 랜딩 화면 → (클릭 시) 기존 스플래시 애니메이션
- * - 그 외(로그인 상태이거나, 이미 랜딩을 본 적 있음) → 기존 스플래시 애니메이션만
+ * - 비로그인 → (방문 기록과 상관없이 항상) 랜딩 화면 → (클릭 시) 기존 스플래시 애니메이션
+ * - 로그인 상태 → 기존 스플래시 애니메이션만
  *
  * 로그인 여부 확인이 끝나기 전(loading)에는 랜딩을 잘못 보여줬다 지우는 깜빡임을 막기 위해
  * 아무것도 렌더링하지 않는다 — 로그인 확인은 보통 API 호출 한 번으로 매우 빠르게 끝난다.
@@ -22,13 +20,8 @@ export default function IntroGate() {
 
   useEffect(() => {
     if (loading) return;
-    if (isLoggedIn) {
-      setShowLanding(false);
-    } else {
-      let seen = false;
-      try { seen = localStorage.getItem(LANDING_SEEN_KEY) === '1'; } catch { /* 시크릿 모드 등 */ }
-      setShowLanding(!seen);
-    }
+    // 로그인 전에는 방문 기록과 상관없이 항상 랜딩을 보여준다.
+    setShowLanding(!isLoggedIn);
     setDecided(true);
   }, [loading, isLoggedIn]);
 
@@ -42,7 +35,6 @@ export default function IntroGate() {
   }
 
   function handleLandingDone() {
-    try { localStorage.setItem(LANDING_SEEN_KEY, '1'); } catch { /* no-op */ }
     setLandingDone(true);
   }
 

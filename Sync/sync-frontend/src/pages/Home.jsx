@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { fetchItunesTrack, normalizeTrack } from '../api/itunes';
+import { fetchArtistPhoto } from '../api/spotifyCatalog';
+import { albumColor, heroTint } from '../utils/albumColor';
 import { plGradient, plEmoji, toggleLike as toggleLikeApi } from '../api/playlists';
 import { useAuth } from '../context/AuthContext';
 import { usePlayer } from '../context/PlayerContext';
@@ -103,11 +105,11 @@ export default function Home() {
         if (cancelled) return;
         const list = Array.isArray(data) ? data : [];
         setArtists(list);
-        // iTunes로 아티스트 이미지 보강 (비동기)
+        // 아티스트 사진 보강 (Spotify 아티스트 사진, 이름 일치할 때만)
         list.forEach(async (a) => {
-          const it = await fetchItunesTrack(a.name);
-          if (!cancelled && it?.albumArt) {
-            setArtistImages((prev) => ({ ...prev, [a.name]: it.albumArt }));
+          const url = await fetchArtistPhoto(a.name);
+          if (!cancelled && url) {
+            setArtistImages((prev) => ({ ...prev, [a.name]: url }));
           }
         });
       })
@@ -179,9 +181,9 @@ export default function Home() {
         const arr = Array.isArray(list) ? list : [];
         setTrendingArtists(arr);
         arr.forEach(async (a) => {
-          const it = await fetchItunesTrack(a.name);
-          if (!cancelled && it?.albumArt) {
-            setTrendingArtistImages((prev) => ({ ...prev, [a.name]: it.albumArt }));
+          const url = await fetchArtistPhoto(a.name, a.externalId);
+          if (!cancelled && url) {
+            setTrendingArtistImages((prev) => ({ ...prev, [a.name]: url }));
           }
         });
       })
@@ -215,6 +217,13 @@ export default function Home() {
   }, [selectedGenre]);
 
   const heroTrack = chart && chart.length ? chart[0] : null;
+  const [heroStyle, setHeroStyle] = useState(null);
+  const heroArt = heroTrack?.albumArt || null;
+  useEffect(() => {
+    let cancelled = false;
+    albumColor(heroArt).then((c) => { if (!cancelled) setHeroStyle(heroTint(c)); });
+    return () => { cancelled = true; };
+  }, [heroArt]);
 
   return (
     <>
@@ -239,7 +248,7 @@ export default function Home() {
         ))}
       </div>
 
-      <div className="hero-banner">
+      <div className="hero-banner" style={heroStyle || undefined}>
         <div className="hero-art">
           {heroTrack?.albumArt
             ? <img src={heroTrack.albumArt} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12 }} />

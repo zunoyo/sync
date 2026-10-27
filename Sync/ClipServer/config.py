@@ -19,6 +19,11 @@ class Settings(BaseSettings):
         "http://127.0.0.1:8081",
     ]
 
+    # 복합(이미지+텍스트) 융합 방식: "late"(후기 융합, 기본) | "early"(예전 임베딩 평균)
+    FUSION_MODE:  str   = "late"
+    # 후기 융합에서 이미지 경로 확률의 지수 가중치(0~1). 0.5 = 기하평균. eval_fusion.py --grid 로 비교
+    FUSION_W_IMG: float = 0.1
+
     # 추천 설정
     MAX_LASTFM_TRACKS:  int = 20
     MAX_SPOTIFY_TRACKS: int = 10

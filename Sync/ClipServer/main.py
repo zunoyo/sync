@@ -106,6 +106,16 @@ def _run_analysis(input_type: str,
         lastfm_tags       = result["lastfm_tags"],
         input_summary     = summary,
         model_val_accuracy = result.get("model_val_accuracy"),
+        reliability      = result.get("reliability"),
+        # 복합 입력의 후기 융합 정보(그 외 입력에서는 result 에 없으므로 전부 None)
+        fusion_mode      = result.get("fusion_mode"),
+        conflict         = result.get("conflict"),
+        conflict_level   = result.get("conflict_level"),
+        agreement        = result.get("agreement"),
+        image_emotion    = result.get("image_emotion"),
+        text_emotion     = result.get("text_emotion"),
+        image_confidence = result.get("image_confidence"),
+        text_confidence  = result.get("text_confidence"),
     )
 
 

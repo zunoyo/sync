@@ -1,0 +1,525 @@
+{
+ "_note": "봉인 평가셋(fresh2): 학습·하이퍼파라미터·가중치 선택에 절대 쓰지 않는다. 최종 보고용. 작성자 Claude 초안, 라벨 모호하면 직접 수정.",
+ "items": [
+  {
+   "text": "방금 복권 3등 됐어 완전 신난다",
+   "label": "happy",
+   "lang": "ko"
+  },
+  {
+   "text": "월요일인데도 이상하게 기분이 좋아",
+   "label": "happy",
+   "lang": "ko"
+  },
+  {
+   "text": "친구들이랑 바닷가 놀러 와서 너무 즐거워",
+   "label": "happy",
+   "lang": "ko"
+  },
+  {
+   "text": "오늘 발표 대성공이라 하루가 반짝반짝해",
+   "label": "happy",
+   "lang": "ko"
+  },
+  {
+   "text": "맛있는 아이스크림 먹으면서 걷는 오후",
+   "label": "happy",
+   "lang": "ko"
+  },
+  {
+   "text": "승진 소식 들었어 날아갈 것 같아",
+   "label": "happy",
+   "lang": "ko"
+  },
+  {
+   "text": "유쾌하게 웃고 싶을 때 듣는 노래",
+   "label": "happy",
+   "lang": "ko"
+  },
+  {
+   "text": "졸업하는 날 다 같이 환호하는 기분",
+   "label": "happy",
+   "lang": "ko"
+  },
+  {
+   "text": "오랜만에 만난 친구랑 하루 종일 깔깔 웃었어",
+   "label": "happy",
+   "lang": "ko"
+  },
+  {
+   "text": "선물 받은 인형을 안고 좋아서 빙글빙글 돌았어",
+   "label": "happy",
+   "lang": "ko"
+  },
+  {
+   "text": "시험 끝! 오늘은 아무 걱정 없어서 최고야",
+   "label": "happy",
+   "lang": "ko"
+  },
+  {
+   "text": "아침 햇살에 기분 좋게 눈이 떠졌어",
+   "label": "happy",
+   "lang": "ko"
+  },
+  {
+   "text": "행복한 하루였다고 말할 수 있는 날",
+   "label": "happy",
+   "lang": "ko"
+  },
+  {
+   "text": "하루 종일 멍하니 있다가 눈물이 쏟아졌어",
+   "label": "sad",
+   "lang": "ko"
+  },
+  {
+   "text": "믿었던 사람한테 배신당해서 너무 슬퍼",
+   "label": "sad",
+   "lang": "ko"
+  },
+  {
+   "text": "헤어진 연인이 그리워서 가슴이 찢어져",
+   "label": "sad",
+   "lang": "ko"
+  },
+  {
+   "text": "혼자 남은 집이 너무 쓸쓸해서 울음이 나",
+   "label": "sad",
+   "lang": "ko"
+  },
+  {
+   "text": "슬픈 이별 노래로 마음껏 울고 싶어",
+   "label": "sad",
+   "lang": "ko"
+  },
+  {
+   "text": "면접에서 또 떨어져서 눈물이 나",
+   "label": "sad",
+   "lang": "ko"
+  },
+  {
+   "text": "사랑하는 할아버지가 돌아가셨어 너무 슬퍼",
+   "label": "sad",
+   "lang": "ko"
+  },
+  {
+   "text": "외롭고 서러워서 이불 속에서 울었어",
+   "label": "sad",
+   "lang": "ko"
+  },
+  {
+   "text": "괜히 서운하고 가슴 아픈 하루",
+   "label": "sad",
+   "lang": "ko"
+  },
+  {
+   "text": "이별 통보를 받고 그대로 주저앉았어",
+   "label": "sad",
+   "lang": "ko"
+  },
+  {
+   "text": "아무도 모르게 혼자 눈물을 삼켰어",
+   "label": "sad",
+   "lang": "ko"
+  },
+  {
+   "text": "너무 힘들어서 다 내려놓고 싶고 눈물만 나",
+   "label": "sad",
+   "lang": "ko"
+  },
+  {
+   "text": "상처받은 마음을 안고 우는 밤",
+   "label": "sad",
+   "lang": "ko"
+  },
+  {
+   "text": "비 내리는 오후 오래된 카페에서 옛 생각에 잠겨",
+   "label": "melancholy",
+   "lang": "ko"
+  },
+  {
+   "text": "어릴 적 놀던 골목을 지나다 아련해졌어",
+   "label": "melancholy",
+   "lang": "ko"
+  },
+  {
+   "text": "늦가을 쓸쓸한 바람 속에서 그리운 얼굴이 떠올라",
+   "label": "melancholy",
+   "lang": "ko"
+  },
+  {
+   "text": "옛날 일기장을 펼쳐보니 가슴이 먹먹하게 그립다",
+   "label": "melancholy",
+   "lang": "ko"
+  },
+  {
+   "text": "낡은 앨범 속 웃는 얼굴들이 이제는 아득해",
+   "label": "melancholy",
+   "lang": "ko"
+  },
+  {
+   "text": "퇴근길 노을을 보며 지난날을 곱씹었어",
+   "label": "melancholy",
+   "lang": "ko"
+  },
+  {
+   "text": "빈 방에 흐르는 오래된 재즈가 쓸쓸하게 들려",
+   "label": "melancholy",
+   "lang": "ko"
+  },
+  {
+   "text": "새벽에 혼자 깨어 지난 인연을 떠올렸어",
+   "label": "melancholy",
+   "lang": "ko"
+  },
+  {
+   "text": "쓸쓸하지만 포근한 가을 저녁 같은 노래",
+   "label": "melancholy",
+   "lang": "ko"
+  },
+  {
+   "text": "옛 동네 버스 정류장에서 추억에 잠긴 시간",
+   "label": "melancholy",
+   "lang": "ko"
+  },
+  {
+   "text": "센치한 밤에 듣는 잔잔한 인디 발라드",
+   "label": "melancholy",
+   "lang": "ko"
+  },
+  {
+   "text": "낙엽 지는 거리에서 괜히 마음이 시려",
+   "label": "melancholy",
+   "lang": "ko"
+  },
+  {
+   "text": "지나간 시절의 냄새가 그리운 저녁",
+   "label": "melancholy",
+   "lang": "ko"
+  },
+  {
+   "text": "조용한 방에서 차분하게 하루를 마무리하고 싶어",
+   "label": "calm",
+   "lang": "ko"
+  },
+  {
+   "text": "잔잔한 물소리 들으며 마음을 가라앉히는 중",
+   "label": "calm",
+   "lang": "ko"
+  },
+  {
+   "text": "책 읽을 때 틀어놓기 좋은 편안한 음악",
+   "label": "calm",
+   "lang": "ko"
+  },
+  {
+   "text": "느긋하게 산책하며 머리를 식히는 오후",
+   "label": "calm",
+   "lang": "ko"
+  },
+  {
+   "text": "숙면에 도움이 되는 부드러운 선율",
+   "label": "calm",
+   "lang": "ko"
+  },
+  {
+   "text": "고요한 아침 명상하는 시간",
+   "label": "calm",
+   "lang": "ko"
+  },
+  {
+   "text": "따뜻한 차 한 잔과 평화로운 저녁",
+   "label": "calm",
+   "lang": "ko"
+  },
+  {
+   "text": "마음이 평온해지는 어쿠스틱 연주",
+   "label": "calm",
+   "lang": "ko"
+  },
+  {
+   "text": "잠깐 눈 감고 호흡을 가다듬고 싶어",
+   "label": "calm",
+   "lang": "ko"
+  },
+  {
+   "text": "주말 오전 느리게 흐르는 시간이 좋아",
+   "label": "calm",
+   "lang": "ko"
+  },
+  {
+   "text": "스트레스 풀리는 포근하고 안정된 음악",
+   "label": "calm",
+   "lang": "ko"
+  },
+  {
+   "text": "차분히 집중해서 과제하는 밤",
+   "label": "calm",
+   "lang": "ko"
+  },
+  {
+   "text": "바람 소리만 들리는 한적한 숲길",
+   "label": "calm",
+   "lang": "ko"
+  },
+  {
+   "text": "운동 시작 전에 파워 업 시켜줄 노래",
+   "label": "energetic",
+   "lang": "ko"
+  },
+  {
+   "text": "달릴 때 속도 맞추기 좋은 빠른 비트",
+   "label": "energetic",
+   "lang": "ko"
+  },
+  {
+   "text": "아침 조깅 하면서 에너지 충전하고 싶어",
+   "label": "energetic",
+   "lang": "ko"
+  },
+  {
+   "text": "신나게 점프하며 즐기는 페스티벌 음악",
+   "label": "energetic",
+   "lang": "ko"
+  },
+  {
+   "text": "졸음 쫓고 텐션 올리고 싶은 노래",
+   "label": "energetic",
+   "lang": "ko"
+  },
+  {
+   "text": "박력 넘치는 드럼에 맞춰 근력 운동 하는 중",
+   "label": "energetic",
+   "lang": "ko"
+  },
+  {
+   "text": "체력이 남아돌아서 뛰고 싶어",
+   "label": "energetic",
+   "lang": "ko"
+  },
+  {
+   "text": "클럽에서 흔들기 좋은 하이에너지 트랙",
+   "label": "energetic",
+   "lang": "ko"
+  },
+  {
+   "text": "오늘 헬스 데이 의욕 폭발이야",
+   "label": "energetic",
+   "lang": "ko"
+  },
+  {
+   "text": "농구 코트를 질주하는 듯한 파워풀한 곡",
+   "label": "energetic",
+   "lang": "ko"
+  },
+  {
+   "text": "몸이 들썩이는 신나는 댄스 음악",
+   "label": "energetic",
+   "lang": "ko"
+  },
+  {
+   "text": "활력 넘치는 응원 구호 같은 노래",
+   "label": "energetic",
+   "lang": "ko"
+  },
+  {
+   "text": "출발선에서 심장이 터질 듯 뛰는 순간",
+   "label": "energetic",
+   "lang": "ko"
+  },
+  {
+   "text": "좋아하는 사람 앞에서 심장이 쿵쾅거려",
+   "label": "romantic",
+   "lang": "ko"
+  },
+  {
+   "text": "기념일 서프라이즈를 준비하며 설레는 중",
+   "label": "romantic",
+   "lang": "ko"
+  },
+  {
+   "text": "달콤한 속삭임 같은 사랑 노래",
+   "label": "romantic",
+   "lang": "ko"
+  },
+  {
+   "text": "썸 타는 그 사람 답장을 기다리며 두근두근",
+   "label": "romantic",
+   "lang": "ko"
+  },
+  {
+   "text": "연인과 함께 야경 보며 걷는 저녁",
+   "label": "romantic",
+   "lang": "ko"
+  },
+  {
+   "text": "처음 사랑을 느꼈던 풋풋한 순간",
+   "label": "romantic",
+   "lang": "ko"
+  },
+  {
+   "text": "프러포즈하는 장면에 어울리는 곡",
+   "label": "romantic",
+   "lang": "ko"
+  },
+  {
+   "text": "손 잡고 걷는 것만으로도 행복해서 설레",
+   "label": "romantic",
+   "lang": "ko"
+  },
+  {
+   "text": "고백 받고 나서 하루 종일 얼굴이 달아올라",
+   "label": "romantic",
+   "lang": "ko"
+  },
+  {
+   "text": "사랑하는 사람에게 전하는 감미로운 노래",
+   "label": "romantic",
+   "lang": "ko"
+  },
+  {
+   "text": "데이트 코스 짜면서 혼자 웃고 있어",
+   "label": "romantic",
+   "lang": "ko"
+  },
+  {
+   "text": "내 사랑에게 바치는 세레나데",
+   "label": "romantic",
+   "lang": "ko"
+  },
+  {
+   "text": "눈 마주칠 때마다 설레는 우리 사이",
+   "label": "romantic",
+   "lang": "ko"
+  },
+  {
+   "text": "아 진짜 열받아서 미치겠다",
+   "label": "angry",
+   "lang": "ko"
+  },
+  {
+   "text": "내 말은 하나도 안 듣고 우기는 사람 때문에 폭발 직전",
+   "label": "angry",
+   "lang": "ko"
+  },
+  {
+   "text": "소리 지르며 듣고 싶은 격렬한 하드록",
+   "label": "angry",
+   "lang": "ko"
+  },
+  {
+   "text": "무례한 사람 때문에 하루 종일 짜증이 나",
+   "label": "angry",
+   "lang": "ko"
+  },
+  {
+   "text": "분노가 치밀어서 주먹이 쥐어져",
+   "label": "angry",
+   "lang": "ko"
+  },
+  {
+   "text": "배신자한테 복수하고 싶은 마음뿐이야",
+   "label": "angry",
+   "lang": "ko"
+  },
+  {
+   "text": "억울한 일을 당해서 화가 끓어올라",
+   "label": "angry",
+   "lang": "ko"
+  },
+  {
+   "text": "화난 날 틀어놓는 묵직하고 거친 사운드",
+   "label": "angry",
+   "lang": "ko"
+  },
+  {
+   "text": "꼴도 보기 싫은 사람이 또 나타났어",
+   "label": "angry",
+   "lang": "ko"
+  },
+  {
+   "text": "참을성이 바닥나서 다 터뜨리고 싶어",
+   "label": "angry",
+   "lang": "ko"
+  },
+  {
+   "text": "이를 꽉 물게 만드는 어두운 메탈",
+   "label": "angry",
+   "lang": "ko"
+  },
+  {
+   "text": "말도 안 되는 변명에 속이 뒤집혀",
+   "label": "angry",
+   "lang": "ko"
+  },
+  {
+   "text": "분통 터지는 상황에서 듣는 강렬한 기타",
+   "label": "angry",
+   "lang": "ko"
+  },
+  {
+   "text": "별빛이 흘러내리는 환상 속을 걷는 기분",
+   "label": "dreamy",
+   "lang": "ko"
+  },
+  {
+   "text": "몽환적인 분위기의 신비로운 노래",
+   "label": "dreamy",
+   "lang": "ko"
+  },
+  {
+   "text": "꿈에서 만난 신비한 숲을 다시 떠올려",
+   "label": "dreamy",
+   "lang": "ko"
+  },
+  {
+   "text": "구름 위에 누워 상상에 빠져 있어",
+   "label": "dreamy",
+   "lang": "ko"
+  },
+  {
+   "text": "안개 속에서 아른거리는 불빛 같은 소리",
+   "label": "dreamy",
+   "lang": "ko"
+  },
+  {
+   "text": "우주를 떠도는 듯 아득한 선율",
+   "label": "dreamy",
+   "lang": "ko"
+  },
+  {
+   "text": "비현실적으로 아름다운 새벽의 푸른빛",
+   "label": "dreamy",
+   "lang": "ko"
+  },
+  {
+   "text": "몽롱한 의식 속으로 스며드는 부드러운 신스",
+   "label": "dreamy",
+   "lang": "ko"
+  },
+  {
+   "text": "꿈결처럼 번지는 달빛 아래의 공상",
+   "label": "dreamy",
+   "lang": "ko"
+  },
+  {
+   "text": "요정이 사는 마법 숲 같은 신비한 분위기",
+   "label": "dreamy",
+   "lang": "ko"
+  },
+  {
+   "text": "무중력으로 둥둥 떠다니는 듯한 느낌",
+   "label": "dreamy",
+   "lang": "ko"
+  },
+  {
+   "text": "잠들기 전 상상의 나래를 펴는 시간",
+   "label": "dreamy",
+   "lang": "ko"
+  },
+  {
+   "text": "오로라 아래 별똥별이 흐르는 환상적인 밤",
+   "label": "dreamy",
+   "lang": "ko"
+  }
+ ]
+}

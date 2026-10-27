@@ -1,0 +1,70 @@
+{
+  "n": 86,
+  "human_claude_agree": 0.6628,
+  "model_human_agree": 0.5814,
+  "model_claude_agree": 0.7674,
+  "acc_on_agreed": 0.807,
+  "n_agreed": 57,
+  "acc_accept_either": 0.814,
+  "acc_on_disagreed_accept_either": 0.8276,
+  "n_disagreed": 29,
+  "per_class_on_agreed": {
+    "happy": {
+      "n_agreed": 8,
+      "recall": 0.875
+    },
+    "sad": {
+      "n_agreed": 5,
+      "recall": 0.8
+    },
+    "calm": {
+      "n_agreed": 17,
+      "recall": 0.7059
+    },
+    "energetic": {
+      "n_agreed": 10,
+      "recall": 1.0
+    },
+    "romantic": {
+      "n_agreed": 8,
+      "recall": 0.75
+    },
+    "melancholy": {
+      "n_agreed": 1,
+      "recall": 0.0
+    },
+    "angry": {
+      "n_agreed": 5,
+      "recall": 1.0
+    },
+    "dreamy": {
+      "n_agreed": 3,
+      "recall": 0.6667
+    }
+  },
+  "disagree_pairs": {
+    "energetic/happy": 6,
+    "melancholy/sad": 3,
+    "dreamy/calm": 3,
+    "romantic/melancholy": 3,
+    "energetic/angry": 2,
+    "dreamy/melancholy": 2,
+    "romantic/dreamy": 2,
+    "calm/romantic": 2,
+    "calm/melancholy": 1,
+    "happy/dreamy": 1
+  },
+  "miss_pairs_on_agreed": {
+    "calm→dreamy": 5,
+    "romantic→calm": 1,
+    "romantic→happy": 1,
+    "happy→dreamy": 1,
+    "melancholy→angry": 1,
+    "sad→angry": 1,
+    "dreamy→happy": 1
+  },
+  "final": {
+    "n": 119,
+    "acc": 0.5798
+  }
+}

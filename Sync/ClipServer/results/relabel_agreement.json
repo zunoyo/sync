@@ -1,0 +1,29 @@
+{
+  "n": 60,
+  "agree": 46,
+  "rate": 0.7666666666666667,
+  "kappa": 0.726027397260274,
+  "per_class": {
+    "happy": "5/6",
+    "sad": "3/5",
+    "calm": "10/14",
+    "energetic": "12/12",
+    "romantic": "9/9",
+    "melancholy": "0/4",
+    "angry": "2/4",
+    "dreamy": "5/6"
+  },
+  "swaps": {
+    "angry→melancholy": 2,
+    "calm→happy": 2,
+    "melancholy→angry": 2,
+    "calm→romantic": 1,
+    "happy→energetic": 1,
+    "melancholy→sad": 1,
+    "calm→dreamy": 1,
+    "dreamy→romantic": 1,
+    "sad→melancholy": 1,
+    "melancholy→romantic": 1,
+    "sad→angry": 1
+  }
+}

@@ -1,6 +1,6 @@
 /**
  * SYNC — Right Panel Module (v3.1)
- * - 가사 fetch (lrclib.net → lyrics.ovh 폴백)
+ * - 가사 fetch (서버 /api/lyrics 프록시 → lrclib.net → lyrics.ovh 폴백)
  * - 타임스탬프 가사: posMs 없어도 durationMs × progress% 로 추정
  * - 가사 로드 완료 즉시 현재 재생 위치로 점프
  * - 전체뷰 DOM 없으면 먼저 renderLyrics 후 하이라이트
@@ -14,6 +14,9 @@ const RightPanel = (() => {
   let _timedLines    = [];
   let _lyricsLoaded  = false;
   let _lastLyricIdx  = -1;
+  let _offsetMs      = 0;      // 곡별 수동 싱크 보정(+: 가사를 더 일찍 표시)
+  let _offsetKey     = '';
+  let _curTrack      = null;
 
   /* ── Open / Close ── */
   function open() {
@@ -105,14 +108,194 @@ const RightPanel = (() => {
     if (!isOpen) open();
   }
 
+  /* ══ 곡별 수동 싱크 보정 ═════════════════════════════════
+     lrclib 의 타임스탬프와 Spotify 음원이 곡마다 조금씩 다를 수 있어서,
+     맞지 않는 곡은 ± 버튼으로 0.25초씩 직접 맞추고 브라우저에 기억해 둔다. */
+  function _trackKey(t) { return 'sync.lyricOffset:' + (t?.name || '') + '|' + (t?.artist || ''); }
+  function _loadOffset(t) {
+    _offsetKey = _trackKey(t);
+    let v = 0;
+    try { v = parseInt(localStorage.getItem(_offsetKey) || '0', 10) || 0; } catch (e) {}
+    _offsetMs = v;
+  }
+  function _fmtOffset() { return (_offsetMs >= 0 ? '+' : '−') + (Math.abs(_offsetMs) / 1000).toFixed(2).replace(/0$/, '') + 's'; }
+  function _updateSyncUi() {
+    const show = _lyricsLoaded && _timedLines.length > 0;
+    document.querySelectorAll('.lyr-sync').forEach(el => { el.hidden = !show; });
+    document.querySelectorAll('.lyr-offset-val').forEach(el => { el.textContent = _fmtOffset(); });
+  }
+  function nudge(delta) {
+    _offsetMs = Math.max(-5000, Math.min(5000, _offsetMs + delta));
+    try { _offsetMs === 0 ? localStorage.removeItem(_offsetKey) : localStorage.setItem(_offsetKey, String(_offsetMs)); } catch (e) {}
+    _updateSyncUi();
+    _reapply();
+  }
+  function resetOffset() { nudge(-_offsetMs); }
+  function _reapply() {
+    if (!_timedLines.length || typeof Player === 'undefined') return;
+    const ps = Player.getState();
+    if (!ps.useSpotify) return;
+    const elapsed = ps.isPlaying ? Math.min(performance.now() - _anchor.t, 1200) : 0;
+    _lastLyricIdx = -1;
+    _applyTimed(_anchor.pos + elapsed + LYRIC_LEAD_MS + _offsetMs);
+  }
+
+  /* ══ 앨범아트 색 → 가사 배경 ═════════════════════════════ */
+  const _colorCache = new Map();
+  function _albumColor(url) {
+    return new Promise(resolve => {
+      if (!url) return resolve(null);
+      if (_colorCache.has(url)) return resolve(_colorCache.get(url));
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        let out = null;
+        try {
+          const N = 24, cv = document.createElement('canvas');
+          cv.width = cv.height = N;
+          const g = cv.getContext('2d', { willReadFrequently: true });
+          g.drawImage(img, 0, 0, N, N);
+          const d = g.getImageData(0, 0, N, N).data;
+          let r = 0, gr = 0, b = 0, w = 0;
+          for (let i = 0; i < d.length; i += 4) {
+            const R = d[i], G = d[i + 1], B = d[i + 2];
+            const mx = Math.max(R, G, B), mn = Math.min(R, G, B);
+            const sat = (mx - mn) / (mx || 1), lum = (R + G + B) / 765;
+            const wt = 0.15 + sat * sat * 2 + (lum > 0.08 && lum < 0.92 ? 0.2 : 0);  // 채도 높은 색을 더 반영
+            r += R * wt; gr += G * wt; b += B * wt; w += wt;
+          }
+          r /= w; gr /= w; b /= w;
+          const mx = Math.max(r, gr, b) / 255, mn = Math.min(r, gr, b) / 255, l = (mx + mn) / 2, dl = mx - mn;
+          let h = 0, sat = 0;
+          if (dl > 0.001) {
+            sat = dl / (1 - Math.abs(2 * l - 1));
+            if (mx === r / 255) h = ((gr - b) / 255 / dl) % 6;
+            else if (mx === gr / 255) h = (b - r) / 255 / dl + 2;
+            else h = (r - gr) / 255 / dl + 4;
+            h = (h * 60 + 360) % 360;
+          }
+          out = { h: Math.round(h), s: Math.min(0.72, sat * 1.1) };
+        } catch (e) { out = null; }   // CORS 로 픽셀을 못 읽는 경우
+        _colorCache.set(url, out);
+        resolve(out);
+      };
+      img.onerror = () => { _colorCache.set(url, null); resolve(null); };
+      img.src = url;
+    });
+  }
+  async function _applyTint(track) {
+    const root = document.documentElement;
+    const col = await _albumColor(track?.albumArt);
+    if (_curTrack !== track) return;   // 그 사이 곡이 바뀜
+    if (!col) { root.style.removeProperty('--lyr-bg'); root.style.removeProperty('--lyr-bg-big'); return; }
+    const s = Math.round(col.s * 100);
+    root.style.setProperty('--lyr-bg', `linear-gradient(160deg, hsl(${col.h} ${s}% 30%), hsl(${col.h} ${s}% 17%))`);
+    root.style.setProperty('--lyr-bg-big', `linear-gradient(160deg, hsl(${col.h} ${s}% 27%), hsl(${col.h} ${Math.max(10, s - 10)}% 12%))`);
+  }
+
+  /* ══ 가사 크게 보기 (화면 가운데 오버레이) ═══════════════ */
+  let _bigEl = null, _bigTimer = null, _bigLines = null, _bigIdx = -2;
+  const _esc = (t) => String(t).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+
+  function _ensureBig() {
+    if (_bigEl) return _bigEl;
+    const el = document.createElement('div');
+    el.className = 'lyr-big';
+    el.id = 'lyr-big';
+    el.innerHTML = `
+      <div class="lyr-big-card" role="dialog" aria-modal="true" aria-label="가사 크게 보기">
+        <div class="lyr-big-head">
+          <img class="lyr-big-art" id="lyr-big-art" alt="" hidden>
+          <div class="lyr-big-meta"><div class="lyr-big-title" id="lyr-big-title"></div><div class="lyr-big-artist" id="lyr-big-artist"></div></div>
+          <span class="lyr-sync" hidden title="가사가 노래보다 늦으면 +, 빠르면 −">
+            <button type="button" onclick="RightPanel.nudge(-250)" aria-label="가사 늦게">−</button>
+            <span class="lyr-offset-val" onclick="RightPanel.resetOffset()" title="클릭하면 0으로">+0s</span>
+            <button type="button" onclick="RightPanel.nudge(250)" aria-label="가사 빠르게">+</button>
+          </span>
+          <button type="button" class="lyr-big-close" onclick="RightPanel.closeBig()" aria-label="닫기">✕</button>
+        </div>
+        <div class="lyr-big-body" id="lyr-big-body"></div>
+      </div>`;
+    el.addEventListener('mousedown', e => { if (e.target === el) closeBig(); });
+    document.body.appendChild(el);
+    _bigEl = el;
+    return el;
+  }
+  function _bigBuild() {
+    const body = document.getElementById('lyr-big-body');
+    if (!body) return;
+    _bigLines = _lyricsLines;
+    _bigIdx = -2;
+    if (!_lyricsLoaded || !_lyricsLines.length) {
+      body.innerHTML = '<div class="lyr-big-empty">' + (document.querySelector('#rp-lyrics-container')?.textContent.trim() || '가사가 없어요') + '</div>';
+      return;
+    }
+    body.innerHTML = _lyricsLines.map((l, i) => `<div class="lb-line" data-i="${i}">${_esc(l)}</div>`).join('');
+    body.onclick = (e) => {
+      const row = e.target.closest('.lb-line'); if (!row || typeof Player === 'undefined') return;
+      const i = +row.dataset.i;
+      if (_timedLines[i]) Player.seekMs(_timedLines[i].ms);
+      else Player.seek(i / _lyricsLines.length * 100);
+    };
+  }
+  function _bigHighlight(idx, instant) {
+    const body = document.getElementById('lyr-big-body');
+    if (!body) return;
+    _bigIdx = idx;
+    const rows = body.querySelectorAll('.lb-line');
+    rows.forEach((r, i) => {
+      const dist = Math.abs(i - idx);
+      r.classList.toggle('active', i === idx);
+      r.style.opacity = i === idx ? '1' : String(Math.max(0.28, 0.62 - dist * 0.12));
+    });
+    const row = rows[idx];
+    if (row) body.scrollTo({ top: row.offsetTop - body.clientHeight / 2 + row.clientHeight / 2, behavior: instant ? 'instant' : 'smooth' });
+  }
+  function openBig() {
+    const el = _ensureBig();
+    const t = _curTrack || {};
+    document.getElementById('lyr-big-title').textContent  = t.name   || '';
+    document.getElementById('lyr-big-artist').textContent = t.artist || '';
+    const art = document.getElementById('lyr-big-art');
+    if (t.albumArt) { art.src = t.albumArt; art.hidden = false; } else art.hidden = true;
+    _bigBuild();
+    _updateSyncUi();
+    el.classList.add('open');
+    document.addEventListener('keydown', _bigKey);
+    _bigHighlight(Math.max(_lastLyricIdx, 0), true);
+    clearInterval(_bigTimer);
+    _bigTimer = setInterval(() => {
+      if (_bigLines !== _lyricsLines || (_lyricsLoaded && !document.querySelector('#lyr-big-body .lb-line'))) {
+        const t2 = _curTrack || {};
+        document.getElementById('lyr-big-title').textContent  = t2.name   || '';
+        document.getElementById('lyr-big-artist').textContent = t2.artist || '';
+        const a2 = document.getElementById('lyr-big-art');
+        if (t2.albumArt) { a2.src = t2.albumArt; a2.hidden = false; } else a2.hidden = true;
+        _bigBuild(); _updateSyncUi();
+        _bigHighlight(Math.max(_lastLyricIdx, 0), true);
+      } else if (_lastLyricIdx !== _bigIdx && _lastLyricIdx >= 0) {
+        _bigHighlight(_lastLyricIdx);
+      }
+    }, 120);
+  }
+  function closeBig() {
+    if (!_bigEl) return;
+    _bigEl.classList.remove('open');
+    document.removeEventListener('keydown', _bigKey);
+    clearInterval(_bigTimer); _bigTimer = null;
+  }
+  function _bigKey(e) { if (e.key === 'Escape') closeBig(); }
+
   /* ══ 가사 fetch ══════════════════════════════════════════ */
   function _parseLrc(lrcText) {
     const result = [];
     for (const line of lrcText.split('\n')) {
       const m = line.match(/\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/);
       if (!m) continue;
+      // [mm:ss.xx] 의 xx 는 1/100초 → 자릿수를 3자리(ms)로 맞춰서 더한다.
+      // (예전에는 '50' 을 50ms 로 읽어서 가사가 평균 0.5초, 최대 ~1초 일찍 넘어갔다)
       const ms   = (parseInt(m[1]) * 60 + parseInt(m[2])) * 1000
-                 + parseInt(m[3].length === 2 ? m[3] : m[3].slice(0,3));
+                 + parseInt(m[3].padEnd(3, '0').slice(0, 3));
       const text = m[4].trim();
       if (text) result.push({ ms, text });
     }
@@ -120,10 +303,14 @@ const RightPanel = (() => {
   }
 
   async function _fetchLyrics(track) {
+    _curTrack     = track;
+    _loadOffset(track);
+    _applyTint(track);
     _lyricsLines  = [];
     _timedLines   = [];
     _lyricsLoaded = false;
     _lastLyricIdx = -1;
+    _updateSyncUi();
 
     const c = document.getElementById('rp-lyrics-container');
     if (!c) return;
@@ -132,62 +319,36 @@ const RightPanel = (() => {
 
     if (!track?.name) return;
 
-    /* ① lrclib.net — 타임스탬프 포함, 한국어 지원 */
+    /* 서버 프록시(/api/lyrics)가 lrclib → lyrics.ovh 순으로 대신 조회한다.
+       브라우저에서 lrclib.net 을 직접 부르면 CORS/520 으로 실패하는 일이 잦았다. */
+    const msg = (t) => '<div style="padding:24px;text-align:center;color:var(--text-secondary);font-size:13px">' + t + '</div>';
     try {
-      const q   = new URLSearchParams({
-        artist_name: track.artist || '',
-        track_name:  track.name,
-      });
-      const res  = await fetch(`https://lrclib.net/api/get?${q}`);
-      if (res.ok) {
-        const data = await res.json();
-        const synced = data?.syncedLyrics;
-        const plain  = data?.plainLyrics;
+      const q   = new URLSearchParams({ artist: track.artist || '', title: track.name });
+      // 곡 길이(초)를 같이 보내 서버가 같은 제목의 다른 버전/다른 곡 가사를 걸러내게 한다
+      const durSec = track.durationMs ? Math.round(track.durationMs / 1000) : (track.durationSec || 0);
+      if (durSec > 0) q.set('duration', String(durSec));
+      const res = await fetch('/api/lyrics?' + q);
+      const data = res.ok ? await res.json() : null;
 
-        if (synced) {
-          _timedLines  = _parseLrc(synced);
-          _lyricsLines = _timedLines.map(t => t.text);
-          _lyricsLoaded = true;
-          _syncToCurrentPosition();  // 로드 완료 즉시 현재 위치로 점프
-          return;
-        }
-        if (plain) {
-          _lyricsLines  = plain.split('\n').map(l => l.trim()).filter(l => l).slice(0, 60);
-          _lyricsLoaded = true;
-          _syncToCurrentPosition();
-          return;
-        }
+      if (data?.syncedLyrics) {
+        _timedLines  = _parseLrc(data.syncedLyrics);
+        _lyricsLines = _timedLines.map(t => t.text);
+        _lyricsLoaded = true;
+        _updateSyncUi();
+        _syncToCurrentPosition();  // 로드 완료 즉시 현재 위치로 점프
+        return;
       }
-    } catch(e) {}
-
-    /* ② lyrics.ovh — 폴백 */
-    try {
-      const artist = encodeURIComponent(track.artist || '');
-      const title  = encodeURIComponent(track.name);
-      const res    = await fetch(`https://api.lyrics.ovh/v1/${artist}/${title}`);
-      const data   = await res.json();
-
-      if (data.lyrics) {
-        const raw         = data.lyrics;
-        const hasKorean   = /[\uAC00-\uD7A3]/.test(raw);
-        const titleKorean = /[\uAC00-\uD7A3]/.test(track.name + (track.artist||''));
-
-        if (titleKorean && !hasKorean) {
-          c.innerHTML = '<div style="padding:24px;text-align:center;' +
-            'color:var(--text-secondary);font-size:13px">' +
-            '한국어 가사를 찾을 수 없어요 🎵</div>';
-          return;
-        }
-        _lyricsLines  = raw.split('\n').map(l => l.trim()).filter(l => l).slice(0, 60);
+      if (data?.plainLyrics) {
+        _lyricsLines  = data.plainLyrics.split('\n').map(l => l.trim()).filter(l => l).slice(0, 60);
         _lyricsLoaded = true;
         _syncToCurrentPosition();
-      } else {
-        c.innerHTML = '<div style="padding:24px;text-align:center;' +
-          'color:var(--text-secondary);font-size:13px">가사를 찾을 수 없어요 🎵</div>';
+        return;
       }
+      c.innerHTML = data?.status === 'not-found-ko'
+        ? msg('한국어 가사를 찾을 수 없어요 🎵')
+        : msg('가사를 찾을 수 없어요 🎵');
     } catch(e) {
-      c.innerHTML = '<div style="padding:24px;text-align:center;' +
-        'color:var(--text-secondary);font-size:13px">가사를 불러올 수 없어요</div>';
+      c.innerHTML = msg('가사를 불러올 수 없어요');
     }
   }
 
@@ -207,10 +368,11 @@ const RightPanel = (() => {
       }
 
       // 타임스탬프 가사: posMs 기반 점프
-      if (_timedLines.length > 0 && posMs !== undefined) {
+      if (_timedLines.length > 0 && posMs !== undefined && ps.useSpotify) {
         let tIdx = 0;
+        const eff = posMs + LYRIC_LEAD_MS + _offsetMs;
         for (let i = 0; i < _timedLines.length; i++) {
-          if (_timedLines[i].ms <= posMs) tIdx = i;
+          if (_timedLines[i].ms <= eff) tIdx = i;
           else break;
         }
         _lastLyricIdx = tIdx;
@@ -309,6 +471,39 @@ const RightPanel = (() => {
   }
 
   /* ══ syncLyrics ══════════════════════════════════════════ */
+  /* ── 타임스탬프 가사 하이라이트 ──
+     Spotify 위치는 0.5초 간격으로만 들어오므로, 그 사이는 시계로 보간(_anchor)해서
+     줄이 늦게 넘어가지 않게 한다. LYRIC_LEAD_MS 는 눈에 보이는 하이라이트를 약간 앞당기는 값. */
+  const LYRIC_LEAD_MS = 0;
+  let _anchor = { pos: 0, t: 0 };
+  let _ticker = null;
+
+  function _applyTimed(ms) {
+    let tIdx = 0;
+    for (let i = 0; i < _timedLines.length; i++) {
+      if (_timedLines[i].ms <= ms) tIdx = i;
+      else break;
+    }
+    if (tIdx === _lastLyricIdx) return;
+    _lastLyricIdx = tIdx;
+    if (!_lyricsScrollEnabled) { _renderMiniLyrics(tIdx); return; }
+    // 전체뷰: DOM 없으면 먼저 렌더
+    const lines = document.querySelectorAll('#rp-lyrics-container .lyrics-line');
+    if (!lines.length) _renderLyrics();
+    _highlightLine(tIdx);
+  }
+
+  function _ensureTicker() {
+    if (_ticker) return;
+    _ticker = setInterval(() => {
+      if (typeof Player === 'undefined' || !_lyricsLoaded || !_timedLines.length) return;
+      const ps = Player.getState();
+      if (!ps.useSpotify || !ps.isPlaying) return;
+      const elapsed = Math.min(performance.now() - _anchor.t, 1200);
+      _applyTimed(_anchor.pos + elapsed + LYRIC_LEAD_MS + _offsetMs);
+    }, 80);
+  }
+
   function syncLyrics(progressPct, posMs) {
     if (!_lyricsLoaded || !_lyricsLines.length) return;
 
@@ -316,27 +511,21 @@ const RightPanel = (() => {
        posMs 없어도 durationMs × progress% 로 추정
     ─────────────────────────────────────────────────────── */
     if (_timedLines.length > 0) {
-      let effectiveMs = posMs;
-      if (effectiveMs === undefined && typeof Player !== 'undefined') {
-        const ps  = Player.getState();
-        const dur = ps.currentTrack?.durationMs;
-        if (dur) effectiveMs = dur * progressPct / 100;
-      }
-
-      if (effectiveMs !== undefined) {
-        let tIdx = 0;
-        for (let i = 0; i < _timedLines.length; i++) {
-          if (_timedLines[i].ms <= effectiveMs) tIdx = i;
-          else break;
+      const ps0 = typeof Player !== 'undefined' ? Player.getState() : null;
+      // 타임스탬프 싱크는 정확한 재생 위치(ms)를 아는 Spotify 전체 재생에서만 쓴다.
+      // iTunes 30초 미리듣기는 곡 중간 구간이라 가사 타임라인과 맞지 않는다 → 아래 비율 추정으로 진행.
+      if (ps0 && ps0.useSpotify) {
+        let effectiveMs = posMs;
+        if (effectiveMs === undefined) {
+          const dur = ps0.currentTrack?.durationMs;
+          if (dur) effectiveMs = dur * progressPct / 100;
         }
-        if (tIdx === _lastLyricIdx) return;
-        _lastLyricIdx = tIdx;
-        if (!_lyricsScrollEnabled) { _renderMiniLyrics(tIdx); return; }
-        // 전체뷰: DOM 없으면 먼저 렌더
-        const lines = document.querySelectorAll('#rp-lyrics-container .lyrics-line');
-        if (!lines.length) _renderLyrics();
-        _highlightLine(tIdx);
-        return;
+        if (effectiveMs !== undefined) {
+          _anchor = { pos: effectiveMs, t: performance.now() };
+          _ensureTicker();
+          _applyTimed(effectiveMs + LYRIC_LEAD_MS + _offsetMs);
+          return;
+        }
       }
     }
 
@@ -569,7 +758,7 @@ const RightPanel = (() => {
   }
 
   return {
-    open, close, toggle, toggleLyricsScroll, toggleQueueView,
+    open, close, toggle, toggleLyricsScroll, toggleQueueView, openBig, closeBig, nudge, resetOffset, albumColor: _albumColor,
     updateTrack, switchTab, renderRelated,
     syncLyrics, init, _queueArtFallback, _toggleRelatedFollow,
   };

@@ -113,3 +113,45 @@ def classify_korean_emotion(text: str) -> Optional[Tuple[str, float]]:
 
     logger.info(f"한국어 감정분류: '{top_label}'({top_conf:.2%}) -> SYNC '{sync_emotion}'")
     return sync_emotion, top_conf
+
+
+# ───────────────────────── 텍스트 헤드용 특징 추출 ─────────────────────────
+# KoELECTRA 감정분류 모델(이미 위에서 로드해 쓰는 것)의 은닉 상태를 그대로 특징으로 쓴다.
+# 라벨 6개 중 SYNC 와 맞는 게 4개뿐이라 '분류 결과'로는 못 쓰지만, 은닉 상태에는 문장의 감정 뉘앙스가
+# 들어 있어서 그 위에 SYNC 8감정 선형 헤드를 얹으면 calm/energetic/romantic/dreamy 도 구분할 수 있다
+# (model/text_head.py, train_text_head.py).
+HIDDEN = 768          # KoELECTRA-base 은닉 크기
+FEAT_DIM = HIDDEN * 2 + 6   # [CLS | 평균풀링 | 6라벨 확률]
+
+
+def encode_features(texts):
+    """문장 리스트 → (n, FEAT_DIM) float32 numpy. 모델을 못 쓰면 None(호출한 쪽이 기존 경로로 폴백)."""
+    loaded = _load_model()
+    if loaded is None:
+        return None
+    tokenizer, model = loaded
+    try:
+        import numpy as np
+        out = []
+        with torch.no_grad():
+            for i in range(0, len(texts), 32):
+                enc = tokenizer(list(texts[i:i + 32]), return_tensors="pt", truncation=True,
+                                max_length=64, padding=True)
+                o = model(**enc, output_hidden_states=True)
+                h = o.hidden_states[-1]
+                m = enc["attention_mask"].unsqueeze(-1).to(h.dtype)
+                cls = h[:, 0]
+                mean = (h * m).sum(1) / m.sum(1).clamp(min=1)
+                pr = torch.softmax(o.logits, dim=-1)
+                out.append(torch.cat([cls, mean, pr], dim=1))
+        return torch.cat(out, dim=0).float().numpy()
+    except Exception as e:
+        logger.error(f"한국어 특징 추출 실패, 텍스트 헤드 없이 진행: {e}")
+        return None
+
+
+@lru_cache(maxsize=256)
+def encode_one(text: str):
+    """한 문장 특징(같은 문장을 서비스가 두 번 처리해도 모델은 한 번만 돈다). 읽기 전용으로 쓸 것."""
+    f = encode_features([text])
+    return None if f is None else f[0]

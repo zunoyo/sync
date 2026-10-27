@@ -171,8 +171,14 @@ public class SpotifyApiController {
                             entry.put("name", t.get("name"));
                             List<Map<String,Object>> ar =
                                 (List<Map<String,Object>>) t.get("artists");
-                            if (ar != null && !ar.isEmpty())
+                            if (ar != null && !ar.isEmpty()) {
                                 entry.put("artist", ar.get(0).get("name"));
+                                // 전체 아티스트 목록 + 곡 길이 — 프런트가 동명 다른 곡을 걸러내는 데 사용
+                                List<Object> allNames = new ArrayList<>();
+                                for (Map<String,Object> a : ar) allNames.add(a.get("name"));
+                                entry.put("artists", allNames);
+                            }
+                            entry.put("durationMs", t.get("duration_ms"));
                             resultTracks.add(entry);
                         }
                         result.put("tracks", resultTracks);

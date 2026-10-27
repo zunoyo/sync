@@ -199,7 +199,7 @@ export function PlayerProvider({ children }) {
     if (SpotifyPlayer.isReady()) {
       let sid = realSpotifyId(track.spotifyId);
       if (!sid && track.name) {
-        sid = await searchSpotifyId(track.name, track.artist || '');
+        sid = await searchSpotifyId(track.name, track.artist || '', track.durationMs);
         if (sid) track.spotifyId = sid; // 다음 재생을 위해 캐시
       }
       if (sid) {

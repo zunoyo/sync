@@ -65,7 +65,68 @@ const Player = (() => {
     return ca === cb || ca.includes(cb) || cb.includes(ca);
   }
 
-  async function _searchSpotifyId(name, artist) {
+  /* Spotify 후보 검증 — 제목 + (아티스트 또는 곡 길이)가 맞는 후보만 인정 */
+  /* ── Spotify 후보 검증 ──────────────────────────────────────────
+     예전에는 "곡 제목이 같으면" 아티스트를 안 보고 첫 후보를 골라서,
+     제목이 흔한 곡(예: Just Like a Dream)은 다른 가수의 곡이 재생됐다.
+     이제 제목 + (아티스트 또는 곡 길이)가 맞는 후보만 인정하고,
+     끝내 검증된 후보가 없으면 null → 호출 쪽에서 30초 미리듣기로 넘어간다. */
+  const _stripNoise = (s) => String(s || '').toLowerCase()
+    .replace(/\(.*?\)|\[.*?\]/g, ' ').replace(/\s-\s.*$/, ' ').replace(/\b(?:feat|ft)\.?\s.*$/, ' ');
+  const _compact = (s) => String(s || '').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+  const _titleKey = (s) => _compact(_stripNoise(s));
+
+  function _artistKeys(s) {
+    const lower = String(s || '').toLowerCase();
+    const out = new Set();
+    const add = (x) => { const k = _compact(String(x).trim().replace(/^the\s+/, '')); if (k) out.add(k); };
+    add(lower);
+    for (const m of lower.matchAll(/\(([^)]*)\)/g)) add(m[1]);
+    const noParen = lower.replace(/\([^)]*\)/g, ' ');
+    add(noParen);
+    noParen.split(/\s*(?:&|,|\/|\+|\bfeat\.?\s|\bft\.?\s|\bwith\s|\band\s|\bx\s)\s*/).forEach(add);
+    return out;
+  }
+  function _artistMatches(a, b) {
+    if (!a || !b) return false;
+    const A = _artistKeys(a), B = _artistKeys(b);
+    for (const x of A) for (const y of B) {
+      if (x === y) return true;
+      if (Math.min(x.length, y.length) >= 3 && (x.includes(y) || y.includes(x))) return true;
+    }
+    return false;
+  }
+
+  /** 후보 중 검증된 곡의 id. strict=true 는 Spotify 가 이미 track+artist 로 걸러준 검색 결과일 때 */
+  function _pickVerified(list, name, artist, durationMs, strict) {
+    const nk = _titleKey(name);
+    if (!nk || !Array.isArray(list)) return null;
+    let best = null, bestScore = 0;
+    for (const c of list) {
+      if (!c || !c.id) continue;
+      const ck = _titleKey(c.name);
+      const exact = ck === nk;
+      const partial = !exact && ck && nk && (ck.includes(nk) || nk.includes(ck));
+      if (!exact && !partial) continue;
+      const names = (c.artists && c.artists.length ? c.artists : [c.artist]).filter(Boolean);
+      const artistOk = !!artist && names.some((n) => _artistMatches(artist, n));
+      const durDiff = durationMs && c.durationMs ? Math.abs(c.durationMs - durationMs) : null;
+      const durOk = durDiff != null && durDiff <= 4000;
+      let score = (artistOk ? 4 : 0) + (durOk ? 2 : 0) + (exact ? 1 : 0);
+      if (partial && !artistOk) continue;                       // 부분 일치는 아티스트까지 맞아야 인정
+      if (!artistOk && !durOk) {
+        if (!(strict && exact)) continue;                       // 검증 수단이 없으면 strict 검색의 정확 일치만 인정
+        if (durDiff != null && durDiff > 15000) continue;       // 길이가 많이 다르면 다른 버전/다른 곡
+        score = 1;
+      }
+      if (durDiff != null && durDiff > 15000) score -= 1;       // 같은 가수여도 길이가 크게 다르면 감점(라이브/리믹스)
+      if (score > bestScore) { best = c; bestScore = score; }
+    }
+    return best ? best.id : null;
+  }
+
+
+  async function _searchSpotifyId(name, artist, durationMs) {
     const cacheKey = `${name}__${artist||''}`.toLowerCase();
     if (_sidCache.has(cacheKey)) return _sidCache.get(cacheKey);
 
@@ -77,55 +138,24 @@ const Player = (() => {
         return res.ok ? await res.json() : null;
       } catch(e) { return null; }
     };
-
-    /* 후보 목록에서 이름이 가장 잘 맞는 곡 반환 */
-    const _bestId = (data, sn) => {
-      const snL = sn.toLowerCase();
-      // data.tracks 없으면 단일 결과 폴백
-      // ※ data.name 없으면(구버전 서버) 빈문자열 → 빈 리스트로 처리
-      const list = data?.tracks
-          || (data?.id && data?.name
-              ? [{ id: data.id, name: data.name }]
-              : []);
-
-      if (!list.length) return data?.id || null; // 이름 검증 불가 → 그냥 반환
-
-      // 1순위: 정확 일치
-      const exact = list.find(t => (t.name||'').toLowerCase() === snL);
-      if (exact?.id) return exact.id;
-
-      // 2순위: 특수문자 제거 후 일치
-      const clean = s => s.replace(/[^a-z0-9가-힣]/g,'').toLowerCase();
-      const similar = list.find(t => {
-        const cn = clean(t.name||'');
-        return cn && clean(snL) && cn === clean(snL);
-      });
-      if (similar?.id) return similar.id;
-
-      // 3순위: 포함 관계 (빈 이름 제외 — 빈문자열은 모든 문자열에 포함되므로)
-      const partial = list.find(t => {
-        const tn = (t.name||'').toLowerCase();
-        if (!tn) return false;  // ← 핵심 수정: 빈 이름 무시
-        return tn.includes(snL) || snL.includes(tn);
-      });
-      return partial?.id || null;
-    };
+    const _list = (data) => data?.tracks
+        || (data?.id && data?.name ? [{ id: data.id, name: data.name, artist: data.artist }] : []);
 
     try {
       // 1차: track:"이름" artist:"아티스트" 정밀 검색
       let data = await _doSearch(`track:"${name}" artist:"${artist||''}"`);
-      let id   = _bestId(data, name);
+      let id   = _pickVerified(_list(data), name, artist, durationMs, true);
 
       // 2차: "이름 아티스트" 일반 검색
       if (!id) {
         data = await _doSearch(`${name} ${artist||''}`.trim());
-        id   = _bestId(data, name);
+        id   = _pickVerified(_list(data), name, artist, durationMs, false);
       }
 
-      // 3차: 이름만으로 검색 (아티스트 제외)
+      // 3차: 이름만으로 검색 — 아티스트/길이가 맞는 후보만 인정(동명 다른 곡 방지)
       if (!id) {
         data = await _doSearch(name);
-        id   = _bestId(data, name);
+        id   = _pickVerified(_list(data), name, artist, durationMs, false);
       }
 
       // 4차: 괄호·특수문자 제거 단순화 (예: "UP (KARINA Solo)" → "UP KARINA")
@@ -134,8 +164,7 @@ const Player = (() => {
         const simpleArtist = (artist || '').replace(/\(.*?\)/g, '').trim();
         if (simpleName && simpleName !== name) {
           data = await _doSearch(`${simpleName} ${simpleArtist}`.trim());
-          id   = _bestId(data, simpleName);
-          // 단순화 이름으로 매칭된 경우 원래 이름도 캐시
+          id   = _pickVerified(_list(data), simpleName, artist, durationMs, false);
           if (id) console.log(`[Player] 단순화 매칭: "${name}" → "${simpleName}" → ${id}`);
         }
       }
@@ -144,7 +173,7 @@ const Player = (() => {
         console.log(`[Player] Spotify 매칭 성공: "${name}" → ${id}`);
         _sidCache.set(cacheKey, id);
       } else {
-        console.warn(`[Player] Spotify에서 "${name}" 정확 매칭 실패 → iTunes 폴백`);
+        console.warn(`[Player] Spotify에서 "${name}" 검증된 매칭 없음 → 미리듣기 폴백`);
       }
       return id;
     } catch(e) { return null; }
@@ -461,7 +490,7 @@ const Player = (() => {
     if (typeof SpotifyPlayer !== 'undefined' && SpotifyPlayer.isReady()) {
       let sid = _realSpotifyId(track.spotifyId);
       if (!sid && track.name) {
-        sid = await _searchSpotifyId(track.name, track.artist || '');
+        sid = await _searchSpotifyId(track.name, track.artist || '', track.durationMs);
         if (sid) track.spotifyId = sid;  // 이후 재클릭 시 캐시
       }
       if (sid) {

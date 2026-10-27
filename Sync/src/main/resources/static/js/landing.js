@@ -1,7 +1,7 @@
 /**
  * LandingView — 커서 반응형 랜딩 화면
  *
- * 비로그인 + 이 브라우저에서 처음 접속할 때만 표시된다(localStorage 'sw_landing_seen').
+ * 비로그인 상태에서는 접속할 때마다 표시된다(방문 기록 무관).
  * 로고를 클릭하면 페이드아웃 후 콜백을 호출해 기존 스플래시 애니메이션으로 자연스럽게 넘어간다.
  * React의 components/Landing.jsx와 동일한 동작을 하는 바닐라 버전.
  */
@@ -17,8 +17,8 @@ const LandingView = (() => {
   }
 
   function shouldShow() {
-    if (typeof Auth !== 'undefined' && Auth.isLoggedIn()) return false;
-    return !hasSeen();
+    // 로그인 전에는 방문 기록과 상관없이 항상 보여준다.
+    return !(typeof Auth !== 'undefined' && Auth.isLoggedIn());
   }
 
   function show(onFadeStart, onDone) {

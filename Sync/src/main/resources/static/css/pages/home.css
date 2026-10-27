@@ -4,7 +4,8 @@
 
 /* ── Hero Banner ── */
 .hero-banner {
-  background: linear-gradient(135deg, #2a1020 0%, #1a0812 40%, #0d0508 100%);
+  /* 추천 플레이리스트: 앨범아트 색을 살짝 섞음 (--hero-c1/--hero-glow 는 JS 가 설정, 없으면 기본 색) */
+  background: linear-gradient(135deg, var(--hero-c1, #2a1020) 0%, var(--hero-c2, #1a0812) 40%, #0d0508 100%);
   border-radius: var(--radius-lg);
   padding: 32px;
   margin-bottom: 32px;
@@ -22,7 +23,7 @@
   right: -5%;
   width: 380px;
   height: 380px;
-  background: radial-gradient(circle, rgba(217,192,143,0.13) 0%, transparent 65%);
+  background: radial-gradient(circle, var(--hero-glow, rgba(217,192,143,0.13)) 0%, transparent 65%);
   pointer-events: none;
 }
 
@@ -177,29 +178,26 @@
 .home-mode-toggle button.active { background: var(--accent); color: #2b0f1f; }
 
 /* ============================================================
-   HOME — Mode B: Galaxy View (portal, position:fixed fullscreen)
+   HOME — Mode B: Galaxy View — solar system (portal, position:fixed fullscreen)
+   중심 태양 = "지금 이 순간", 행성 = 무드 카테고리 / Sync AI.
+   카테고리를 고르면 카메라가 그 행성으로 "빨려 들어가고"(zoom-in + swirl + warp),
+   다시 전체 보기로 "빠져나온다"(zoom-out).
    ============================================================ */
 
-/* Galaxy-specific gradient tokens (not in global variables.css) */
 .galaxy-view {
   --gx-amber:        var(--accent);
   --gx-amber-strong: #ecd9ae;
-  --gx-amber-deep:   var(--accent-dark);
   --gx-amber-shadow: var(--accent-shadow);
   --gx-bg3-hover:    #351c2d;
-  --gx-grad-amber:   var(--grad-3);
-  --gx-grad-rust:    var(--grad-4);
-  --gx-grad-gold:    var(--grad-1);
-  --gx-grad-rose:    var(--grad-6);
-  --gx-grad-plum:    var(--grad-2);
-  --gx-grad-teal:    linear-gradient(135deg,#7fc9bb 0%,#123a34 100%);
+  --gx-panel:        rgba(20,10,28,.9);
+  --gx-line:         rgba(245,238,240,.16);
 }
 
 .galaxy-view {
   position: fixed;
   inset: 0;
   z-index: 400;
-  background: var(--bg-base);
+  background: #07030f;
   color: var(--text-base);
   font-family: var(--font);
   -webkit-font-smoothing: antialiased;
@@ -207,29 +205,47 @@
 }
 .galaxy-view.hidden { display: none; }
 
+/* ── 배경 ───────────────────────────────────────────── */
 .galaxy-view .g-viewport {
   position: absolute;
   inset: 0;
   overflow: hidden;
   cursor: grab;
-  background:
-    radial-gradient(1200px 900px at 20% 15%, rgba(217,192,143,.07), transparent 60%),
-    radial-gradient(1000px 800px at 85% 80%, rgba(140,20,80,.05), transparent 60%),
-    var(--bg-base);
+  background: radial-gradient(ellipse at 50% 48%, #2c1326 0%, #180a1e 40%, #07030f 100%);
 }
 .galaxy-view .g-viewport.dragging { cursor: grabbing; }
+.galaxy-view .g-viewport.locked { cursor: default; }
+
+.galaxy-view .gx-nebula { position: absolute; border-radius: 50%; pointer-events: none; filter: blur(32px); }
+.galaxy-view .gx-nebula.a { left: -8%;  top: -9%;  width: 44%; height: 42%; background: radial-gradient(ellipse, rgba(255,177,90,.26), transparent 70%); transform: rotate(20deg); }
+.galaxy-view .gx-nebula.b { left: -5%;  top: 44%;  width: 42%; height: 42%; background: radial-gradient(ellipse, rgba(80,140,230,.3),  transparent 70%); transform: rotate(-18deg); }
+.galaxy-view .gx-nebula.c { left: 65%;  top: -4%;  width: 42%; height: 40%; background: radial-gradient(ellipse, rgba(217,99,158,.34), transparent 70%); transform: rotate(14deg); }
+.galaxy-view .gx-nebula.d { left: 62%;  top: 62%;  width: 44%; height: 44%; background: radial-gradient(ellipse, rgba(130,90,200,.36), transparent 70%); transform: rotate(-12deg); }
+.galaxy-view .gx-nebula.e { left: 36%;  top: 73%;  width: 36%; height: 30%; background: radial-gradient(ellipse, rgba(60,170,170,.2),  transparent 70%); }
+.galaxy-view .gx-milkyway {
+  position: absolute; left: -14%; top: 37%; width: 128%; height: 29%;
+  transform: rotate(-24deg); pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgba(190,160,255,.14) 35%, rgba(255,200,230,.22) 50%, rgba(190,160,255,.14) 65%, transparent);
+  filter: blur(22px);
+}
+.galaxy-view .gx-milkyway.dust {
+  filter: none; opacity: .5;
+  background-image: radial-gradient(rgba(255,255,255,.85) .6px, transparent 1.1px), radial-gradient(rgba(255,226,200,.7) .5px, transparent 1px);
+  background-size: 11px 13px, 17px 9px; background-position: 0 0, 5px 4px;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 50%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 50%, transparent);
+}
+.galaxy-view .gx-dgal { position: absolute; border-radius: 50%; pointer-events: none; }
 
 .galaxy-view .g-stars-layer {
   position: absolute; left: 50%; top: 50%;
-  width: 4000px; height: 3000px;
-  margin: -1500px 0 0 -2000px;
+  width: 2600px; height: 1800px;
+  margin: -900px 0 0 -1300px;
   pointer-events: none; will-change: transform;
 }
-.galaxy-view .star {
-  position: absolute; border-radius: 50%;
-  animation: gx-starTwinkle ease-in-out infinite alternate;
-}
-@keyframes gx-starTwinkle { from { filter: brightness(1); } to { filter: brightness(2); } }
+.galaxy-view .star { position: absolute; border-radius: 50%; }
+.galaxy-view .g-stars-layer.near .star:nth-child(3n) { animation: gx-starTwinkle ease-in-out infinite alternate; }
+@keyframes gx-starTwinkle { from { opacity: .45; } to { opacity: 1; } }
 .galaxy-view .star-spike::before,
 .galaxy-view .star-spike::after {
   content: ''; position: absolute; left: 50%; top: 50%;
@@ -241,8 +257,8 @@
 
 .galaxy-view .planets-layer {
   position: absolute; left: 50%; top: 50%;
-  width: 4000px; height: 3000px;
-  margin: -1500px 0 0 -2000px;
+  width: 2600px; height: 1800px;
+  margin: -900px 0 0 -1300px;
   pointer-events: none; will-change: transform;
 }
 .galaxy-view .planet {
@@ -260,187 +276,222 @@
   transform: translate(-50%,-50%) rotate(var(--ring-rot));
   pointer-events: none;
 }
+
+/* ── 우주 (1440×900 장면 좌표계) ───────────────────── */
 .galaxy-view .g-universe {
   position: absolute; left: 0; top: 0;
-  width: 5200px; height: 3400px;
-  transform-origin: 0 0; will-change: transform;
+  width: 1440px; height: 900px;
+  transform-origin: 0 0;
 }
-.galaxy-view .cluster-glow {
-  position: absolute; border-radius: 50%;
-  filter: blur(6px); pointer-events: none;
-  mix-blend-mode: screen; opacity: .55;
+.galaxy-view .gx-arms { position: absolute; left: 150px; top: 100px; width: 1140px; height: 660px; transform: rotate(-14deg); opacity: .75; pointer-events: none; }
+.galaxy-view .gx-arms-spin { position: absolute; inset: 0; animation: gx-spin 220s linear infinite; }
+.galaxy-view .gx-arms-spin i {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(255,214,150,0) 0deg, rgba(255,214,150,.36) 38deg, rgba(255,214,150,0) 100deg, rgba(255,214,150,0) 180deg, rgba(255,150,185,.32) 218deg, rgba(255,150,185,0) 280deg, rgba(255,214,150,0) 360deg);
+  -webkit-mask-image: radial-gradient(ellipse, #000 6%, rgba(0,0,0,.7) 38%, transparent 72%);
+  mask-image: radial-gradient(ellipse, #000 6%, rgba(0,0,0,.7) 38%, transparent 72%);
 }
-.galaxy-view .node-wrap {
-  position: absolute;
-  display: flex; flex-direction: column; align-items: center;
-  cursor: pointer;
+.galaxy-view .gx-orbits { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
+
+/* 카테고리 단위 레이어 — 포커스 때 나머지를 흐리게 */
+.galaxy-view .gx-body {
+  position: absolute; left: 0; top: 0; width: 1440px; height: 900px;
+  pointer-events: none;
+  transition: opacity .7s ease;
 }
-.galaxy-view .node-wrap:hover .node {
-  transform: scale(1.12);
-  box-shadow: 0 10px 40px rgba(0,0,0,.6), 0 0 0 6px var(--gx-amber-shadow), inset 0 0 0 1px rgba(255,255,255,.14);
+.galaxy-view.focus-mode .gx-body:not(.is-target),
+.galaxy-view.focus-mode .gx-belt,
+.galaxy-view.focus-mode .gx-orbits,
+.galaxy-view.focus-mode .gx-odots { opacity: .1; }
+.galaxy-view .gx-belt, .galaxy-view .gx-orbits, .galaxy-view .gx-odots { transition: opacity .7s ease; }
+/* 궤도 위를 도는 점 — SVG SMIL 대신 CSS offset-path (SVG 전체가 매 프레임 다시 그려지는 것을 막는다) */
+.galaxy-view .gx-odots { position: absolute; left: 0; top: 0; width: 1440px; height: 900px; pointer-events: none; }
+.galaxy-view .gx-odot { position: absolute; left: 0; top: 0; width: 6px; height: 6px; border-radius: 50%; offset-rotate: 0deg; animation: gx-orbit linear infinite; }
+@keyframes gx-orbit { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+.galaxy-view .gx-halo { position: absolute; border-radius: 50%; pointer-events: none; }
+
+.galaxy-view .gx-planet {
+  position: absolute; border-radius: 50%; pointer-events: auto; cursor: pointer;
+  transition: transform .35s cubic-bezier(.2,.8,.3,1), box-shadow .35s;
 }
-.galaxy-view .node-label {
-  margin-top: 5px;
-  display: flex; flex-direction: column; align-items: center;
-  text-align: center; pointer-events: none;
-}
-.galaxy-view .node-label-title {
-  font-size: 9.5px; font-weight: 700; color: var(--text-base);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  max-width: 88px; line-height: 1.3;
-  text-shadow: 0 1px 4px rgba(0,0,0,.9);
-}
-.galaxy-view .node-label-artist {
-  font-size: 8px; color: var(--text-muted);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  max-width: 88px;
-  text-shadow: 0 1px 3px rgba(0,0,0,.8);
-}
-.galaxy-view .node {
-  position: relative; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 8px 30px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.08);
-  transition: transform .25s cubic-bezier(.2,.8,.3,1), box-shadow .25s;
-  overflow: hidden;
-}
-.galaxy-view .node:hover {
-  transform: scale(1.12);
-  box-shadow: 0 10px 40px rgba(0,0,0,.6), 0 0 0 6px var(--gx-amber-shadow), inset 0 0 0 1px rgba(255,255,255,.14);
-}
-.galaxy-view .node::after {
+.galaxy-view .gx-planet::before {
   content: ''; position: absolute; inset: 0; border-radius: 50%;
-  background: radial-gradient(circle at 32% 28%, rgba(255,255,255,.35), transparent 55%);
+  background: repeating-linear-gradient(8deg, rgba(255,255,255,.07) 0 6px, rgba(0,0,0,.06) 6px 13px);
 }
-.galaxy-view .node .node-icon { font-size: 15px; opacity: .85; filter: grayscale(1) brightness(2); }
-.galaxy-view .node.n-amber { background: var(--gx-grad-amber); }
-.galaxy-view .node.n-rust  { background: var(--gx-grad-rust); }
-.galaxy-view .node.n-gold  { background: var(--gx-grad-gold); }
-.galaxy-view .node.n-rose  { background: var(--gx-grad-rose); }
-.galaxy-view .node.n-plum  { background: var(--gx-grad-plum); }
-.galaxy-view .node.n-teal  { background: var(--gx-grad-teal); }
+.galaxy-view .gx-planet:hover { transform: scale(1.1); }
+.galaxy-view .gx-body.is-target .gx-planet { box-shadow: 0 0 0 3px #ffe2a8, 0 0 54px rgba(255,226,168,.6); }
+.galaxy-view .gx-planet.gx-station { display: flex; align-items: center; justify-content: center; }
+.galaxy-view .gx-ring { position: absolute; border-radius: 50%; border: 3px solid rgba(247,195,189,.5); transform: rotate(-20deg); pointer-events: none; }
+.galaxy-view .mring { position: absolute; border-radius: 50%; border: 1px dashed rgba(245,238,240,.28); pointer-events: none; }
+.galaxy-view .gx-body.is-target .mring { border-color: rgba(255,226,170,.6); }
+.galaxy-view .gx-spin  { position: absolute; animation: gx-spin 40s linear infinite; pointer-events: none; }
+.galaxy-view .gx-spin.rev { animation-direction: reverse; }
+.galaxy-view .disc { position: absolute; border-radius: 50%; overflow: hidden; background-size: cover; background-position: center; }
+.galaxy-view .disc::after {
+  content: ''; position: absolute; left: 50%; top: 50%; width: 14%; height: 14%;
+  transform: translate(-50%,-50%); border-radius: 50%; background: #0d0508;
+  box-shadow: 0 0 0 2px rgba(255,255,255,.18);
+}
+.galaxy-view .disc::before {
+  content: ''; position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(from 30deg, rgba(255,255,255,.22), rgba(255,255,255,0) 25%, rgba(255,255,255,.12) 50%, rgba(255,255,255,0) 75%, rgba(255,255,255,.22));
+}
+.galaxy-view .gx-moon.has-art::after { display: none; }
+.galaxy-view .gx-pulse { position: absolute; border-radius: 50%; border: 2px solid #9ec0ff; animation: gx-pulse 2.6s ease-out infinite; pointer-events: none; }
+@keyframes gx-pulse { 0% { transform: scale(.9); opacity: .8; } 100% { transform: scale(1.6); opacity: 0; } }
 
+/* 태양 (지금 이 순간) */
+.galaxy-view .gx-corona { position: absolute; border-radius: 50%; pointer-events: none; }
+.galaxy-view .gx-corona.c2 { left: 300px; top: 10px;  width: 840px; height: 840px; animation: gx-breathe 11s ease-in-out infinite alternate-reverse;
+  background: radial-gradient(circle, rgba(255,196,120,.2) 0%, rgba(255,170,100,.1) 30%, rgba(255,150,110,.04) 52%, rgba(255,150,110,0) 70%); }
+.galaxy-view .gx-corona.c1 { left: 470px; top: 180px; width: 500px; height: 500px; animation: gx-breathe 7s ease-in-out infinite alternate;
+  background: radial-gradient(circle, rgba(255,236,190,.55) 0%, rgba(255,206,130,.3) 24%, rgba(255,176,100,.12) 46%, rgba(255,176,100,0) 70%); }
+@keyframes gx-breathe { 0% { transform: scale(1); opacity: .85; } 100% { transform: scale(1.07); opacity: 1; } }
+.galaxy-view .gx-rays {
+  position: absolute; left: 500px; top: 210px; width: 440px; height: 440px; border-radius: 50%; pointer-events: none;
+  animation: gx-spin 200s linear infinite;
+  background: conic-gradient(from 10deg, rgba(255,226,170,0) 0deg, rgba(255,226,170,.22) 18deg, rgba(255,226,170,0) 44deg, rgba(255,226,170,.14) 83deg, rgba(255,226,170,0) 118deg, rgba(255,226,170,.2) 160deg, rgba(255,226,170,0) 196deg, rgba(255,226,170,.12) 236deg, rgba(255,226,170,0) 270deg, rgba(255,226,170,.22) 312deg, rgba(255,226,170,0) 345deg);
+  -webkit-mask-image: radial-gradient(circle, #000 10%, rgba(0,0,0,.5) 38%, transparent 68%);
+  mask-image: radial-gradient(circle, #000 10%, rgba(0,0,0,.5) 38%, transparent 68%);
+}
+.galaxy-view .gx-sunpulse { position: absolute; left: 660px; top: 370px; width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, transparent 56%, rgba(255,214,140,.34) 58%, transparent 70%); animation: gx-sunpulse 3.4s ease-out infinite; pointer-events: none; }
+@keyframes gx-sunpulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2.1); opacity: 0; } }
+.galaxy-view .gx-sunball {
+  position: absolute; left: 660px; top: 370px; width: 120px; height: 120px; border-radius: 50%;
+  background: radial-gradient(circle at 42% 38%, #fffaf0 0%, #ffe9b8 26%, #f5c46a 58%, #d98a2e 100%);
+  box-shadow: 0 0 36px rgba(255,226,160,.9), 0 0 90px rgba(255,190,100,.55), 0 0 160px rgba(255,160,90,.3);
+  pointer-events: auto; cursor: pointer; transition: transform .35s cubic-bezier(.2,.8,.3,1);
+}
+.galaxy-view .gx-sunball:hover { transform: scale(1.06); }
+.galaxy-view .gx-sat { pointer-events: auto; cursor: pointer; transition: transform .25s; }
+.galaxy-view .gx-sat:hover { transform: scale(1.18); }
+
+/* 소행성대 = 인기 차트 */
+.galaxy-view .gx-belt { position: absolute; left: 0; top: 0; width: 1440px; height: 900px; pointer-events: none; }
 .galaxy-view .rank-card {
-  position: absolute; width: 190px; padding: 10px 12px;
-  background: rgba(28,22,15,.82); border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  display: flex; align-items: center; gap: 10px;
-  backdrop-filter: blur(6px);
-  box-shadow: 0 10px 24px rgba(0,0,0,.4);
-  transition: transform .2s; cursor: pointer;
+  position: absolute; width: 108px; height: 48px; padding: 0 8px; box-sizing: border-box;
+  background: rgba(43,22,36,.94); border: 1px solid rgba(245,238,240,.14);
+  border-radius: 12px; display: flex; align-items: center; gap: 6px;
+  transition: transform .2s, border-color .2s; cursor: pointer; pointer-events: auto;
 }
-.galaxy-view .rank-card:hover { transform: translateX(4px); border-color: var(--gx-amber-shadow); }
-.galaxy-view .rank-num { font-family: var(--font-display); font-weight: 800; font-size: 15px; color: var(--gx-amber); width: 18px; }
-.galaxy-view .rank-thumb { width: 32px; height: 32px; border-radius: 6px; flex-shrink: 0; }
+.galaxy-view .rank-card:first-child { border-color: rgba(217,192,143,.4); }
+.galaxy-view .rank-card:hover { transform: translateY(-3px); border-color: var(--gx-amber-shadow); }
+.galaxy-view .rank-num { font-family: var(--font-display); font-weight: 800; font-size: 14px; color: var(--gx-amber); }
+.galaxy-view .rank-thumb { width: 26px; height: 26px; border-radius: 6px; flex-shrink: 0; background-size: cover; background-position: center; }
 .galaxy-view .rank-text { min-width: 0; display: flex; flex-direction: column; }
-.galaxy-view .rank-title { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.galaxy-view .rank-artist { font-size: 10.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.galaxy-view .rank-title { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60px; }
+.galaxy-view .rank-artist { font-size: 11px; color: rgba(245,238,240,.72); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60px; }
 
-.galaxy-view .artist-node {
-  position: absolute; width: 64px; height: 64px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--text-base);
-  box-shadow: 0 8px 26px rgba(0,0,0,.5), inset 0 0 0 2px rgba(244,236,223,.14);
-  cursor: pointer; transition: transform .25s;
-}
-.galaxy-view .artist-node:hover {
-  transform: scale(1.14);
-  box-shadow: 0 10px 34px rgba(0,0,0,.55), 0 0 0 6px var(--gx-amber-shadow);
-}
-.galaxy-view .orbit-ring {
-  position: absolute; border: 1px dashed rgba(244,236,223,.08);
-  border-radius: 50%; pointer-events: none;
-}
+/* ── HUD 라벨 (화면 고정 크기, 위치만 카메라를 따라감) ── */
 .galaxy-view .hud-label {
-  position: fixed; transform: translate(-50%,-50%);
-  font-family: var(--font-display); font-weight: 800; color: var(--text-base);
-  letter-spacing: .01em; white-space: nowrap; pointer-events: none;
-  text-shadow: 0 2px 16px rgba(0,0,0,.6); z-index: 410;
+  position: fixed; left: 0; top: 0; transform: translate3d(-9999px,0,0);
+  display: flex; align-items: center; gap: 8px;
+  white-space: nowrap; pointer-events: none; z-index: 410;
+  text-shadow: 0 2px 16px rgba(0,0,0,.7);
+  transition: opacity .5s ease;
 }
-.galaxy-view .hud-label .sub {
-  display: block; font-family: var(--font); font-weight: 500;
-  font-size: 11px; color: var(--text-muted); letter-spacing: 0; margin-top: 2px;
+.galaxy-view .hud-label b { font-family: var(--font-display); font-weight: 800; font-size: 17px; color: var(--text-base); letter-spacing: .01em; }
+.galaxy-view .hud-label i {
+  font-style: normal; font-size: 12px; color: rgba(245,238,240,.78);
+  background: rgba(245,238,240,.08); border: 1px solid rgba(245,238,240,.16);
+  border-radius: 999px; padding: 2px 9px;
 }
-.galaxy-view .hud-label.lbl-home  { font-size: 26px; }
-.galaxy-view .hud-label.lbl-small { font-size: 15px; }
-.galaxy-view .hud-label.lbl-beacon { color: #bfe9df; }
+.galaxy-view .hud-label.sun b { font-size: 19px; color: #ffe2a8; }
+.galaxy-view .hud-label .now { display: block; font-size: 12px; color: rgba(245,238,240,.82); text-shadow: none; }
+.galaxy-view .hud-label.col { flex-direction: column; gap: 2px; }
+.galaxy-view .hud-label.col b { font-size: 15px; }
+.galaxy-view .hud-label .sub { font-size: 12px; color: rgba(245,238,240,.78); }
+.galaxy-view.focus-mode .hud-label { opacity: 0; }
 
-.galaxy-view .g-hint {
-  position: fixed; left: 50%; top: 26px; transform: translateX(-50%);
-  font-size: 12.5px; color: var(--text-muted);
-  padding: 8px 16px; border-radius: var(--radius-pill);
-  background: rgba(21,17,12,.65); border: 1px solid var(--border);
-  backdrop-filter: blur(8px); z-index: 420;
-  transition: opacity .6s ease; pointer-events: none;
+/* ── 워프 효과 (빨려들어가기 / 빠져나오기) ── */
+.galaxy-view .gx-warp { position: fixed; inset: 0; pointer-events: none; z-index: 405; overflow: hidden; }
+.galaxy-view .gx-warp-streaks {
+  position: absolute; inset: -12%; opacity: 0;
+  background: repeating-conic-gradient(from 0deg at var(--wx, 50%) var(--wy, 50%),
+    rgba(255,255,255,.5) 0deg .5deg, transparent .5deg 3.1deg,
+    rgba(255,226,170,.38) 3.1deg 3.5deg, transparent 3.5deg 7.3deg,
+    rgba(190,210,255,.34) 7.3deg 7.6deg, transparent 7.6deg 11deg);
+  -webkit-mask-image: radial-gradient(circle at var(--wx, 50%) var(--wy, 50%), transparent 6%, #000 55%);
+  mask-image: radial-gradient(circle at var(--wx, 50%) var(--wy, 50%), transparent 6%, #000 55%);
+  transform-origin: var(--wx, 50%) var(--wy, 50%);
+  will-change: transform, opacity;
 }
-.galaxy-view .g-hint.hidden { opacity: 0; }
-
-.galaxy-view .gx-exit-btn {
-  position: fixed; top: 22px; left: 22px; z-index: 441;
-  display: flex; align-items: center; gap: 7px;
-  background: rgba(15,12,8,.72); border: 1px solid var(--border);
-  border-radius: var(--radius-pill); backdrop-filter: blur(10px);
-  padding: 10px 16px; font-size: 12.5px; font-weight: 700;
-  color: var(--text-base); cursor: pointer;
-  font-family: var(--font); box-shadow: 0 14px 34px rgba(0,0,0,.5);
-  transition: border-color .15s, color .15s;
+.galaxy-view .gx-warp-flash {
+  position: absolute; inset: 0; opacity: 0;
+  background: radial-gradient(circle at var(--wx, 50%) var(--wy, 50%), var(--wc, #ffe2a8) 0%, transparent 46%);
 }
-.galaxy-view .gx-exit-btn:hover { border-color: var(--accent); color: var(--accent); }
 
+/* ── 상단 바 ── */
+.galaxy-view .gx-topbar {
+  position: fixed; left: 0; top: 0; right: 0; height: 72px; z-index: 440;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 28px; box-sizing: border-box;
+  background: linear-gradient(180deg, rgba(7,3,15,.92), rgba(7,3,15,0));
+  pointer-events: none;
+}
+.galaxy-view .gx-topbar > * { pointer-events: auto; }
+.galaxy-view .gx-logo { height: 44px; border: 0; background: transparent; color: var(--accent); font: 800 24px var(--font-display); letter-spacing: .14em; cursor: pointer; padding: 0; }
+.galaxy-view .gx-chips { display: flex; gap: 8px; align-items: center; }
+.galaxy-view .gx-chip {
+  border: 1px solid var(--gx-line); background: rgba(28,14,21,.7); color: rgba(245,238,240,.82);
+  font: 500 13px var(--font); border-radius: 999px; padding: 0 16px; height: 36px; cursor: pointer;
+  transition: background .2s, color .2s, border-color .2s;
+}
+.galaxy-view .gx-chip:hover { border-color: var(--accent); }
+.galaxy-view .gx-chip.on { background: var(--accent); color: #1a0d12; border-color: var(--accent); font-weight: 700; }
+.galaxy-view .gx-right { display: flex; align-items: center; gap: 10px; }
+.galaxy-view .gx-iconbtn {
+  width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--gx-line);
+  background: rgba(20,10,28,.82); color: var(--text-base); cursor: pointer; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.galaxy-view .gx-iconbtn:hover { border-color: var(--accent); color: var(--accent); }
+.galaxy-view .gx-toggle { display: flex; border: 1px solid var(--gx-line); border-radius: 12px; background: rgba(20,10,28,.82); padding: 3px; }
+.galaxy-view .gx-toggle button { height: 38px; padding: 0 14px; border: 0; border-radius: 9px; background: transparent; color: rgba(245,238,240,.8); font: 500 13px var(--font); cursor: pointer; }
+.galaxy-view .gx-toggle button.on { background: var(--accent); color: #1a0d12; font-weight: 700; }
+
+/* ── 미니맵 (좌측 상단) ── */
 .galaxy-view .minimap {
-  position: fixed; top: 22px; right: 22px;
-  width: 168px; height: 110px;
-  background: rgba(15,12,8,.72); border: 1px solid var(--border);
-  border-radius: var(--radius-xl); backdrop-filter: blur(10px);
+  position: fixed; top: 84px; left: 24px; width: 208px; height: 140px;
+  background: rgba(20,10,28,.88); border: 1px solid var(--gx-line);
+  border-radius: 14px; backdrop-filter: blur(10px);
   z-index: 420; cursor: pointer; overflow: hidden;
 }
-.galaxy-view .mm-dot {
-  position: absolute; width: 6px; height: 6px; border-radius: 50%;
-  background: var(--gx-amber); opacity: .75; transform: translate(-50%,-50%);
-}
-.galaxy-view .mm-dot.beacon { background: #7fc9bb; }
+.galaxy-view .minimap svg { position: absolute; left: 0; top: 12px; }
+.galaxy-view .mm-caption { position: absolute; left: 8px; top: 5px; font-size: 10px; color: rgba(245,238,240,.78); pointer-events: none; }
 .galaxy-view .mm-frame {
   position: absolute; border: 1px solid var(--gx-amber-strong);
   background: rgba(217,192,143,.08); border-radius: 2px; pointer-events: none;
 }
-.galaxy-view .mm-caption {
-  position: absolute; bottom: 4px; left: 8px;
-  font-size: 9px; color: var(--border-light); letter-spacing: .04em;
-}
 
+/* ── 컴퍼스 (좌측 하단) : 카테고리 포커스 메뉴 ── */
 .galaxy-view .compass-wrap { position: fixed; left: 110px; bottom: 36px; z-index: 430; }
 .galaxy-view .compass-btn {
   width: 58px; height: 58px; border-radius: 50%;
   background: var(--bg-surface); border: 1px solid var(--border);
   box-shadow: 0 12px 34px rgba(0,0,0,.5);
   display: flex; align-items: center; justify-content: center;
-  position: relative; transition: box-shadow .3s, transform .3s;
-  cursor: pointer;
+  position: relative; transition: box-shadow .3s, transform .3s; cursor: pointer; padding: 0;
 }
-.galaxy-view .compass-btn:hover {
-  box-shadow: 0 12px 34px rgba(0,0,0,.5), 0 0 0 8px rgba(217,192,143,.14);
-}
+.galaxy-view .compass-btn:hover { box-shadow: 0 12px 34px rgba(0,0,0,.5), 0 0 0 8px rgba(217,192,143,.14); }
 .galaxy-view .compass-btn .ring {
   position: absolute; inset: 8px; border-radius: 50%;
   border: 1.5px solid var(--gx-amber); opacity: .6;
-  transition: transform .4s cubic-bezier(.2,.8,.3,1);
-  pointer-events: none;
+  transition: transform .4s cubic-bezier(.2,.8,.3,1); pointer-events: none;
 }
 .galaxy-view .compass-wrap.open .compass-btn .ring { transform: rotate(135deg); }
-.galaxy-view .compass-btn .core {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--gx-amber); box-shadow: 0 0 12px var(--gx-amber-shadow);
-}
+.galaxy-view .compass-btn .core { width: 8px; height: 8px; border-radius: 50%; background: var(--gx-amber); box-shadow: 0 0 12px var(--gx-amber-shadow); }
 .galaxy-view .spoke {
   position: absolute; left: 29px; top: 29px;
   width: 46px; height: 46px; margin: -23px 0 0 -23px;
   border-radius: 50%; background: var(--bg-mid); border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  flex-direction: column; font-size: 9px; font-weight: 600; color: var(--text-secondary);
+  display: flex; align-items: center; justify-content: center; flex-direction: column;
+  font: 600 9px var(--font); color: rgba(245,238,240,.82);
   opacity: 0; pointer-events: none;
   transition: transform .38s cubic-bezier(.2,.85,.3,1), opacity .3s;
-  box-shadow: 0 8px 22px rgba(0,0,0,.4); cursor: pointer;
+  box-shadow: 0 8px 22px rgba(0,0,0,.4); cursor: pointer; padding: 0;
 }
 .galaxy-view .spoke .dot { width: 5px; height: 5px; border-radius: 50%; margin-bottom: 3px; }
+.galaxy-view .spoke.on { background: var(--gx-bg3-hover); color: #fff; border-color: var(--accent); }
 .galaxy-view .compass-wrap.open .spoke { opacity: 1; pointer-events: auto; }
 .galaxy-view .compass-wrap.open .spoke:hover { background: var(--gx-bg3-hover); color: var(--text-base); }
 .galaxy-view .compass-wrap.open .spoke[data-i="0"] { transform: translate(0px,-92px); }
@@ -449,17 +500,68 @@
 .galaxy-view .compass-wrap.open .spoke[data-i="3"] { transform: translate(-52px,-78px); }
 .galaxy-view .compass-wrap.open .spoke[data-i="4"] { transform: translate(-86px,-34px); }
 
+/* ── 줌 컨트롤 (우측 하단) ── */
+.galaxy-view .gx-zoom { position: fixed; right: 24px; bottom: 24px; z-index: 430; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.galaxy-view .gx-zoom .pct { font-size: 12px; color: rgba(245,238,240,.8); }
+
+/* ── 카테고리 패널 (포커스 도착 후) ── */
+.galaxy-view .gx-panel {
+  position: fixed; right: 28px; top: 96px; bottom: 120px; width: 340px; z-index: 436;
+  background: var(--gx-panel); border: 1px solid var(--gx-line); border-radius: 18px;
+  backdrop-filter: blur(14px); box-shadow: 0 24px 60px rgba(0,0,0,.55);
+  display: flex; flex-direction: column; padding: 18px; box-sizing: border-box;
+  opacity: 0; transform: translateX(36px); pointer-events: none;
+  transition: opacity .5s ease .1s, transform .6s cubic-bezier(.2,.85,.3,1) .1s;
+}
+.galaxy-view .gx-panel.open { opacity: 1; transform: none; pointer-events: auto; }
+.galaxy-view .gx-panel-back {
+  align-self: flex-start; height: 36px; padding: 0 14px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--gx-line); background: rgba(245,238,240,.06); color: var(--text-base);
+  font: 600 12.5px var(--font); display: flex; align-items: center; gap: 6px;
+}
+.galaxy-view .gx-panel-back:hover { border-color: var(--accent); color: var(--accent); }
+.galaxy-view .gx-panel-head { display: flex; align-items: center; gap: 12px; margin: 16px 0 12px; }
+.galaxy-view .gx-panel-head .orbdot { width: 42px; height: 42px; border-radius: 50%; flex: none; box-shadow: 0 0 22px var(--pc, #fff); }
+.galaxy-view .gx-panel-head .name { font-family: var(--font-display); font-weight: 800; font-size: 20px; }
+.galaxy-view .gx-panel-head .sub { font-size: 12px; color: rgba(245,238,240,.72); margin-top: 2px; }
+.galaxy-view .gx-panel-play {
+  height: 44px; border-radius: 12px; border: 0; background: var(--accent); color: #1a0d12;
+  font: 700 13.5px var(--font); cursor: pointer; margin-bottom: 12px;
+}
+.galaxy-view .gx-panel-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; margin: 0 -6px; padding: 0 6px; }
+.galaxy-view .gx-row {
+  display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 12px; cursor: pointer;
+  border: 0; background: transparent; color: inherit; text-align: left; font-family: var(--font); width: 100%;
+}
+.galaxy-view .gx-row:hover { background: rgba(245,238,240,.07); }
+.galaxy-view .gx-row .art { width: 44px; height: 44px; border-radius: 10px; flex: none; background-size: cover; background-position: center; }
+.galaxy-view .gx-row .t { font-size: 13.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.galaxy-view .gx-row .a { font-size: 12px; color: rgba(245,238,240,.72); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.galaxy-view .gx-row .txt { min-width: 0; flex: 1; }
+.galaxy-view .gx-row .go { font-size: 12px; color: var(--accent); }
+
+.galaxy-view .g-hint {
+  position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%);
+  font-size: 12.5px; color: rgba(245,238,240,.78);
+  padding: 8px 16px; border-radius: var(--radius-pill);
+  background: rgba(20,10,28,.7); border: 1px solid var(--gx-line);
+  backdrop-filter: blur(8px); z-index: 420;
+  transition: opacity .6s ease; pointer-events: none; white-space: nowrap;
+}
+.galaxy-view .g-hint.hidden { opacity: 0; }
+
+/* ── 미니 플레이어 ── */
 .galaxy-view .gplayer {
   position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%);
   display: flex; align-items: center; gap: 10px;
-  background: rgba(21,17,12,.82); border: 1px solid var(--border);
+  background: rgba(20,10,28,.88); border: 1px solid var(--gx-line);
   border-radius: var(--radius-pill); padding: 7px 16px 7px 7px;
   backdrop-filter: blur(12px); box-shadow: 0 16px 40px rgba(0,0,0,.5);
   z-index: 430;
 }
 .galaxy-view .gplayer .thumb {
   width: 36px; height: 36px; border-radius: 50%;
-  background: var(--grad-3); flex-shrink: 0;
+  background: radial-gradient(circle at 40% 35%, #fff6dc, #f0d9a8 40%, #c98a2c 100%); flex-shrink: 0;
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.15);
   animation: gx-spin 8s linear infinite;
   overflow: hidden; object-fit: cover;
@@ -468,7 +570,7 @@
 @keyframes gx-spin { to { transform: rotate(360deg); } }
 .galaxy-view .gplayer .meta { display: flex; flex-direction: column; line-height: 1.25; max-width: 130px; }
 .galaxy-view .gplayer .t { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.galaxy-view .gplayer .a { font-size: 10.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.galaxy-view .gplayer .a { font-size: 10.5px; color: rgba(245,238,240,.72); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .galaxy-view .gplayer .ctrl { display: flex; align-items: center; gap: 10px; margin-left: 6px; }
 .galaxy-view .gplayer .play-btn {
   width: 30px; height: 30px; border-radius: 50%;
@@ -476,11 +578,12 @@
   display: flex; align-items: center; justify-content: center;
   font-size: 11px; border: none; cursor: pointer;
 }
-.galaxy-view .gplayer .skip { font-size: 13px; color: var(--text-muted); cursor: pointer; background: none; border: none; }
+.galaxy-view .gplayer .skip { font-size: 13px; color: rgba(245,238,240,.72); cursor: pointer; background: none; border: none; }
 .galaxy-view .gplayer .skip:hover { color: var(--text-base); }
 
+/* ── 검색 오버레이 / 곡 상세 팝업 ── */
 .galaxy-view .search-overlay {
-  position: fixed; inset: 0; z-index: 440;
+  position: fixed; inset: 0; z-index: 445;
   background: rgba(6,5,3,.72); backdrop-filter: blur(10px);
   display: flex; align-items: flex-start; justify-content: center;
   padding-top: 14vh; opacity: 0; pointer-events: none; transition: opacity .25s;
@@ -494,43 +597,91 @@
   font-weight: 700; padding: 10px 2px; outline: none;
 }
 .galaxy-view .search-box input::placeholder { color: var(--border-light); }
-.galaxy-view .search-hint { margin-top: 14px; font-size: 12px; color: var(--text-muted); }
+.galaxy-view .search-hint { margin-top: 14px; font-size: 12px; color: rgba(245,238,240,.72); }
 .galaxy-view .search-close-btn {
-  position: fixed; top: 26px; right: 210px; font-size: 12px;
-  color: var(--text-muted); z-index: 441; cursor: pointer;
-  background: none; border: none;
+  position: fixed; top: 26px; right: 28px; font-size: 12px;
+  color: rgba(245,238,240,.72); z-index: 446; cursor: pointer; background: none; border: none;
 }
 .galaxy-view .search-close-btn:hover { color: var(--text-base); }
 .galaxy-view .search-close-btn.hidden { display: none; }
 
 .galaxy-view .node-detail {
-  position: fixed; z-index: 435; width: 216px;
+  position: fixed; z-index: 438; width: 216px;
   background: var(--bg-surface); border: 1px solid var(--border);
   border-radius: var(--radius-2xl); padding: 14px;
   box-shadow: 0 20px 50px rgba(0,0,0,.55);
   opacity: 0; transform: translate(-50%,-8px) scale(.96);
   pointer-events: none; transition: opacity .18s, transform .18s;
 }
-.galaxy-view .node-detail.open {
-  opacity: 1; transform: translate(-50%,-14px) scale(1); pointer-events: auto;
-}
-.galaxy-view .node-detail .art { width: 100%; height: 110px; border-radius: var(--radius-xl); margin-bottom: 10px; }
+.galaxy-view .node-detail.open { opacity: 1; transform: translate(-50%,-14px) scale(1); pointer-events: auto; }
+.galaxy-view .node-detail .art { width: 100%; height: 110px; border-radius: var(--radius-xl); margin-bottom: 10px; background-size: cover; background-position: center; }
 .galaxy-view .node-detail .tag {
   display: inline-block; font-size: 10px; color: var(--gx-amber);
   background: rgba(217,192,143,.14); padding: 3px 8px;
   border-radius: var(--radius-pill); margin-bottom: 8px;
 }
 .galaxy-view .node-detail .title { font-size: 13.5px; font-weight: 700; margin-bottom: 2px; }
-.galaxy-view .node-detail .artist { font-size: 11.5px; color: var(--text-muted); margin-bottom: 12px; }
+.galaxy-view .node-detail .artist { font-size: 11.5px; color: rgba(245,238,240,.72); margin-bottom: 12px; }
 .galaxy-view .node-detail .go {
   width: 100%; padding: 8px; border-radius: var(--radius-pill);
   background: var(--text-base); color: var(--bg-base);
-  font-size: 12px; font-weight: 700; text-align: center;
-  cursor: pointer; border: none;
+  font-size: 12px; font-weight: 700; text-align: center; cursor: pointer; border: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .galaxy-view .g-universe { transition: none !important; }
-  .galaxy-view .gplayer .thumb { animation: none; }
-  .galaxy-view .star { animation: none; }
+  .galaxy-view .gplayer .thumb,
+  .galaxy-view .star,
+  .galaxy-view .gx-arms-spin,
+  .galaxy-view .gx-rays,
+  .galaxy-view .gx-spin,
+  .galaxy-view .gx-corona,
+  .galaxy-view .gx-sunpulse,
+  .galaxy-view .gx-pulse { animation: none; }
+  .galaxy-view .gx-body, .galaxy-view .gx-panel { transition: none; }
 }
+
+/* ── 자주 듣는 아티스트 별무리 / 마지막 감정 분석 칩 ── */
+.galaxy-view .gx-artist-glow { position: absolute; border-radius: 50%; pointer-events: none; }
+.galaxy-view .artist-node {
+  position: absolute; border-radius: 50%; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: 700; color: var(--text-base);
+  box-shadow: 0 8px 26px rgba(0,0,0,.5), inset 0 0 0 2px rgba(244,236,223,.14), 0 0 22px rgba(255,214,140,.22);
+  pointer-events: auto; cursor: pointer; transition: transform .25s, box-shadow .25s;
+}
+.galaxy-view .artist-node:hover { transform: scale(1.14); box-shadow: 0 10px 34px rgba(0,0,0,.55), 0 0 0 5px rgba(255,226,170,.3); }
+.galaxy-view .artist-node .an-name {
+  position: absolute; bottom: 0; left: 0; right: 0; text-align: center;
+  padding: 2px 2px 3px; font-size: inherit; font-weight: 600; background: rgba(0,0,0,.35);
+}
+.galaxy-view .artist-node.has-img .an-name { background: rgba(0,0,0,.55); }
+.galaxy-view .hud-label.mood { display: none; }
+.galaxy-view .hud-label.mood.has { display: flex; }
+.galaxy-view .hud-label.mood span {
+  font-size: 12px; font-weight: 600; color: #ffe2a8; text-shadow: none;
+  padding: 3px 12px; border-radius: 999px;
+  background: rgba(30,16,26,.78); border: 1px solid rgba(255,226,170,.38);
+  box-shadow: 0 0 0 1px rgba(255,226,170,.04), 0 6px 18px rgba(0,0,0,.45);
+}
+
+/* ── 이동/줌 중에는 비싼 효과를 잠시 멈춘다 (끝나면 자동 복구) ── */
+.galaxy-view[data-moving] .g-universe { will-change: transform; }
+.galaxy-view[data-moving] .g-stars-layer .star,
+.galaxy-view[data-moving] .gx-arms-spin,
+.galaxy-view[data-moving] .gx-corona,
+.galaxy-view[data-moving] .gx-rays,
+.galaxy-view[data-moving] .gx-sunpulse,
+.galaxy-view[data-moving] .gx-pulse { animation-play-state: paused; }
+.galaxy-view[data-moving] .minimap,
+.galaxy-view[data-moving] .gx-panel,
+.galaxy-view[data-moving] .g-hint,
+.galaxy-view[data-moving] .gplayer { -webkit-backdrop-filter: none; backdrop-filter: none; }
+.galaxy-view[data-moving] .gx-body .gx-planet { transition: none; }
+.galaxy-view[data-moving] .gx-odot { animation-play-state: paused; }
+/* 이동 중에는 전체 크기 레이어의 투명도 전환을 만들지 않는다 */
+.galaxy-view[data-moving] .gx-body,
+.galaxy-view[data-moving] .gx-belt,
+.galaxy-view[data-moving] .gx-orbits,
+.galaxy-view[data-moving] .gx-odots { transition: none; }
+/* 날아가는 동안 HUD 라벨은 숨김 */
+.galaxy-view[data-flying] .hud-label { opacity: 0; }

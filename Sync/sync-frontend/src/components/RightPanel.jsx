@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { usePlayer } from '../context/PlayerContext';
 import { useLyrics } from '../context/LyricsContext';
@@ -163,8 +164,74 @@ function Waveform({ trackId, progressPct }) {
   );
 }
 
+function SyncNudge() {
+  const { offsetMs, nudge, hasTimed } = useLyrics();
+  if (!hasTimed) return null;
+  const label = `${offsetMs >= 0 ? '+' : '−'}${(Math.abs(offsetMs) / 1000).toFixed(2).replace(/0$/, '')}s`;
+  return (
+    <span className="lyr-sync" title="가사가 노래보다 늦으면 +, 빠르면 −">
+      <button type="button" onClick={() => nudge(-250)} aria-label="가사 늦게">−</button>
+      <span className="lyr-offset-val" onClick={() => nudge(0)} title="클릭하면 0으로">{label}</span>
+      <button type="button" onClick={() => nudge(250)} aria-label="가사 빠르게">+</button>
+    </span>
+  );
+}
+
+/** 가사 크게 보기 — 화면 가운데 오버레이 */
+function LyricsBigView() {
+  const { lines, activeIndex, loaded, status, seekToLine, bigOpen, closeBig, tint } = useLyrics();
+  const { currentTrack } = usePlayer();
+  const bodyRef = useRef(null);
+
+  useEffect(() => {
+    if (!bigOpen) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') closeBig(); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [bigOpen, closeBig]);
+
+  useEffect(() => {
+    if (!bigOpen || !bodyRef.current) return;
+    const row = bodyRef.current.querySelector('.lb-line.active');
+    if (row) bodyRef.current.scrollTo({ top: row.offsetTop - bodyRef.current.clientHeight / 2 + row.clientHeight / 2, behavior: 'smooth' });
+  }, [activeIndex, bigOpen, loaded, lines]);
+
+  const empty = status === 'loading' ? '가사 불러오는 중...' : status === 'not-found-ko' ? '한국어 가사를 찾을 수 없어요 🎵' : '가사를 찾을 수 없어요 🎵';
+
+  return createPortal(
+    <div className={`lyr-big ${bigOpen ? 'open' : ''}`} style={tint || undefined} onMouseDown={(e) => { if (e.target === e.currentTarget) closeBig(); }}>
+      <div className="lyr-big-card" role="dialog" aria-modal="true" aria-label="가사 크게 보기">
+        <div className="lyr-big-head">
+          {currentTrack?.albumArt && <img className="lyr-big-art" src={currentTrack.albumArt} alt="" />}
+          <div className="lyr-big-meta">
+            <div className="lyr-big-title">{currentTrack?.name}</div>
+            <div className="lyr-big-artist">{currentTrack?.artist}</div>
+          </div>
+          <SyncNudge />
+          <button type="button" className="lyr-big-close" onClick={closeBig} aria-label="닫기">✕</button>
+        </div>
+        <div className="lyr-big-body" ref={bodyRef}>
+          {!loaded && <div className="lyr-big-empty">{empty}</div>}
+          {loaded && lines.map((line, i) => {
+            const dist = Math.abs(i - activeIndex);
+            return (
+              <div
+                key={i}
+                className={`lb-line ${i === activeIndex ? 'active' : ''}`}
+                style={{ opacity: i === activeIndex ? 1 : Math.max(0.28, 0.62 - dist * 0.12) }}
+                onClick={() => seekToLine(i)}
+              >{line}</div>
+            );
+          })}
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
 function LyricsSection() {
-  const { lines, activeIndex, status, loaded, scrollEnabled, seekToLine } = useLyrics();
+  const { lines, activeIndex, status, loaded, scrollEnabled, seekToLine, tint, openBig } = useLyrics();
   const activeLineRef = useRef(null);
 
   useEffect(() => {
@@ -174,8 +241,16 @@ function LyricsSection() {
   }, [activeIndex, scrollEnabled]);
 
   return (
-    <div className="rp-lyrics">
-      <div className="rp-section-label">가사</div>
+    <div className="rp-lyrics" style={tint || undefined}>
+      <div className="rp-lyrics-head">
+        <div className="rp-section-label">가사</div>
+        <div className="rp-lyrics-tools">
+          <SyncNudge />
+          <button type="button" className="lyr-expand" onClick={openBig} title="가사 크게 보기" aria-label="가사 크게 보기">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M5 5h5v2H7v3H5V5zm9 0h5v5h-2V7h-3V5zM5 14h2v3h3v2H5v-5zm12 0h2v5h-5v-2h3v-3z" /></svg>
+          </button>
+        </div>
+      </div>
       <div id="rp-lyrics-container" style={scrollEnabled ? { height: 300, overflowY: 'auto', padding: '4px 0' } : { height: 90, overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
         {status === 'loading' && (
           <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-secondary)', fontSize: 13, opacity: .6 }}>가사 불러오는 중...</div>
@@ -208,6 +283,7 @@ function LyricsSection() {
           </div>
         ))}
       </div>
+      <LyricsBigView />
     </div>
   );
 }

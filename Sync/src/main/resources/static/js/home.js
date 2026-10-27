@@ -66,6 +66,55 @@ const HomePage = (() => {
     } catch(e) { return null; }
   }
 
+  /* ── 아티스트 사진 ──
+     예전에는 "아티스트 이름으로 검색한 첫 곡의 앨범아트"를 썼는데 다른 가수의 곡이 걸리면 사진이 틀렸다
+     (예: Lady Gaga). Spotify 아티스트 사진을 이름이 일치할 때만 쓰고, 없으면 iTunes 결과도
+     아티스트명이 일치할 때만 쓴다. 못 찾으면 null(이모지 카드 유지). */
+  const _photoCache = new Map();
+  const _akey = (s) => String(s || '').toLowerCase().replace(/^the\s+/, '').replace(/[^\p{L}\p{N}]/gu, '');
+  function _fetchArtistPhoto(name, externalId) {
+    if (!name) return Promise.resolve(null);
+    const ck = name + '|' + (externalId || '');
+    if (_photoCache.has(ck)) return _photoCache.get(ck);
+    const p = (async () => {
+      const want = _akey(name);
+      if (!want) return null;
+      // ① iTunes artistId 를 알면(국가별 차트) 그 아티스트의 앨범을 바로 조회 — 가장 정확하다
+      if (externalId) {
+        try {
+          const r = await fetch(`/api/itunes-proxy/lookup?id=${encodeURIComponent(externalId)}&entity=album&limit=5`, { cache: 'no-store' });
+          const alb = ((await r.json()).results || []).find(x => x.artworkUrl100);
+          if (alb) return hiResArt(alb.artworkUrl100, 500);
+        } catch (e) {}
+      }
+      let list = [];
+      try {
+        const r = await fetch(`/api/spotify/catalog/search-artists?q=${encodeURIComponent(name)}&limit=5`, { credentials: 'include' });
+        list = (await r.json())?.artists || [];
+      } catch (e) {}
+      const exact = list.find(a => a.image && _akey(a.name) === want);
+      if (exact) return exact.image;
+      const loose = list.find(a => {
+        const k = _akey(a.name);
+        return a.image && Math.min(k.length, want.length) >= 3 && (k.includes(want) || want.includes(k));
+      });
+      if (loose) return loose.image;
+      // iTunes 곡 검색은 제목이 겹치는 다른 가수의 곡이 먼저 나올 수 있어서(예: 튜이드),
+      // 100건을 받아 그 중 (아티스트 상세 페이지와 같은 방식) 아티스트명이 일치하는 첫 곡의 앨범아트를 쓴다.
+      try {
+        const r = await fetch(`/api/itunes-proxy/search?term=${encodeURIComponent(name)}&media=music&entity=song&limit=100`, { cache: 'no-store' });
+        const hit = ((await r.json()).results || []).find(x => {
+          const ik = _akey(x.artistName);
+          return x.artworkUrl100 && ik && (ik === want || ik.startsWith(want));
+        });
+        if (hit) return hiResArt(hit.artworkUrl100, 500);
+      } catch (e) {}
+      return null;
+    })();
+    _photoCache.set(ck, p);
+    return p;
+  }
+
   /* ── 앨범아트 오류 콜백 (글로벌) ── */
   window._swCardImgErr = function(el, i) {
     const p = el.closest('.card-art') || el.parentElement;
@@ -337,6 +386,17 @@ const HomePage = (() => {
         artEl.innerHTML = top.emoji || '🎵';
       }
     }
+    // 앨범아트 색을 배너 배경에 살짝 섞는다 (색을 못 읽으면 기본 색 유지)
+    if (typeof RightPanel !== 'undefined' && RightPanel.albumColor && top.albumArt) {
+      RightPanel.albumColor(top.albumArt).then(c => {
+        const st = hero.style;
+        if (!c) { ['--hero-c1','--hero-c2','--hero-glow'].forEach(k => st.removeProperty(k)); return; }
+        const s = Math.round(Math.min(c.s, 0.6) * 100);
+        st.setProperty('--hero-c1', `hsl(${c.h} ${s}% 20%)`);
+        st.setProperty('--hero-c2', `hsl(${c.h} ${Math.round(s * 0.7)}% 10%)`);
+        st.setProperty('--hero-glow', `hsla(${c.h}, ${Math.min(100, s + 20)}%, 62%, 0.2)`);
+      });
+    }
     const titleEl = hero.querySelector('.hero-title');
     if (titleEl) titleEl.textContent = top.name;
     const metaEl  = hero.querySelector('.hero-meta');
@@ -387,12 +447,12 @@ const HomePage = (() => {
 
       // iTunes로 아티스트 이미지 보강 (비동기)
       artists.forEach(async (a, i) => {
-        const it = await _fetchItunes(a.name);
-        if (!it?.albumArt) return;
-        window._homeArtistImages[a.name] = it.albumArt;
+        const photo = await _fetchArtistPhoto(a.name);
+        if (!photo) return;
+        window._homeArtistImages[a.name] = photo;
         const el = document.getElementById('artist-art-' + i);
         if (el) {
-          el.innerHTML = `<img src="${it.albumArt}"
+          el.innerHTML = `<img src="${photo}"
             style="width:100%;height:100%;object-fit:cover;border-radius:50%"
             onerror="this.parentElement.innerHTML='${EMOJIS[i]}'">`;
         }
@@ -953,10 +1013,10 @@ const HomePage = (() => {
       }).join('');
 
       artists.forEach(async (a, i) => {
-        const it = await _fetchItunes(a.name);
-        if (!it?.albumArt) return;
+        const photo = await _fetchArtistPhoto(a.name, a.externalId);
+        if (!photo) return;
         const el = document.getElementById('trend-artist-art-' + i);
-        if (el) el.innerHTML = `<img src="${it.albumArt}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentElement.innerHTML='${EMOJIS[i % EMOJIS.length]}'">`;
+        if (el) el.innerHTML = `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentElement.innerHTML='${EMOJIS[i % EMOJIS.length]}'">`;
       });
     } catch (e) {
       console.warn('[HomePage] 인기 아티스트(국가별):', e);

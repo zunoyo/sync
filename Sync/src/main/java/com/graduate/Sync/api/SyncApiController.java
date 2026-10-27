@@ -203,6 +203,8 @@ public class SyncApiController {
             // 모델 자체의 전반적 검증 정확도. 텍스트만 분석했거나 아직 모델을
             // 학습 안 했으면 null(DB에는 저장 안 하고 이 응답에만 실어 보냄)
             emotion.put("modelValAccuracy", dto.getModelValAccuracy());
+            // 이미지 단독 입력의 '확실/보통/애매'(1·2위 확률 차이 기준). 텍스트·복합은 null
+            emotion.put("reliability", dto.getReliability());
 
             Map<String, Object> response = new HashMap<>();
             response.put("emotion",         emotion);

@@ -106,7 +106,19 @@
 
       <!-- 가사 -->
       <div class="rp-lyrics">
-        <div class="rp-section-label">가사</div>
+        <div class="rp-lyrics-head">
+          <div class="rp-section-label">가사</div>
+          <div class="rp-lyrics-tools">
+            <span class="lyr-sync" hidden title="가사가 노래보다 늦으면 +, 빠르면 −">
+              <button type="button" onclick="RightPanel.nudge(-250)" aria-label="가사 늦게">−</button>
+              <span class="lyr-offset-val" onclick="RightPanel.resetOffset()" title="클릭하면 0으로">+0s</span>
+              <button type="button" onclick="RightPanel.nudge(250)" aria-label="가사 빠르게">+</button>
+            </span>
+            <button type="button" class="lyr-expand" onclick="RightPanel.openBig()" title="가사 크게 보기" aria-label="가사 크게 보기">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M5 5h5v2H7v3H5V5zm9 0h5v5h-2V7h-3V5zM5 14h2v3h3v2H5v-5zm12 0h2v5h-5v-2h3v-3z"/></svg>
+            </button>
+          </div>
+        </div>
         <div id="rp-lyrics-container">
           <div class="lyrics-line">내가 바라던 세상은</div>
           <div class="lyrics-line active">너로 가득 찬 곳이었어</div>

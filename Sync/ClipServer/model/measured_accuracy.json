@@ -1,0 +1,21 @@
+{
+  "text": {
+    "accuracy": 0.9134615384615384,
+    "n": 104,
+    "source": "step9_text_head.json eval.fresh2.blend"
+  },
+  "image": {
+    "accuracy": 0.6262626262626263,
+    "n": 99,
+    "source": "봉인 테스트(학습·선택에 안 쓴 새 이미지) emotion_projection_v4.pt 95% 구간 52.8%~71.5%",
+    "ci95": [
+      0.5279226260765785,
+      0.7151696634249464
+    ]
+  },
+  "both": {
+    "accuracy": 0.66,
+    "n": 100,
+    "source": "step8_fusion.json late_w0.10 (충돌쌍 70%)"
+  }
+}

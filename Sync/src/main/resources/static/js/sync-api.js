@@ -279,6 +279,12 @@
         var conf = em.confidence ? Math.round(em.confidence * 100) : 0;
         var acc = em.modelValAccuracy != null ? Math.round(em.modelValAccuracy * 100) : null;
         var hasVA = em.valence != null && em.arousal != null;
+        var REL = { high: ['확실', 'var(--success, #4ade80)'], mid: ['보통', 'var(--warning, #fbbf24)'], low: ['애매', 'var(--text-secondary)'] };
+        var rel = REL[em.reliability] || null;
+        var relBadge = rel
+            ? '<span data-testid="reliability-badge" style="font-size:11px;font-weight:700;color:' + rel[1] +
+              ';border:1px solid ' + rel[1] + ';border-radius:999px;padding:1px 9px;white-space:nowrap">' + rel[0] + '</span>'
+            : '';
 
         var tagsHtml = tags.length ? [
             '<div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px">',
@@ -304,6 +310,7 @@
                         '<div style="display:flex;flex-direction:column;align-items:center;gap:6px">',
                             _renderConfidenceGauge(conf),
                             '<span style="font-size:10px;color:var(--text-secondary);white-space:nowrap">분석 신뢰도</span>',
+                            relBadge,
                         '</div>',
                         acc != null ? [
                             '<div style="display:flex;flex-direction:column;align-items:center;gap:6px">',
@@ -324,6 +331,7 @@
                 '<div style="font-size:11px;color:var(--text-muted);line-height:1.6">',
                     '입력하신 내용을 CLIP으로 분석해 위 감정·태그를 추출하고, 그 태그로 Last.fm에서',
                     '인기 트랙을 찾은 뒤 Spotify에서 앨범아트·미리듣기를 매칭해 추천했어요.',
+                    rel ? " 이미지 분석의 '확실·보통·애매'는 1위와 2위 감정의 확률 차이로 나눈 표시예요. 지난 검증에서 맞힌 비율은 확실 70%대, 보통 50~60%, 애매 30%대였어요." : '',
                     em.modelValAccuracy != null
                         ? ' "분석 신뢰도"는 이번 한 번의 결과가 얼마나 확실한지고, "모델 정확도"는 학습된 모델이 평소에 얼마나 잘 맞히는지를 나타내는 서로 다른 값이에요.'
                         : '',

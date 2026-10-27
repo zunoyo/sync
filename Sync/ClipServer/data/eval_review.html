@@ -1,0 +1,63 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>이미지 라벨링</title>
+<style>
+:root{--bg:#14090f;--card:#22121b;--fg:#f5eef0;--mut:#a8959e;--acc:#d9c08f;--line:#3a2530}
+@media(prefers-color-scheme:light){:root{--bg:#f7f2f3;--card:#fff;--fg:#26151c;--mut:#7a6670;--acc:#8a6d3a;--line:#e2d6da}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,'Noto Sans KR',sans-serif}
+main{max-width:760px;margin:0 auto;padding:20px 16px 40px}
+.top{display:flex;justify-content:space-between;gap:12px;margin-bottom:10px;color:var(--mut);font-size:14px}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:14px}.bar>i{display:block;height:100%;background:var(--acc);width:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+img{display:block;max-width:100%;max-height:440px;margin:0 auto 14px;border-radius:12px}
+.hint{text-align:center;color:var(--mut);font-size:13px;margin:0 0 12px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+button{font:inherit;color:var(--fg);background:transparent;border:1px solid var(--line);border-radius:10px;padding:10px 6px;cursor:pointer}
+button:hover{border-color:var(--acc)}button.on{background:var(--acc);color:#1a0f14;border-color:var(--acc);font-weight:700}
+.nav{display:flex;gap:8px;margin-top:12px}.nav button{flex:1}
+.cnt{margin-top:14px;color:var(--mut);font-size:13px;text-align:center}
+@media(max-width:520px){.grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+<main>
+<div class="top"><span id="pos"></span><span id="name"></span></div>
+<div class="bar"><i id="bar"></i></div>
+<div class="card">
+  <img id="img" alt="">
+  <p class="hint">이 이미지에 어울리는 <b>노래의 감정</b>을 고르세요. 키보드 1~8 = 감정, 0 = 애매함(건너뛰기), ← → 이동</p>
+  <div class="grid" id="grid"></div>
+  <div class="nav"><button id="prev">← 이전</button><button id="skip">0 · 건너뛰기</button><button id="next">다음 →</button></div>
+</div>
+<p class="cnt" id="cnt"></p>
+<p class="cnt"><button id="export" style="padding:10px 18px">라벨 CSV 내보내기</button><br><span id="msg"></span></p>
+</main>
+<script>
+const ITEMS=[{"file": "c004.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c004.jpg"}, {"file": "c005.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c005.jpg"}, {"file": "c006.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c006.jpg"}, {"file": "c007.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c007.jpg"}, {"file": "c014.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c014.jpg"}, {"file": "c017.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c017.jpg"}, {"file": "c030.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c030.jpg"}, {"file": "c044.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c044.jpg"}, {"file": "c053.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c053.jpg"}, {"file": "c060.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c060.jpg"}, {"file": "c062.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c062.jpg"}, {"file": "c067.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c067.jpg"}, {"file": "c068.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c068.jpg"}, {"file": "c072.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c072.jpg"}, {"file": "c073.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c073.jpg"}, {"file": "c074.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c074.jpg"}, {"file": "c077.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c077.jpg"}, {"file": "c082.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c082.jpg"}, {"file": "c084.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c084.jpg"}, {"file": "c085.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c085.jpg"}, {"file": "c091.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c091.jpg"}, {"file": "c094.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c094.jpg"}, {"file": "c100.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c100.jpg"}, {"file": "c101.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/c101.jpg"}, {"file": "p013.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/p013.jpg"}, {"file": "p023.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/p023.jpg"}, {"file": "p028.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/p028.jpg"}, {"file": "p040.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/p040.jpg"}, {"file": "p051.jpg", "img": "file:///C:/Users/Atomic/Desktop/CODE/Spring/Sync/Sync/ClipServer/data/eval_review_images/p051.jpg"}], EMO=[["happy", "행복"], ["sad", "슬픔"], ["calm", "평온"], ["energetic", "활기"], ["romantic", "로맨틱"], ["melancholy", "우울/쓸쓸"], ["angry", "분노"], ["dreamy", "몽환"]], KEY='eval_final_v1:'+ITEMS.length+':'+(ITEMS[0]?ITEMS[0].file:'');
+let i=0, L={};
+try{L=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+const $=id=>document.getElementById(id);
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(L))}catch(e){}};
+function go(d){const n=i+d; if(n>=0&&n<ITEMS.length){i=n;show()}}
+function pick(k){const f=ITEMS[i].file; if(k===''){delete L[f]} else {L[f]=k} save(); show(); setTimeout(()=>go(1),160)}
+function show(){
+  const it=ITEMS[i], cur=L[it.file];
+  $('img').src=it.img; $('name').textContent=it.file;
+  const n=Object.keys(L).length;
+  $('pos').textContent=(i+1)+' / '+ITEMS.length+'  ·  라벨 '+n; $('bar').style.width=(n/ITEMS.length*100)+'%';
+  $('grid').innerHTML='';
+  EMO.forEach(([k,ko],j)=>{const b=document.createElement('button');b.textContent=(j+1)+' · '+ko+' ('+k+')';
+    if(cur===k)b.classList.add('on'); b.onclick=()=>pick(k); $('grid').appendChild(b)});
+  const c={}; Object.values(L).forEach(v=>c[v]=(c[v]||0)+1);
+  $('cnt').textContent=EMO.map(([k,ko])=>ko+' '+(c[k]||0)).join(' · ');
+}
+$('prev').onclick=()=>go(-1); $('next').onclick=()=>go(1); $('skip').onclick=()=>pick('');
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft')go(-1); else if(e.key==='ArrowRight')go(1);
+  else if(e.key==='0')pick(''); else if(e.key>='1'&&e.key<='8')pick(EMO[+e.key-1][0]);});
+$('export').onclick=()=>{
+  const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  const lines=['file,emotion'].concat(ITEMS.filter(it=>L[it.file]).map(it=>q(it.file)+','+q(L[it.file])));
+  const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='eval_final_labels.csv';a.click();
+  $('msg').textContent=(lines.length-1)+'장 라벨됨 — 받은 eval_final_labels.csv 를 ClipServer/data/ 에 두세요';
+};
+show();
+</script></html>

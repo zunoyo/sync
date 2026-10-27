@@ -17,6 +17,12 @@ export function ConfidenceGauge({ pct, color = 'var(--accent)' }) {
   );
 }
 
+const RELIABILITY = {
+  high: { label: '확실', color: 'var(--success, #4ade80)' },
+  mid:  { label: '보통', color: 'var(--warning, #fbbf24)' },
+  low:  { label: '애매', color: 'var(--text-secondary)' },
+};
+
 export function VAPlot({ valence, arousal }) {
   const v = Math.max(-1, Math.min(1, valence));
   const a = Math.max(-1, Math.min(1, arousal));
@@ -69,6 +75,7 @@ export default function AnalysisDetail({ emotion }) {
   const tags = parseTags(emotion.tags);
   const conf = emotion.confidence ? Math.round(emotion.confidence * 100) : 0;
   const acc = emotion.modelValAccuracy != null ? Math.round(emotion.modelValAccuracy * 100) : null;
+  const rel = RELIABILITY[emotion.reliability] || null;
   const hasVA = emotion.valence != null && emotion.arousal != null;
 
   return (
@@ -81,6 +88,14 @@ export default function AnalysisDetail({ emotion }) {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
             <ConfidenceGauge pct={conf} />
             <span style={{ fontSize: 10, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>분석 신뢰도</span>
+            {rel && (
+              <span
+                data-testid="reliability-badge"
+                style={{ fontSize: 11, fontWeight: 700, color: rel.color, border: `1px solid ${rel.color}`, borderRadius: 999, padding: '1px 9px', whiteSpace: 'nowrap' }}
+              >
+                {rel.label}
+              </span>
+            )}
           </div>
           {acc != null && (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
@@ -112,6 +127,9 @@ export default function AnalysisDetail({ emotion }) {
 
       <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.6 }}>
         입력하신 내용을 CLIP으로 분석해 위 감정·태그를 추출하고, 그 태그로 Last.fm에서 인기 트랙을 찾은 뒤 Spotify에서 앨범아트·미리듣기를 매칭해 추천했어요.
+        {rel && (
+          <> 이미지 분석의 '확실·보통·애매'는 1위와 2위 감정의 확률 차이로 나눈 표시예요. 지난 검증에서 맞힌 비율은 확실 70%대, 보통 50~60%, 애매 30%대였어요.</>
+        )}
         {emotion.modelValAccuracy != null && (
           <> "분석 신뢰도"는 이번 한 번의 결과가 얼마나 확실한지고, "모델 정확도"는 학습된 모델이 평소에 얼마나 잘 맞히는지를 나타내는 서로 다른 값이에요.</>
         )}
